@@ -1,0 +1,6 @@
+** README for Secutiry functions of Shroom Shroom Mushroom project **
+
+TODO:
+
+    -   Might need to simplify RSA keys structure 
+        since n is the same for both public and private keys.
