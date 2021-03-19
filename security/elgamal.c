@@ -8,14 +8,6 @@ typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
 
 // GCD function.
-/*uint128_t gcd(uint128_t a, uint128_t b)
-{
-    if (b == 0)
-        return a;
-
-    return gcd(b, a %b);
-}*/
-
 uint128_t gcd(uint128_t a, uint128_t b)
 {
     if (a < b)
@@ -51,7 +43,7 @@ uint128_t coprime_key(double q)
 }
 
 // Modular exponential.
-/*uint128_t mod_power(uint128_t a, uint128_t b, uint128_t m)
+uint128_t mod_power(uint128_t a, uint128_t b, uint128_t m)
 {
     // Result initialization.
     uint128_t res = 1;
@@ -75,24 +67,6 @@ uint128_t coprime_key(double q)
 
     return res;
 }
-*/
-
-uint128_t mod_power(uint128_t a, uint128_t b, uint128_t m)
-{
-    uint128_t x = 1;
-    uint128_t y = a;
-
-    while (b > 0)
-    {
-        if (b % 2 == 0)
-            x = (x * y) % m;
-        
-        y = (y * y) % m;
-        b = (uint128_t) (b / 2);
-    }
-
-    return (x % m);
-}
 
 // Encryption and decryption.
 void encrypt_gamal(char *msg, uint128_t q, uint128_t h, uint128_t g, uint128_t *p, uint128_t *res)
@@ -109,19 +83,15 @@ void encrypt_gamal(char *msg, uint128_t q, uint128_t h, uint128_t g, uint128_t *
     for (size_t i = 0; i < len; i++)
     {
         int tmp = (int) msg[i];
-        printf("Ord: %i\n", tmp);
         res[i] = s * tmp;
     }
 
     // return res;
 }
 
-void decrypt_gamal(uint128_t *en_msg, size_t len, size_t p, size_t key, size_t q, char *res)
+void decrypt_gamal(uint128_t *en_msg, size_t len, uint128_t p, uint128_t key, uint128_t q, char *res)
 {
     // Decrypted message initialisation.
-    // size_t len = strlen(en_msg);
-    // res = malloc((len+1) * sizeof(char));;
-
     uint128_t h = mod_power(p, key, q);
 
     for (size_t i = 0; i < len; i++)
@@ -133,7 +103,6 @@ void decrypt_gamal(uint128_t *en_msg, size_t len, size_t p, size_t key, size_t q
     // Null terminate result.
     res[len] = '\0';
 
-    // return res;
 }
 
 int main()
@@ -143,8 +112,7 @@ int main()
 
     printf("Original message : %s\n", msg);
     
-    // uint128_t q = large_keygen(pow(10,20), pow(10,38));
-    uint128_t q = large_keygen(1000, 10000);
+    uint128_t q = large_keygen(pow(10,20), pow(10,38));
     uint128_t g = large_keygen(2, q);
 
     // Receiver's private key.
@@ -154,13 +122,13 @@ int main()
     uint128_t p;
 
     uint128_t *en_msg;
-    en_msg = malloc((len+1) * sizeof(uint128_t));
+    en_msg = malloc((len) * sizeof(uint128_t));
 
     encrypt_gamal(msg, q, h, g, &p, en_msg);
-    // printf("Encrypted message: %s\n", en_msg);
 
     char *dr_msg;
     dr_msg = malloc((len+1) * sizeof(char));
+
     decrypt_gamal(en_msg, len, p, key, q, dr_msg);
     
     printf("Decrypted message: %s\n", dr_msg);
