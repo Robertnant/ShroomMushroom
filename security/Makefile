@@ -1,10 +1,7 @@
 CC = gcc
 CFLAGS = -std=c99 -Wall -Wextra -Werror -fsanitize=address -lm -g
 
-all: rsa
-
-rsa: rsa.c
-	$(CC) $(CFLAGS) -o rsa rsa.c
+all: elgamal
 
 elgamal: elgamal.c
 	$(CC) $(CFLAGS) -o elgamal elgamal.c
@@ -12,4 +9,4 @@ elgamal: elgamal.c
 clean:
 	${RM} *.o
 	${RM} *.d
-	rm -f rsa elgamal
+	rm -f elgamal
