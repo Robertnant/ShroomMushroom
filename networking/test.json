@@ -1,7 +1,7 @@
 {
     "sender": 123456789,
     "receiver": 987654321,
-    "mess_type": TEXT_MESSAGE,
+    "mess_type": "TEXT_MESSAGE",
     "message": "Encrypted message",
     "time": 1845689,
     "file_name": "file.txt"
