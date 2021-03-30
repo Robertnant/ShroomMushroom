@@ -15,18 +15,24 @@
 #include <signal.h>
 #include <arpa/inet.h>
 
-#include "saved_users/users.h"
+#include "../saved_users/users.h"
 
 #define MAX 80 
 #define PORT 8080 
 #define SA struct sockaddr 
 
 int running = 1;
-  
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+//#############################################################################
+//  CLIENT LIST (to put in a separare file?)
+//#############################################################################
+
 struct client
 {
     int fd;
     struct client* next;
+    struct client* prev;
 };
 
 struct client * get_sentinel()
@@ -36,10 +42,33 @@ struct client * get_sentinel()
     {
         sentinel = (struct client *) malloc(sizeof(struct client));
         sentinel->next = NULL;
+        sentinel->prev = NULL;
         sentinel->fd = -1;
     }
     return sentinel;
 }
+
+void free_clients(struct client* sentinel)
+{
+    if(sentinel->next)
+        free_clients(sentinel->next);
+    free(sentinel);
+}
+
+void free_client(struct client* client)
+{
+    pthread_mutex_lock(&mutex);
+    // Remove the current client from the list
+    struct client* prev = client->prev;
+    struct client* next = client->next;
+    prev->next = next;
+    if (next)
+        next->prev = prev;
+    free(client);
+    pthread_mutex_unlock(&mutex);
+}
+
+//#############################################################################
 
 void end_connection()
 {
@@ -62,23 +91,19 @@ void end_connection()
     // connect the client socket to server socket 
     if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) 
     { 
-        printf("End connection with the server failed...\n"); 
+        printf("Ending connection with the server failed...\n"); 
         exit(0); 
     } 
 } 
 
-void free_clients(struct client* sentinel)
-{
-    if(sentinel->next)
-        free_clients(sentinel->next);
-    free(sentinel);
-}
 
 void interrupt(int err)
 {
     running = 0;
     end_connection();
+    pthread_mutex_lock(&mutex);
     free_clients(get_sentinel());
+    pthread_mutex_unlock(&mutex);
     printf("Program interrupted with error %d\n", err);
 }
 
@@ -101,6 +126,7 @@ void send_to(char number[], char buffer[], size_t buf_size)
 }
 
 
+//void send_new_user();
 
 void * listen_to_client( void * arg )
 {
