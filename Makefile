@@ -1,11 +1,13 @@
 CC=gcc
 CFLAGS= -Wall -Wextra -Werror -g -pthread
+#CXXFLAGS= -Inetworking -Isaved_users
+VPATH=networking:saved_users
 
 all: server client
 
-server: networking/server.c saved_users/users.c
+server: server.c users.c
 
-client: networking/client.c saved_users/users.c
+client: client.c users.c
 
 
 clean:
