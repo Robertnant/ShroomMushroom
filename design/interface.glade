@@ -64,7 +64,17 @@
                             <property name="can_focus">True</property>
                             <property name="shadow_type">in</property>
                             <child>
-                              <placeholder/>
+                              <object class="GtkViewport">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkLabel" id="textlabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="xalign">0</property>
+                                  </object>
+                                </child>
+                              </object>
                             </child>
                           </object>
                         </child>
@@ -89,9 +99,15 @@
                                 <property name="can_focus">True</property>
                                 <property name="shadow_type">in</property>
                                 <child>
-                                  <object class="GtkTextView" id="TextView">
+                                  <object class="GtkViewport">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <object class="GtkEntry" id="TextEntry">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                      </object>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
