@@ -205,6 +205,15 @@ char *toString(uint128_t *data, size_t len)
 
 int main()
 {
+    // Save keys for receiver to struct.
+    // Public key struct will be sent to server when
+    // client first connects.
+    struct publicKey *receiver_pubkey = malloc(sizeof(struct publicKey));
+    struct privateKey *receiver_privkey = malloc(sizeof(struct privateKey));
+
+    // Structure for encrypted message and second ciphertext.
+    struct cyphers *dataCyphers = malloc(sizeof(struct cyphers));
+
     char *msg = "figaro is lit";
     size_t len = strlen(msg);
 
@@ -219,6 +228,15 @@ int main()
 
     uint128_t h = mod_power(g, key, q);
 
+
+    // Save receiver keys to structs.
+    receiver_pubkey -> q = q;
+    receiver_pubkey -> g = q;
+    receiver_pubkey -> h = h;
+    receiver_privkey -> a = key;
+
+    // Free key structs.
+
     uint128_t p;
 
     uint128_t *en_msg;
@@ -226,15 +244,16 @@ int main()
 
     encrypt_gamal(msg, q, h, g, &p, en_msg);
 
-
     // Convert encrypted data to string.
     char *en_tostring = toString(en_msg, len);
 
     printf("\nEncryption: \n%s\n", en_tostring);
 
-    // Free converted data result.
-    free(en_tostring);
-    
+    // Save cyphers and string conversion of encryption 
+    // to structure.
+    dataCyphers -> en_msg = en_msg;
+    dataCyphers -> p = p;
+    dataCyphers -> dataString = en_tostring;
 
     // Decrypt data.
     char *dr_msg;
@@ -247,6 +266,10 @@ int main()
     // Free memory space.
     free(en_msg);
     free(dr_msg);
+    free(en_tostring);
+    free(receiver_pubkey);
+    free(receiver_privkey);
+    free(dataCyphers);
 
     return 0;
 
