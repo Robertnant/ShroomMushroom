@@ -6,10 +6,9 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "users.h"
-
-
 
 unsigned int hash(char *key)
 {
@@ -52,18 +51,21 @@ char * get_filename(char directory[], char filename[])
 
 void save_user(struct user * user)
 {
+    // Create user and pipe paths.
     char *file_name = get_filename(USERS_FILE, user->number);
     char *pipe_name = get_filename(PIPES_FILE, user->UID);
 
-    printf("FILE NAME: %s\n", file_name);
+    // Save user and pipe.
     FILE* user_file = fopen(file_name, "wb");
     if (user_file == NULL)
         errx(1, "Couldn't open file");
+
     fwrite(user, sizeof(struct user), 1, user_file);
     fclose(user_file);
 
     mkfifo(pipe_name, 0666);
 
+    // Free memory.
     free(file_name);
     free(pipe_name);
 }
@@ -75,6 +77,7 @@ struct user* get_user(char number[])
     free(filename);
     if (!user_file)
         errx(3, "USER DOES NOT EXIST!");
+
     struct user* user = (struct user*) malloc(sizeof(struct user));
     fread(user, sizeof(struct user), 1, user_file);
 
@@ -109,4 +112,3 @@ int main()
     return 0;
 }
 */
-

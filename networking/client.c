@@ -37,7 +37,6 @@ void func(int sockfd)
 int main() 
 { 
 
-
     struct user* User = init_user("sergiombd", "0776727908");
     printf("Address of user is %p\n", User);
 
