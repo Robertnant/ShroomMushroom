@@ -43,6 +43,7 @@ void printStruct(struct message *parsed)
             (int) parsed->type, parsed->time, parsed->filename);
 }
 
+/*
 int main()
 {
     // Test JSON parser.
@@ -60,3 +61,4 @@ int main()
     // Print structure.
     printStruct(parsed);
 }
+*/

@@ -17,6 +17,18 @@ void func(int sockfd)
 { 
     char buff[MAX]; 
     int n;
+   
+    char *json_test = "{\"sender\": \"123456789\",\
+    \"receiver\": \"987654321\",\
+    \"type\": 5,\
+    \"content\": \"Encrypted message\",\
+    \"time\": \"1845689\",\
+    \"filename\": \"file.txt\"\
+    }";
+
+
+    size_t len = strlen(json_test);
+    write(sockfd, json_test, len);
 
     for (;;) 
     { 

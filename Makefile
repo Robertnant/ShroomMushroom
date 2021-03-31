@@ -1,16 +1,17 @@
 CC=gcc
-CFLAGS= -Wall -Wextra -Werror -g -pthread
+CFLAGS= -Wall -Wextra -fsanitize=address -g -pthread
+LDLIBS= -ljson-c
 #CXXFLAGS= -Inetworking -Isaved_users
-VPATH=networking:saved_users
+VPATH=networking:saved_users:messages
 
 all: server client
 
-server: server.c users.c
+server: server.c users.c messages.c
 
-client: client.c users.c
+client: client.c users.c messages.c
 
 
 clean:
-	${RM} -f client server
+	${RM} client server
 
 .PHONY: clean

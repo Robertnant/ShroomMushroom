@@ -17,6 +17,7 @@
 #include <err.h>
 
 #include "../saved_users/users.h"
+#include "../messages/messages.h"
 
 #define MAX 80 
 #define PORT 8080 
@@ -225,8 +226,11 @@ int main()
 
 
     struct client* sentinel = get_sentinel();
-    struct client* curr = sentinel;
+    struct client* curr = sentinel->next;
     signal(SIGINT, interrupt);
+
+    char buf[1024];
+    struct message* message = (struct message*) malloc(sizeof(struct message));
 
     while(running)
     {
@@ -242,14 +246,33 @@ int main()
         else
             printf("Server acccept the client...\n");
 
-        // Function for chatting between client and server
-        //func(connfd);
+        
+        // Get through JSON UID and number to identify you
+        
+        memset(buf, 0, 1024 * sizeof(char));
+        
+        int r;
+        r = read(connfd, buf, 1024);
+        if (r <= 0)
+            errx(1, "Error with identification process");
+        
+        
+        parseMessage(buf, message);
+        printStruct(message);
+        printf("Received message: %s | Content is: %s\n", buf, message->content);
+
+        
+
 
         struct client* user = (struct client*) malloc(sizeof(struct client));
-        curr->next = user;
-        user->fd = connfd;
-        user->next = NULL;
+        sentinel->next = user;
+        user->prev = sentinel;
+        
+        if (curr)
+            curr->prev = user;
+        user->next = curr;
         curr = user;
+        user->fd = connfd;
         
         // implement functions to get username, UID, and password
         // we'll need to get user from phone number and verify if UID matches (security)

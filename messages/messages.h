@@ -19,3 +19,6 @@ struct message
     char *receiver;
     char *filename; // For image and document type
 };
+
+void parseMessage(char *data, struct message *parsed);
+void printStruct(struct message *parsed);
