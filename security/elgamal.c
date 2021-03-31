@@ -3,9 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
-
-typedef __int128 int128_t;
-typedef unsigned __int128 uint128_t;
+#include "elgamal.h"
 
 // GCD function.
 uint128_t gcd(uint128_t a, uint128_t b)
@@ -69,7 +67,8 @@ uint128_t mod_power(uint128_t a, uint128_t b, uint128_t m)
 }
 
 // Encryption and decryption.
-void encrypt_gamal(char *msg, uint128_t q, uint128_t h, uint128_t g, uint128_t *p, uint128_t *res)
+void encrypt_gamal(char *msg, uint128_t q, uint128_t h, uint128_t g, 
+        uint128_t *p, uint128_t *res)
 {
     // Encrypted message initialization.
     size_t len = strlen(msg);
@@ -89,7 +88,8 @@ void encrypt_gamal(char *msg, uint128_t q, uint128_t h, uint128_t g, uint128_t *
     // return res;
 }
 
-void decrypt_gamal(uint128_t *en_msg, size_t len, uint128_t p, uint128_t key, uint128_t q, char *res)
+void decrypt_gamal(uint128_t *en_msg, size_t len, uint128_t p, 
+        uint128_t key, uint128_t q, char *res)
 {
     // Decrypted message initialisation.
     uint128_t h = mod_power(p, key, q);
