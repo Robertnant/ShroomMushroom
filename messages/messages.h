@@ -4,7 +4,8 @@ enum MESSAGE_TYPE
     INIT, // to "register"
     ADD, // to add user
     IMAGE,
-    DOCUMENT
+    DOCUMENT,
+    IDENTIFICATION
 };
 
 

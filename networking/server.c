@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <arpa/inet.h>
+#include <err.h>
 
 #include "../saved_users/users.h"
 
@@ -25,12 +26,13 @@ int running = 1;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //#############################################################################
-//  CLIENT LIST (to put in a separare file?)
+//  CLIENT LIST (to put in a separare file? NO BECAUSE WE NEED GLOBAL MUTEX)
 //#############################################################################
 
 struct client
 {
     int fd;
+    struct user* user;
     struct client* next;
     struct client* prev;
 };
@@ -170,6 +172,12 @@ void * listen_to_client( void * arg )
     return NULL;
 }
 
+void connect_client(char pipe[], int client)
+{
+    int fd = open(pipe, O_RDONLY);
+    if (dup2(fd, client) < 0)
+        errx(1, "Could not forward data to client");
+}
 
 int main()
 {
@@ -242,18 +250,29 @@ int main()
         user->fd = connfd;
         user->next = NULL;
         curr = user;
+        
+        // implement functions to get username, UID, and password
+        // we'll need to get user from phone number and verify if UID matches (security)
+        // 
+        
+        //struct user* real_user = get_user(number); // do that instead of the thing below
 
+
+        /*
+        // Might need to literally copy the memory
+        user->user->username = ;
+        user->user->UID = ;
+        user->user->number = ;
+        */
+        
         pthread_t id;
-
         pthread_create(&id, NULL, listen_to_client, &(user->fd));
+        
 
-        //int* ptr;
 
-        // Wait for foo() and retrieve value in ptr;
-        //pthread_join(id, NULL);//(void**)&ptr);
-        //listen_to_client(&connfd);
+        // To uncomment whenever we create the user identification procedure
+        //connect_client(user->UID, user->fd);
+        
         printf("New user connected!\n");
-        // After chatting close the socket
-        //close(sockfd);
     }
 }
