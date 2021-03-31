@@ -124,8 +124,9 @@ void print(uint128_t x)
     // of the string.
 }
 
-// Convert uint128_t to string
-char *largenum_string(uint128_t x)
+// Convert uint128_t to string.
+// (Get length of string).
+char *largenum_string(uint128_t x, int *len)
 {
     // Result should have maximum 40 digits.
     char *res = calloc(40, sizeof(char));
@@ -133,18 +134,18 @@ char *largenum_string(uint128_t x)
     uint128_t tmp = x;
 
     // Do conversion and get length of result.
-    int len = 0;
+    *len = 0;
     while (tmp)
     {
-        res[len] = (tmp % 10 + '0');
+        res[*len] = (tmp % 10 + '0');
         tmp /= 10;
 
-        len++;
+        *len += 1;
     }
 
     // Reverse result.
     char *begin = res;
-    char *end = res + len - 1;
+    char *end = res + *len - 1;
     char tmpC;
 
     while (begin < end)
@@ -183,7 +184,8 @@ int main()
 
     encrypt_gamal(msg, q, h, g, &p, en_msg);
 
-    // Print encrypted message.
+    // Convert encrypted message to string.
+    size_t en_count = 0;
     for (size_t i = 0; i < len; i++)
     {
         printf("\nPrinting without saving res: ");
@@ -191,12 +193,18 @@ int main()
         printf("\n");
 
         // Print result by saving res first.
-        char *msg_part = largenum_string(en_msg[i]);
+        int size = 0;
+        char *msg_part = largenum_string(en_msg[i], &size);
         printf("Data of string %li created: %s", i, msg_part);
+
+        // Update size of final string.
+        en_count += size;
 
         // Free string.
         free(msg_part);
     }
+
+    printf("Size of final string %li\n", en_count);
 
     char *dr_msg;
     dr_msg = malloc((len+1) * sizeof(char));
