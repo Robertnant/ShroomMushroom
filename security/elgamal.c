@@ -175,6 +175,34 @@ char *largenum_string(uint128_t x)
     return res;
 }
 
+// Convert array of large numbers to string.
+char *toString(uint128_t *data, size_t len)
+{
+    // Get size of each uint128 in encrypted message.
+    size_t en_count = 0;
+    for (size_t i = 0; i < len; i++)
+    {
+        en_count += largenum_len(data[i]);
+    }
+
+    // Final string.
+    char *res = calloc(en_count + 1, sizeof(char));
+
+    // Convert each uint128 and append to final string.
+    en_count = 0;
+    for (size_t i = 0; i < len; i++)
+    {
+        char *msg_part = largenum_string(data[i]);
+        strcat(res, msg_part);
+
+        // Free string.
+        free(msg_part);
+    }
+    
+    return res;
+
+}
+
 int main()
 {
     char *msg = "figaro is lit";
@@ -199,32 +227,14 @@ int main()
     encrypt_gamal(msg, q, h, g, &p, en_msg);
 
 
-    /* Convert encrypted message to string. */
-
-    // Get size of each uint128 in encrypted message.
-    size_t en_count = 0;
-    for (size_t i = 0; i < len; i++)
-    {
-        en_count += largenum_len(en_msg[i]);
-    }
-
-    // Final string.
-    char *en_tostring = calloc(en_count + 1, sizeof(char));
-
-    // Convert each uint128 and append to final string.
-    en_count = 0;
-    for (size_t i = 0; i < len; i++)
-    {
-        char *msg_part = largenum_string(en_msg[i]);
-        strcat(en_tostring, msg_part);
-
-        // Free string.
-        free(msg_part);
-    }
+    // Convert encrypted data to string.
+    char *en_tostring = toString(en_msg, len);
 
     printf("\nEncryption: \n%s\n", en_tostring);
-    free(en_tostring);
 
+    // Free converted data result.
+    free(en_tostring);
+    
 
     // Decrypt data.
     char *dr_msg;
