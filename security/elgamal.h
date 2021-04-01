@@ -24,13 +24,10 @@ typedef struct privateKey
 // Structure for Elgamal encrypted message.
 typedef struct cyphers 
 {
-    uint128_t *en_msg;
+    char **en_msg;
     uint128_t p;
     size_t size;
     
-    // Encrypted message in string.
-    char *dataString;
-
 } cyphers;
 
 // Tools for key generation.
@@ -48,5 +45,9 @@ int largenum_len(uint128_t x);
 void print_largenum(uint128_t x); 
 char *toString(uint128_t *data, size_t len);
 char *largenum_string(uint128_t x);
+
+// Tools for uint128 to array of strings conversion.
+uint128_t *fromStringArr(char **arr, size_t len);
+char **toStringArr(uint128_t *data, size_t len);
 
 #endif

@@ -22,8 +22,7 @@ uint128_t gcd(uint128_t a, uint128_t b)
 // Key generators.
 uint128_t large_keygen(uint128_t lower, uint128_t upper)
 {
-    // To get a different value at each
-    // function call.
+    // Randomize value at each function call.
     srand(time(0));
 
     uint128_t a = (rand() % (upper - lower + 1)) + lower;
@@ -79,7 +78,7 @@ void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data)
     // Encrypted message initialization.
     size_t len = strlen(msg);
     en_data->size = len;
-    en_data->en_msg = malloc(len * sizeof(uint128_t));
+    uint128_t *encryption = malloc(len * sizeof(uint128_t));
 
     // Generate sender's private key.
     uint128_t k = coprime_key(q);
@@ -91,17 +90,23 @@ void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data)
     for (size_t i = 0; i < len; i++)
     {
         int tmp = (int) msg[i];
-        en_data->en_msg[i] = s * tmp;
+        encryption[i] = s * tmp;
     }
 
-    // Save string conversion of encryption.
-    en_data->dataString = toString(en_data->en_msg, len);
+    // Save string array conversion of encryption.
+    en_data->en_msg = toStringArr(encryption, len);
+
+    // Free encryption array.
+    free(encryption);
 }
 
 char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
 {
-    // Decrypted message initialisation.
+    // Convert encrypted message to array of uint128 numbers.
     size_t len = en_data->size;
+    uint128_t *data = fromStringArr(en_data->en_msg, len);
+
+    // Decrypted message initialisation.
     char *res = malloc((len+1) * sizeof(char));
 
     uint128_t p = en_data->p;
@@ -112,12 +117,15 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
 
     for (size_t i = 0; i < len; i++)
     {
-        char tmp = (char) ((uint128_t) (en_data->en_msg[i] / h));
+        char tmp = (char) ((uint128_t) (data[i]/h));
         res[i] = tmp;
     }
 
     // Null terminate result.
     res[len] = '\0';
+
+    // Free created array.
+    free(data);
 
     return res;
 }
@@ -217,6 +225,38 @@ char *toString(uint128_t *data, size_t len)
 
 }
 
+// Convert array of large numbers to array of strings.
+char **toStringArr(uint128_t *data, size_t len)
+{
+    char **res = malloc(len * sizeof(char*));
+
+    for (size_t i = 0; i < len; i++)
+    {
+        res[i] = largenum_string(data[i]);
+    }
+
+    return res;
+}
+
+// Convert array of strings to array of large numbers.
+uint128_t *fromStringArr(char **arr, size_t len)
+{
+    uint128_t *res = malloc(len * sizeof(uint128_t));
+
+    for (size_t i = 0; i < len; i++)
+    {
+        uint128_t current = 0;
+        for (size_t c = 0; c < strlen(arr[i]); c++)
+        {
+            current = current * 10 + (arr[i][c] - '0');
+        }
+
+        res[i] = current;
+    }
+
+    return res;
+}
+
 // Public and private keys generation for receiver.
 void generateKeys(publicKey *pubKey, privateKey *privKey)
 {
@@ -241,8 +281,12 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
 // Free encrypted data memory.
 void freeCyphers(cyphers *data)
 {
+    // Free each string in encryption.
+    for (size_t i = 0; i < data->size; i++)
+        free(data->en_msg[i]);
+
+    // Free entire encryption.
     free(data->en_msg);
-    free(data->dataString);
 
     // Free entire struct.
     free(data);
@@ -250,8 +294,17 @@ void freeCyphers(cyphers *data)
 
 int main()
 {
-    char *msg = "figaro is lit";
-    printf("Original message : %s\n", msg);
+    char *msg = "Black leather gloves, no sequins\n\
+                 Buckles on the jacket, it's Alyx ****\n\
+                 Nike crossbody, got a piece in it\n\
+                 Got a dance, but it's really on some street ****\n\
+                 I'ma show you how to get it\n\
+                 It go, right foot up, left foot slide\n\
+                 Left foot up, right foot slide\n\
+                 Basically, I'm saying either way, we 'bout to slide, ayy\n\
+                 Can't let this one slide, ayy";
+
+    printf("Original message: %s\n", msg);
 
     // Receiver and data structures.
     struct publicKey *receiver_pubkey = malloc(sizeof(struct publicKey));
@@ -263,7 +316,7 @@ int main()
 
     // Encrypt message and print.
     encrypt_gamal(msg, receiver_pubkey, dataCyphers);
-    printf("\nEncryption: \n%s\n", dataCyphers -> dataString);
+    // printf("\nEncryption: %s\n", dataCyphers -> dataString);
 
     // Decrypt data and print.
     char *dr_msg = decrypt_gamal(dataCyphers, receiver_privkey);
