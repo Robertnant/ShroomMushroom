@@ -182,9 +182,11 @@ void connect_client(char pipe[], int client)
 
 int main()
 {
+    /*
     char user[] = "sergiombd";
     char number[] = "0776727908";
-    init_user(user, number);
+    free(init_user(user, number));
+    */
 
     int sockfd, connfd;
     socklen_t len;
@@ -231,6 +233,8 @@ int main()
 
     char buf[1024];
     struct message* message = (struct message*) malloc(sizeof(struct message));
+    //struct user* tmp_user = (struct user*) malloc(sizeof(struct user));
+    struct user* tmp_user;
 
     while(running)
     {
@@ -259,8 +263,22 @@ int main()
         
         parseMessage(buf, message);
         printStruct(message);
-        printf("Received message: %s | Content is: %s\n", buf, message->content);
+        if(message->sender[0] != 0)
+        {   
+            tmp_user = get_user(message->sender);
+            printf("Comapring content: %s to real UID: %s\n", message->content, tmp_user->UID);
+            if (tmp_user!=NULL && strcmp(tmp_user->UID, message->content) == 0)
+                printf("USER %s IDENTIFIED SUCCESSFULLY\n", tmp_user->username);
+            else
+            {
+                printf("FRAUD DETECTED OR NONE EXSISTING USER\n");
+                close(connfd);
+                continue;
+            }
+        } 
 
+
+        // freeMessage(message); // doesn't work because of weird type issues
         
 
 

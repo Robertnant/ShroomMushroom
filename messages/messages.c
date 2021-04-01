@@ -43,6 +43,16 @@ void printStruct(struct message *parsed)
             (int) parsed->type, parsed->time, parsed->filename);
 }
 
+void freeMessage(struct message *message)
+{
+    free(message->type);
+    free(message->content);
+    free(message->time);
+    free(message->sender);
+    free(message->receiver);
+    free(message->filename);
+}
+
 /*
 int main()
 {

@@ -18,10 +18,10 @@ void func(int sockfd)
     char buff[MAX]; 
     int n;
    
-    char *json_test = "{\"sender\": \"123456789\",\
-    \"receiver\": \"987654321\",\
+    char *json_test = "{\"sender\": \"0776727909\",\
+    \"receiver\": \"0776727908\",\
     \"type\": 5,\
-    \"content\": \"Encrypted message\",\
+    \"content\": \"1005838116\",\
     \"time\": \"1845689\",\
     \"filename\": \"file.txt\"\
     }";
@@ -58,9 +58,11 @@ void func(int sockfd)
 
 int main() 
 { 
+    // Check if user is already initialized, if not create it
+    struct user* User = init_user_path("sergiombd", "0776727908", ".user");
+    
+    // if initialized, open it and send identification
 
-    struct user* User = init_user("sergiombd", "0776727908");
-    printf("Address of user is %p\n", User);
 
     int sockfd; 
     struct sockaddr_in servaddr; //, cli; 

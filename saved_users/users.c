@@ -70,11 +70,36 @@ void save_user(struct user * user)
     free(pipe_name);
 }
 
+
+void save_user_path(struct user * user, char * path)
+{
+    // Save user file
+    FILE* user_file = fopen(path, "wb");
+    if (user_file == NULL)
+        errx(1, "Couldn't open file");
+
+    fwrite(user, sizeof(struct user), 1, user_file);
+    fclose(user_file);
+}
+
 struct user* get_user(char number[])
 {
     char* filename = get_filename(USERS_FILE, number);
     FILE* user_file = fopen(filename, "r");
     free(filename);
+    if (!user_file)
+        return NULL;
+    //errx(3, "USER DOES NOT EXIST!");
+
+    struct user* user = (struct user*) malloc(sizeof(struct user));
+    fread(user, sizeof(struct user), 1, user_file);
+
+    return user;
+}
+
+struct user* get_user_path(char path[])
+{
+    FILE* user_file = fopen(path, "r");
     if (!user_file)
         errx(3, "USER DOES NOT EXIST!");
 
@@ -84,7 +109,9 @@ struct user* get_user(char number[])
     return user;
 }
 
-//public key variable needs to be added 
+
+
+
 struct user* init_user(char username[], char number[])
 {
     struct user* new =  malloc(sizeof(struct user));
@@ -99,6 +126,26 @@ struct user* init_user(char username[], char number[])
     free(id);
 
     save_user(new);
+    //free(new);
+    return new;
+}
+
+
+//public key variable needs to be added 
+struct user* init_user_path(char username[], char number[], char path[])
+{
+    struct user* new =  malloc(sizeof(struct user));
+    if (new == NULL)
+    {
+        errx(2, "Could not create new user structure!");
+    }
+    char * id = get_id(number);
+    strcpy(new->username, username);
+    strcpy(new->number, number);
+    strcpy(new->UID, id);
+    free(id);
+
+    save_user_path(new, path);
     //free(new);
     return new;
 }

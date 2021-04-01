@@ -15,6 +15,10 @@ char * get_filename(char directory[], char filename[]);
 
 struct user* get_user(char number[]);
 
+struct user* get_user_path(char path[]);
+
 struct user* init_user(char username[], char number[]);
+
+struct user* init_user_path(char username[], char number[], char path[]);
 
 #endif
