@@ -15,7 +15,9 @@ typedef struct publicKey
 
 typedef struct privateKey
 {
+    // Public key q is added for easier decryption.
     uint128_t a;
+    uint128_t q;
 
 } privateKey;
 
@@ -24,6 +26,7 @@ typedef struct cyphers
 {
     uint128_t *en_msg;
     uint128_t p;
+    size_t size;
     
     // Encrypted message in string.
     char *dataString;
@@ -37,10 +40,13 @@ uint128_t coprime_key(double q);
 uint128_t mod_power(uint128_t a, uint128_t b, uint128_t m);
 
 // Encryption and decryption.
-void encrypt_gamal(char *msg, uint128_t q, uint128_t h, uint128_t g, 
-        uint128_t *p, uint128_t *res);
-void decrypt_gamal(uint128_t *en_msg, size_t len, uint128_t p, 
-        uint128_t key, uint128_t q, char *res);
+void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data);
+char *decrypt_gamal(cyphers *en_data, privateKey *privkey);
 
+// Tools for uint128 to string conversion and display.
+int largenum_len(uint128_t x);
+void print_largenum(uint128_t x); 
+char *toString(uint128_t *data, size_t len);
+char *largenum_string(uint128_t x);
 
 #endif
