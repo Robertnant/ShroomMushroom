@@ -12,7 +12,7 @@ enum MESSAGE_TYPE
 // all pointers to make it easier to transform a JSON to a struct
 struct message
 {
-    enum MESSAGE_TYPE *type;
+    enum MESSAGE_TYPE type;
     char *content;
     char *time;
     char *sender;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <json-c/json.h>
 #include "messages.h"
 
@@ -25,13 +26,24 @@ void parseMessage(char *data, struct message *parsed)
     json_object_object_get_ex(parsed_json, "filename", &filename);
 
     // Store objects from json.
-    parsed -> type = (enum MESSAGE_TYPE*) json_object_get_int(type);
-    parsed -> content = json_object_get_string(content);
-    parsed -> time = json_object_get_string(time);
-    parsed -> sender = json_object_get_string(sender);
-    parsed -> receiver = json_object_get_string(receiver);
-    parsed -> filename = json_object_get_string(filename);
+    parsed -> type =  (enum MESSAGE_TYPE) json_object_get_int(type);
+    free(type);
 
+    //parsed -> content = json_object_get_string(content);
+    strcpy(parsed->content, json_object_get_string(content));
+    free(content);
+    
+    strcpy(parsed->time, json_object_get_string(time));
+    free(time);
+
+    strcpy(parsed->sender, json_object_get_string(sender));
+    free(sender);
+
+    strcpy(parsed->receiver, json_object_get_string(receiver));
+    free(receiver);
+
+    strcpy(parsed->filename, json_object_get_string(filename));
+    free(filename);
 }
 
 void printStruct(struct message *parsed)
@@ -40,9 +52,11 @@ void printStruct(struct message *parsed)
             parsed->sender, parsed->content, parsed->receiver);
 
     printf("Message of type %d sent at %s with file name %s\n",
-            (int) parsed->type, parsed->time, parsed->filename);
+            parsed->type, parsed->time, parsed->filename);
 }
 
+/*
+// Probably useless
 void freeMessage(struct message *message)
 {
     free(message->type);
@@ -52,6 +66,8 @@ void freeMessage(struct message *message)
     free(message->receiver);
     free(message->filename);
 }
+*/
+
 
 /*
 int main()

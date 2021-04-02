@@ -22,9 +22,14 @@
 #define MAX 80 
 #define PORT 8080 
 #define SA struct sockaddr 
+#define MESSAGE_SIZE sizeof(struct message)
 
 int running = 1;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+
+struct message* message; // = (struct message*) malloc(MESSAGE_SIZE);
+
 
 //#############################################################################
 //  CLIENT LIST (to put in a separare file? NO BECAUSE WE NEED GLOBAL MUTEX)
@@ -107,6 +112,7 @@ void interrupt(int err)
     pthread_mutex_lock(&mutex);
     free_clients(get_sentinel());
     pthread_mutex_unlock(&mutex);
+    free(message);
     printf("Program interrupted with error %d\n", err);
 }
 
@@ -196,6 +202,8 @@ struct user* parseUser(char string[])
     return res;
 }
 
+
+
 int main()
 {
     /*
@@ -203,6 +211,9 @@ int main()
     char number[] = "0776727908";
     free(init_user(user, number));
     */
+
+    message = (struct message*) malloc(MESSAGE_SIZE);
+
 
     int sockfd, connfd;
     socklen_t len;
@@ -248,7 +259,6 @@ int main()
     signal(SIGINT, interrupt);
 
     char buf[1024];
-    struct message* message = (struct message*) malloc(sizeof(struct message));
     //struct user* tmp_user = (struct user*) malloc(sizeof(struct user));
     struct user* tmp_user;
 
