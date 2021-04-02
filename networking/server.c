@@ -180,6 +180,22 @@ void connect_client(char pipe[], int client)
         errx(1, "Could not forward data to client");
 }
 
+struct user* parseUser(char string[])
+{
+    struct user* res = (struct user *) malloc(sizeof(struct user));
+    
+    char *token = strtok(string, " ");
+    strcpy(res->username, token);
+
+    token = strtok(NULL, " ");
+    strcpy(res->number, token);
+    
+    token = strtok(NULL, " ");
+    strcpy(res->UID, token);
+
+    return res;
+}
+
 int main()
 {
     /*

@@ -18,17 +18,6 @@ void func(int sockfd)
     char buff[MAX]; 
     int n;
    
-    char *json_test = "{\"sender\": \"0776727909\",\
-    \"receiver\": \"0776727908\",\
-    \"type\": 5,\
-    \"content\": \"1005838116\",\
-    \"time\": \"1845689\",\
-    \"filename\": \"file.txt\"\
-    }";
-
-
-    size_t len = strlen(json_test);
-    write(sockfd, json_test, len);
 
     for (;;) 
     { 
@@ -56,10 +45,25 @@ void func(int sockfd)
     } 
 } 
 
+int exists(char filename[])
+{
+    return (access(filename, F_OK ) == 0);
+}
+
+void init_procedure(int fd, char username[], char number[])
+{
+    struct user* user = init_user_path(username, number, ".user");
+    char* buf;
+    int n;
+    if ((n = asprintf(&buf, "%s %s %s", user->username, user->number, user->UID)) < 1)
+        errx(1, "Weird error sending generated user data");
+    write(fd, buf, n);
+    free(user);
+}
+
 int main() 
 { 
     // Check if user is already initialized, if not create it
-    struct user* User = init_user_path("sergiombd", "0776727908", ".user");
     
     // if initialized, open it and send identification
 
@@ -89,7 +93,33 @@ int main()
     else
         printf("Connection to server successful...\n"); 
 
+
+    /*
+    char *json_test = "{\"sender\": \"0776727909\",\
+    \"receiver\": \"0776727908\",\
+    \"type\": 5,\
+    \"content\": \"1005838116\",\
+    \"time\": \"1845689\",\
+    \"filename\": \"file.txt\"\
+    }";
+    
+
+    //size_t len = strlen(json_test);
+    //write(sockfd, json_test, len);
     // Chat function. 
+    
+    */
+    if (exists(".user"))
+    {
+        struct user* user = get_user_path(".user");
+        // send simple message with UID as content (use the function robert will implement)
+    }
+    else
+    {
+        //fetch user and number data to run through this function
+        // init_procedure(username, number);
+    }
+
     func(sockfd); 
 
     // Close socket.
