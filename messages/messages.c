@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,9 +31,13 @@ void parseMessage(char *data, struct message *parsed)
     free(type);
 
     //parsed -> content = json_object_get_string(content);
-    strcpy(parsed->content, json_object_get_string(content));
-    free(content);
-    
+    if (content != NULL)
+    {
+        printf("address of string -> %p\n", json_object_get_string(content));
+        strcpy(parsed->content, json_object_get_string(content));
+        free(content);
+    }
+
     strcpy(parsed->time, json_object_get_string(time));
     free(time);
 
@@ -44,6 +49,32 @@ void parseMessage(char *data, struct message *parsed)
 
     strcpy(parsed->filename, json_object_get_string(filename));
     free(filename);
+}
+
+/*
+struct message
+{
+    enum MESSAGE_TYPE type;
+    char *content;
+    char *time;
+    char *sender;
+    char *receiver;
+    char *filename; // For image and document type
+};
+*/
+
+char *genMessage(struct message* message, int *l)
+{
+    char *res;
+    *l = asprintf(&res, "{\"type\":%d,\
+\"content\":\"%s\",\
+\"time\":\"%s\",\
+\"sender\":\"%s\",\
+\"receiver\":\"%s\",\
+\"filename\":\"%s\"}",\
+message->type, message->content, message->time,\
+message->sender, message->receiver, message->filename);
+    return res;
 }
 
 void printStruct(struct message *parsed)

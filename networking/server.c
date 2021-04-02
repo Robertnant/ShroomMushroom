@@ -149,25 +149,16 @@ void * listen_to_client( void * arg )
     { 
         bzero(buff, MAX); 
   
-        printf("From client: ");
         // read the message from client and copy it in buffer 
         while((er = read(*sockfd, buff, sizeof(buff))) > 0)
         {
-            printf("%s", buff);
-            send_to(num, message, 12);
+            printf("From client: ");
+            printf("%s\n", buff);
+            //send_to(num, message, 12);
             bzero(buff, MAX); 
         }
         if(er < 1)
             return NULL;
-        // print buffer which contains the client contents 
-        //printf("From client: %s \n", buff); 
-        //bzero(buff, MAX); 
-        // n = 0; 
-        // copy server message in the buffer 
-        //while ((buff[n++] = getchar()) != '\n'); 
-  
-        // and send that buffer to client 
-        //write(sockfd, buff, sizeof(buff)); 
   
         // if msg contains "Exit" then server exit and chat ended. 
         if (strncmp("exit", buff, 4) == 0) 
@@ -212,7 +203,8 @@ int main()
     free(init_user(user, number));
     */
 
-    message = (struct message*) malloc(MESSAGE_SIZE);
+    message = (struct message*) malloc(sizeof(struct message));
+    //printf("address of message -> %p\n", message);
 
 
     int sockfd, connfd;
@@ -281,15 +273,16 @@ int main()
         
         memset(buf, 0, 1024 * sizeof(char));
         
+ 
         int r;
         r = read(connfd, buf, 1024);
         if (r <= 0)
             errx(1, "Error with identification process");
         
-        
+        printf("%s\n", buf); 
         parseMessage(buf, message);
         printStruct(message);
-        if(message->sender[0] != 0)
+        if(strcmp(message->sender,"(null)") != 0)
         {   
             tmp_user = get_user(message->sender);
             printf("Comapring content: %s to real UID: %s\n", message->content, tmp_user->UID);
@@ -301,11 +294,12 @@ int main()
                 close(connfd);
                 continue;
             }
-        } 
+        }
+        else
+            printf("Weird error: couldn't read message\n");
 
 
         // freeMessage(message); // doesn't work because of weird type issues
-        
 
 
         struct client* user = (struct client*) malloc(sizeof(struct client));

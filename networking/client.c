@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "../messages/messages.h"
 #include "../saved_users/users.h"
 
 #define MAX 80 
@@ -110,16 +111,32 @@ int main()
     // Chat function. 
     
     */
+    
+    struct message* message = (struct message*) calloc(1, sizeof(struct message));
     if (exists(".user"))
     {
         struct user* user = get_user_path(".user");
         // send simple message with UID as content (use the function robert will implement)
+        message->type = IDENTIFICATION;
+        message->content = user->UID;
+        message->sender = user->number;
+        //message->receiver[0] = 0;
+        //message->time[0] = 0;
+        //message->filename[0] = 0;
+
+        int l;
+        char *msg = genMessage(message, &l);
+        printf("%s\n", msg);
+        write(sockfd, msg, l);
+        free(msg);
     }
     else
     {
         //fetch user and number data to run through this function
         // init_procedure(username, number);
     }
+
+    free(message);
 
     func(sockfd); 
 
