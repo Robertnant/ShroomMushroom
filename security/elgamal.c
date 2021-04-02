@@ -6,6 +6,7 @@
 #include <math.h>
 #include <time.h>
 #include "elgamal.h"
+#include "tools.h"
 
 // GCD function.
 uint128_t gcd(uint128_t a, uint128_t b)
@@ -93,8 +94,8 @@ void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data)
         encryption[i] = s * tmp;
     }
 
-    // Save string array conversion of encryption.
-    en_data->en_msg = toStringArr(encryption, len);
+    // Save string conversion of encryption.
+    en_data->en_msg = toString(encryption, len);
 
     // Free encryption array.
     free(encryption);
@@ -104,7 +105,7 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
 {
     // Convert encrypted message to array of uint128 numbers.
     size_t len = en_data->size;
-    uint128_t *data = fromStringArr(en_data->en_msg, len);
+    uint128_t *data = fromString(en_data->en_msg, len);
 
     // Decrypted message initialisation.
     char *res = malloc((len+1) * sizeof(char));
@@ -126,133 +127,6 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
 
     // Free created array.
     free(data);
-
-    return res;
-}
-
-// Print a uint128 number.
-void print_largenum(uint128_t x) 
-{
-    if (x > 9)
-        print_largenum(x / 10);
-    
-    putchar(x % 10 + '0');
-
-    // Idea: instead of putchar, continuously add
-    // number to a buffer.
-    // asprintf. Take size returned by asprint and
-    // use &(buff+sizeReturned) to asprintf to that part
-    // of the string.
-}
-
-int largenum_len(uint128_t x)
-{
-    uint128_t tmp = x;
-
-    // Do conversion and get length of result.
-    int len = 0;
-    while (tmp)
-    {
-        tmp /= 10;
-
-        len++;
-    }
-
-    return len;
-}
-
-// Convert uint128_t to string.
-char *largenum_string(uint128_t x)
-{
-    // Result should have maximum 40 digits.
-    char *res = calloc(40, sizeof(char));
-
-    uint128_t tmp = x;
-
-    // Do conversion and get length of result.
-    int len = 0;
-    while (tmp)
-    {
-        res[len] = (tmp % 10 + '0');
-        tmp /= 10;
-
-        len++;
-    }
-
-    // Reverse result.
-    char *begin = res;
-    char *end = res + len - 1;
-    char tmpC;
-
-    while (begin < end)
-    {
-        tmpC = *begin;
-        *begin = *end;
-        *end = tmpC;
-
-        begin++;
-        end--;
-    }
-
-    return res;
-}
-
-// Convert array of large numbers to string.
-char *toString(uint128_t *data, size_t len)
-{
-    // Get size of each uint128 in encrypted message.
-    size_t en_count = 0;
-    for (size_t i = 0; i < len; i++)
-    {
-        en_count += largenum_len(data[i]);
-    }
-
-    // Final string.
-    char *res = calloc(en_count + 1, sizeof(char));
-
-    // Convert each uint128 and append to final string.
-    en_count = 0;
-    for (size_t i = 0; i < len; i++)
-    {
-        char *msg_part = largenum_string(data[i]);
-        strcat(res, msg_part);
-
-        // Free string.
-        free(msg_part);
-    }
-    
-    return res;
-
-}
-
-// Convert array of large numbers to array of strings.
-char **toStringArr(uint128_t *data, size_t len)
-{
-    char **res = malloc(len * sizeof(char*));
-
-    for (size_t i = 0; i < len; i++)
-    {
-        res[i] = largenum_string(data[i]);
-    }
-
-    return res;
-}
-
-// Convert array of strings to array of large numbers.
-uint128_t *fromStringArr(char **arr, size_t len)
-{
-    uint128_t *res = malloc(len * sizeof(uint128_t));
-
-    for (size_t i = 0; i < len; i++)
-    {
-        uint128_t current = 0;
-        for (size_t c = 0; c < strlen(arr[i]); c++)
-        {
-            current = current * 10 + (arr[i][c] - '0');
-        }
-
-        res[i] = current;
-    }
 
     return res;
 }
@@ -281,11 +155,6 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
 // Free encrypted data memory.
 void freeCyphers(cyphers *data)
 {
-    // Free each string in encryption.
-    for (size_t i = 0; i < data->size; i++)
-        free(data->en_msg[i]);
-
-    // Free entire encryption.
     free(data->en_msg);
 
     // Free entire struct.
@@ -316,7 +185,7 @@ int main()
 
     // Encrypt message and print.
     encrypt_gamal(msg, receiver_pubkey, dataCyphers);
-    // printf("\nEncryption: %s\n", dataCyphers -> dataString);
+    // printf("\nEncryption: %s\n", dataCyphers -> en_msg);
 
     // Decrypt data and print.
     char *dr_msg = decrypt_gamal(dataCyphers, receiver_privkey);
