@@ -55,6 +55,7 @@ void init_procedure(int fd, char username[], char number[])
     int n;
     if ((n = asprintf(&buf, "%s %s %s", user->username, user->number, user->UID)) < 1)
         errx(1, "Weird error sending generated user data");
+    // 
     write(fd, buf, n);
     free(user);
 }
@@ -125,6 +126,7 @@ int main()
         char *msg = genMessage(message, &l);
         write(sockfd, msg, l);
         free(msg);
+        free(user);
     }
     else
     {
