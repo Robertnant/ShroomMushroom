@@ -33,7 +33,8 @@ void parseMessage(char *data, struct message *parsed)
     //parsed -> content = json_object_get_string(content);
     if (content != NULL)
     {
-        printf("address of string -> %p\n", json_object_get_string(content));
+        printf("string -> %s\n", json_object_get_string(content));
+        printf("Trying to copy it to address -> %p\n", parsed->content);
         strcpy(parsed->content, json_object_get_string(content));
         free(content);
     }

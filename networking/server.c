@@ -143,8 +143,8 @@ void * listen_to_client( void * arg )
     char buff[MAX]; 
     int er;
 
-    char num[] = "0776727908";
-    char message[] = "HelloWorld!";
+    //char num[] = "0776727908";
+    //char message[] = "HelloWorld!";
     for (;;) 
     { 
         bzero(buff, MAX); 
@@ -225,6 +225,12 @@ int main()
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servaddr.sin_port = htons(PORT);
+    
+    // Let server unbind from port after connection
+    int value = 1;
+    int err = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(int));
+    if (err == -1)
+        printf("Could not set port to unbind after connection\n");
 
     // Binding newly created socket to given IP and verification
     if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) 
@@ -234,6 +240,9 @@ int main()
     }
     else
         printf("Socket successfully binded..\n");
+
+
+
 
     // Now server is ready to listen and verification
     if ((listen(sockfd, 5)) != 0) 
