@@ -15,6 +15,7 @@
 #define MAX 80 
 #define PORT 8080 
 #define SA struct sockaddr 
+
 void func(int sockfd) 
 { 
     char buff[MAX]; 
@@ -32,6 +33,8 @@ void func(int sockfd)
             ;
 
         // Send buffer data to server.
+
+        // Encrypt message.
         write(sockfd, buff, sizeof(buff)); 
 
         // Check for exit signal.
@@ -125,12 +128,17 @@ int main()
         char *msg = genMessage(message, &l);
         write(sockfd, msg, l);
         free(msg);
+
+        // TODO: This is a test (user was not freed).
+        free(user);
     }
     else
     {
         printf("USER CONFIGURATION NOT FOUND!\n");
         //fetch user and number data to run through this function
-        // init_procedure(username, number);
+        char *username = "sergiombd";
+        char number[] = "0776727908";         
+        init_procedure(sockfd, username, number);
     }
 
     free(message);

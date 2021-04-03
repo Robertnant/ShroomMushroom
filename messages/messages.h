@@ -14,6 +14,9 @@ struct message
 {
     enum MESSAGE_TYPE type;
     char *content;
+    char *p;
+    size_t size;
+
     char *time;
     char *sender;
     char *receiver;

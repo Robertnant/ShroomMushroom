@@ -197,11 +197,9 @@ struct user* parseUser(char string[])
 
 int main()
 {
-    /*
     char user[] = "sergiombd";
     char number[] = "0776727908";
     free(init_user(user, number));
-    */
 
     message = (struct message*) malloc(sizeof(struct message));
     //printf("address of message -> %p\n", message);
@@ -289,10 +287,11 @@ int main()
             errx(1, "Error with identification process");
         
         parseMessage(buf, message);
-        //printStruct(message);
+        // printStruct(message);
         if(strcmp(message->sender,"(null)") != 0)
         {   
             tmp_user = get_user(message->sender);
+
             if (tmp_user!=NULL && strcmp(tmp_user->UID, message->content) == 0)
                 printf("USER %s IDENTIFIED SUCCESSFULLY\n", tmp_user->username);
             else
@@ -305,7 +304,9 @@ int main()
         else
             printf("Weird error: couldn't read message\n");
 
-
+        // Free user.
+        // TODO: Remove this after Sergio implements function to handle this.
+        free(tmp_user);
 
 
         struct client* user = (struct client*) malloc(sizeof(struct client));
