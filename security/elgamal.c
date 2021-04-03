@@ -86,7 +86,7 @@ void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data)
 
     uint128_t s = mod_power(h, k, q);
     uint128_t p = mod_power(g, k, q);
-    en_data -> p = p;
+    en_data -> p = largenum_string(p);
 
     for (size_t i = 0; i < len; i++)
     {
@@ -110,7 +110,7 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
     // Decrypted message initialisation.
     char *res = malloc((len+1) * sizeof(char));
 
-    uint128_t p = en_data->p;
+    uint128_t p = string_largenum(en_data->p);
     uint128_t key = privkey->a;
     uint128_t q = privkey->q;
 
@@ -155,6 +155,7 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
 void freeCyphers(cyphers *data)
 {
     free(data->en_msg);
+    free(data->p);
 
     // Free entire struct.
     free(data);

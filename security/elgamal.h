@@ -26,7 +26,7 @@ typedef struct privateKey
 typedef struct cyphers 
 {
     char *en_msg;
-    uint128_t p;
+    char *p;
     size_t size;
     
 } cyphers;

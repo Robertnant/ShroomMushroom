@@ -11,6 +11,8 @@ void parseMessage(char *data, struct message *parsed)
 
     struct json_object *parsed_json;
     struct json_object *content;
+    struct json_object *p;
+    struct json_object *size;
     struct json_object *time;
     struct json_object *sender;
     struct json_object *receiver;
@@ -20,6 +22,8 @@ void parseMessage(char *data, struct message *parsed)
     parsed_json = json_tokener_parse(data);
 
     json_object_object_get_ex(parsed_json, "content", &content);
+    json_object_object_get_ex(parsed_json, "p", &p);
+    json_object_object_get_ex(parsed_json, "size", &size);
     json_object_object_get_ex(parsed_json, "time", &time);
     json_object_object_get_ex(parsed_json, "sender", &sender);
     json_object_object_get_ex(parsed_json, "receiver", &receiver);
@@ -35,7 +39,15 @@ void parseMessage(char *data, struct message *parsed)
     parsed->content = (char *) malloc(sizeof(char) * len + 1);
     strcpy(parsed->content, json_object_get_string(content));
     free(content);
-    
+
+    len = strlen(json_object_get_string(p));
+    parsed->p = (char *) malloc(sizeof(char) * len + 1);
+    strcpy(parsed->p, json_object_get_string(p));
+    free(p);
+
+    parsed->size = json_object_get_int(size);
+    free(size);
+
     len = strlen(json_object_get_string(time));
     parsed->time = (char *) malloc(sizeof(char) * len + 1);
     strcpy(parsed->time, json_object_get_string(time));
@@ -76,12 +88,14 @@ char *genMessage(struct message* message, int *l)
     char *res;
     *l = asprintf(&res, "{\"type\":%d,\
 \"content\":\"%s\",\
+\"p\":\"%s\",\
+\"size\":%lu,\
 \"time\":\"%s\",\
 \"sender\":\"%s\",\
 \"receiver\":\"%s\",\
 \"filename\":\"%s\"}",\
-message->type, message->content, message->time,\
-message->sender, message->receiver, message->filename);
+message->type, message->content, message->p, message->size,\
+message->time, message->sender, message->receiver, message->filename);
     return res;
 }
 
@@ -99,6 +113,7 @@ void printStruct(struct message *parsed)
 void freeMessage(struct message *message)
 {
     free(message->content);
+    free(message->p);
     free(message->time);
     free(message->sender);
     free(message->receiver);

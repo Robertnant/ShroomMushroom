@@ -4,11 +4,15 @@
 #define USERS_FILE "saved_users/Users"
 #define PIPES_FILE "saved_users/Pipes"
 
+#include "../security/elgamal.h"
+
 struct user
 {
     char username[17];
     char number[11];
     char UID[11];
+    privateKey priv;
+    publicKey pub;
 };
 
 char * get_filename(char directory[], char filename[]);

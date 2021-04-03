@@ -18,6 +18,7 @@
 
 #include "../saved_users/users.h"
 #include "../messages/messages.h"
+#include "../security/elgamal.h"
 
 #define MAX 80 
 #define PORT 8080 
@@ -52,6 +53,7 @@ struct client * get_sentinel()
         sentinel->next = NULL;
         sentinel->prev = NULL;
         sentinel->fd = -1;
+        sentinel->user = (struct user*) malloc(sizeof(struct user));
     }
     return sentinel;
 }
@@ -60,6 +62,7 @@ void free_clients(struct client* sentinel)
 {
     if(sentinel->next)
         free_clients(sentinel->next);
+    free(sentinel->user);
     free(sentinel);
 }
 
@@ -72,6 +75,7 @@ void free_client(struct client* client)
     prev->next = next;
     if (next)
         next->prev = prev;
+    free(client->user);
     free(client);
     pthread_mutex_unlock(&mutex);
 }
@@ -114,6 +118,7 @@ void interrupt(int err)
     pthread_mutex_unlock(&mutex);
     freeMessage(message);
     printf("Program interrupted with error %d\n", err);
+    exit(0);
 }
 
 
@@ -142,6 +147,7 @@ void * listen_to_client( void * arg )
     int * sockfd = (int *) arg;
     char buff[MAX]; 
     int er;
+    printf("Listening to client...");
 
     //char num[] = "0776727908";
     //char message[] = "HelloWorld!";
@@ -154,7 +160,7 @@ void * listen_to_client( void * arg )
         {
             printf("From client: ");
             printf("%s\n", buff);
-            //send_to(num, message, 12);
+            //send_to(num, buff, err);
             bzero(buff, MAX); 
         }
         if(er < 1)
@@ -172,7 +178,12 @@ void * listen_to_client( void * arg )
 
 void connect_client(char pipe[], int client)
 {
-    int fd = open(pipe, O_RDONLY);
+    char * filename = get_filename(PIPES_FILE, pipe);
+    int fd = open(filename, O_RDONLY | O_NONBLOCK);
+    if (fd < 0)
+        errx(1, "Couldn't open pipe for client redirection");
+    free(filename);
+    //printf("FD IS %d\n", fd);
     if (dup2(fd, client) < 0)
         errx(1, "Could not forward data to client");
 }
@@ -197,11 +208,9 @@ struct user* parseUser(char string[])
 
 int main()
 {
-    /*
     char user[] = "sergiombd";
     char number[] = "0776727908";
     free(init_user(user, number));
-    */
 
     message = (struct message*) malloc(sizeof(struct message));
     //printf("address of message -> %p\n", message);
@@ -289,24 +298,42 @@ int main()
             errx(1, "Error with identification process");
         
         parseMessage(buf, message);
-        //printStruct(message);
-        if(strcmp(message->sender,"(null)") != 0)
-        {   
-            tmp_user = get_user(message->sender);
-            if (tmp_user!=NULL && strcmp(tmp_user->UID, message->content) == 0)
-                printf("USER %s IDENTIFIED SUCCESSFULLY\n", tmp_user->username);
-            else
-            {
-                printf("FRAUD DETECTED OR NONE EXSISTING USER\n");
-                close(connfd);
+        // printStruct(message);
+        switch (message->type)
+        {
+            case (IDENTIFICATION):
+                if(strcmp(message->sender,"(null)") != 0)
+                {   
+                    tmp_user = get_user(message->sender);
+
+                    if (tmp_user!=NULL && strcmp(tmp_user->UID, message->content) == 0)
+                        printf("USER %s IDENTIFIED SUCCESSFULLY\n", tmp_user->username);
+                    else
+                    {
+                        printf("FRAUD DETECTED OR NONE EXSISTING USER\n");
+                        close(connfd);
+                        continue;
+                    }
+                }
+                else
+                    printf("Weird error: couldn't read message\n");
+                break;
+
+
+            case INIT:
+                printf("Starting init procedure..\n");
+                break;
+
+
+            default:
+                printf("MESSAGE NOT RECOGNIZED!\n");
                 continue;
-            }
+            
         }
-        else
-            printf("Weird error: couldn't read message\n");
-
-
-
+        // Free user.
+        // TODO: Remove this after Sergio implements function to handle this.
+        //free(tmp_user);
+        
 
         struct client* user = (struct client*) malloc(sizeof(struct client));
         sentinel->next = user;
@@ -316,12 +343,16 @@ int main()
             curr->prev = user;
         user->next = curr;
         curr = user;
-        user->fd = connfd;
+
+        curr->fd = connfd;
+        curr->user = tmp_user;
         
+
+        connect_client(curr->user->UID, curr->fd);
         // implement functions to get username, UID, and password
         // we'll need to get user from phone number and verify if UID matches (security)
         // 
-        
+         
         //struct user* real_user = get_user(number); // do that instead of the thing below
 
 
