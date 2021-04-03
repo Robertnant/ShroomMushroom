@@ -185,15 +185,21 @@ publicKey* stringtoPub(char *string)
     char *token;
 
     token = strtok(string, "-");
-    key->g = (char *) malloc(strlen(token) * sizeof(char) + 1);
+    printf("Token: %s\n", token);
+    key->g = token;
+    
     token = strtok(NULL, "-");
-    key->q = (char *) malloc(strlen(token) * sizeof(char) + 1);
+    printf("Token: %s\n", token);
+    key->q = token;
+
     token = strtok(NULL, "-");
-    key->h = (char *) malloc(strlen(token) * sizeof(char) + 1);
+    printf("Token: %s\n", token);
+    key->h = token;
 
     return key;
 }
 
+/*
 int main()
 {
     char *msg = "Black leather gloves, no sequins\n\
@@ -233,4 +239,4 @@ int main()
     return 0;
 
 }
-
+*/

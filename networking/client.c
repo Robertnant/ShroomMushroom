@@ -11,12 +11,52 @@
 
 #include "../messages/messages.h"
 #include "../saved_users/users.h"
+#include "../security/elgamal.h"
 
 #define MAX 80 
 #define PORT 8080 
 #define SA struct sockaddr 
 
-void func(int sockfd) 
+struct message *message;
+
+// TODO: Uncomment once request handling is implemented on server.
+/* Request receiver's public keys for encryption.
+struct publicKey *requestKey(struct message *message, int sockfd)
+{
+    // Create request.
+    // (Make request as JSON using ADD).
+
+    // Send query to server.
+    if (write(sockfd, query, strlen(json)) == -1)
+        errx(1, "Write error occured");
+
+    free(query);
+
+    // Read response and parse public key.
+    // (Size shouldn't exceed 150 bytes).
+    // Might need to use MAX instead but
+    // only after increase MAX value.
+    char buffer[150];
+    if (read(sockfd, buffer, 150) == -1)
+        errx(1, "Read error occured");
+
+    // TODO: Implement this return function.
+    // (Sergio is coding this function).
+    return parseKey(buffer);
+}
+*/
+
+// Temporary public key request function. Hardcoded keys.
+// (These harcoded keys will be temporary used by server as well).
+char *requestKeyTmp(struct message *message, int sockfd)
+{
+    char *key = calloc(120, sizeof(char));
+    strcpy(key, "288106915-100000000000288106913-60547751503877636969");
+
+    return key;
+}
+
+void func(int sockfd, struct message *message) 
 { 
     char buff[MAX]; 
     int n;
@@ -32,19 +72,70 @@ void func(int sockfd)
         while (n < MAX && (buff[n++] = getchar()) != '\n')
             ;
 
-        // Send buffer data to server.
-
-        // Encrypt message.
-        write(sockfd, buff, sizeof(buff)); 
-
         // Check for exit signal.
         if ((strncmp(buff, "exit", 4)) == 0)
-        { 
+        {
             printf("Client exited...\n"); 
-            break; 
+            break;
         }
+
+        // Step 0: Server asks for receiver and type (this is will be done with GTK).
+        // of message that will be sent by user.
+        // char *receiver = "Sergio";
+
+        // Step 1: Get receiver's public key (hard coded for now).
+        message->receiver = "077644562";
+        char *key = requestKeyTmp(message, 2);
+
+        printf("Requested key: %s\n", key);
+
+        struct publicKey *receiver_keys = stringtoPub(key);
+
+        // Step 2: Encrypt message.
+        struct cyphers *cyphers= malloc(sizeof(struct cyphers));
+
+        printf("g -> %s\n", receiver_keys -> g);
+        printf("q -> %s\n", receiver_keys -> q);
+        printf("h -> %s\n", receiver_keys -> h);
+
+        encrypt_gamal(buff, receiver_keys, cyphers);
+
+        // Free receiver public key.
+        free(key);
+        free(receiver_keys);
+
+        // Step 3: Generate JSON with cyphers (maybe hard code don't know yet).
+        message->type = TEXT;
+        message->content = cyphers->en_msg;
+        message->p = cyphers->p;
+        message->size = cyphers->size;
+        message->time = "1015";
+        message->sender = "Robert";
+        // message->receiver = "Sergio";
+        message->filename = 0;
+
+        int jsonSize;
+        char *json = genMessage(message, &jsonSize);
+
+        printf("JSON: %s\n", json);
+        
+        // Step 4: Send JSON to server.
+        write(sockfd, json, jsonSize); 
+        
+        // Free json.
+        free(json);
+
+        // TODO Read.
+        // (For now the server won't send the data
+        // to a receiver. It will have the private key of the "receiver". It will just decrypt and print it).
+        // Note: normally the server should never have a private key. But since identification is not done,
+        // we can do this for now.
+
+        // Do the opposite for the server.
+
+        
     } 
-} 
+}
 
 int exists(char filename[])
 {
@@ -112,7 +203,7 @@ int main()
     
     */
     
-    struct message* message = (struct message*) calloc(1, sizeof(struct message));
+    message = (struct message*) calloc(1, sizeof(struct message));
     if (exists(".user"))
     {
         printf("Starting identification procedure...\n");
@@ -142,9 +233,11 @@ int main()
         init_procedure(sockfd, username, number);
     }
 
-    free(message);
 
-    func(sockfd); 
+    func(sockfd, message); 
+
+    // Free message structure.
+    free(message);
 
     // Close socket.
     close(sockfd); 

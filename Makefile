@@ -1,14 +1,14 @@
 CC=gcc
-CFLAGS= -Wall -Wextra -fsanitize=address -g -pthread
+CFLAGS= -Wall -Wextra -fsanitize=address -g -lm -pthread
 LDLIBS= -ljson-c
 #CXXFLAGS= -Inetworking -Isaved_users
-VPATH=networking:saved_users:messages
+VPATH=networking:saved_users:messages:security
 
 all: server client
 
-server: server.c users.c messages.c
+server: server.c users.c messages.c tools.c elgamal.c
 
-client: client.c users.c messages.c
+client: client.c users.c messages.c tools.c elgamal.c
 
 
 clean:

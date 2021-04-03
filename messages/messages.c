@@ -101,8 +101,9 @@ message->time, message->sender, message->receiver, message->filename);
 
 void printStruct(struct message *parsed)
 {
-    printf("User: %s sending message %s to User %s\n", 
-            parsed->sender, parsed->content, parsed->receiver);
+    printf("User: %s sending message %s with second cypher %s\
+            and original msg size %lu to User %s\n", 
+            parsed->sender, parsed->content, parsed->p, parsed->size, parsed->receiver);
 
     printf("Message of type %d sent at %s with file name %s\n",
             parsed->type, parsed->time, parsed->filename);
