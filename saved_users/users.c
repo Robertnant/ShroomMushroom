@@ -131,6 +131,7 @@ struct user* init_user(char username[], char number[])
 }
 
 
+
 //public key variable needs to be added 
 struct user* init_user_path(char username[], char number[], char path[])
 {
@@ -144,6 +145,14 @@ struct user* init_user_path(char username[], char number[], char path[])
     strcpy(new->number, number);
     strcpy(new->UID, id);
     free(id);
+
+    publicKey* pubKey = (publicKey *) malloc(sizeof(publicKey));
+    privateKey* privKey = (privateKey *) malloc(sizeof(privateKey));
+
+    generateKeys(pubKey, privKey);
+
+    new->pub = pubKey;
+    user->priv = privKey;
 
     save_user_path(new, path);
     //free(new);

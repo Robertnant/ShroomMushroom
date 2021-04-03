@@ -21,6 +21,8 @@ struct user* get_user(char number[]);
 
 struct user* get_user_path(char path[]);
 
+void save_user(struct user* user);
+
 void save_user_path(struct user * user, char * path);
 
 struct user* init_user(char username[], char number[]);

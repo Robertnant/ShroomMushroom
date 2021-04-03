@@ -330,7 +330,7 @@ int main()
             case INIT:
                 printf("Starting init procedure..\n");
                 tmp_user = parseUser(message->content);
-
+                save_user(tmp_user);
                 break;
 
 

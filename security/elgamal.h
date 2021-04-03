@@ -41,6 +41,8 @@ uint128_t mod_power(uint128_t a, uint128_t b, uint128_t m);
 char * pubtoString(publicKey* key);
 publicKey* stringtoPub(char* string);
 
+// Key generation
+void generateKeys(publicKey *pubKey, privateKey *privKey);
 
 // Encryption and decryption.
 void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data);

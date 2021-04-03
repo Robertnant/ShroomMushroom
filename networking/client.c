@@ -141,13 +141,21 @@ int exists(char filename[])
 void init_procedure(int fd, char username[], char number[])
 {
     struct user* user = init_user_path(username, number, ".user");
+    struct message* tmp_msg = (struct message *) calloc(1, sizeof(struct message));
     char* buf;
+    char* key = pubtoString(user->pub);
     int n;
-    if ((n = asprintf(&buf, "%s %s %s", user->username, user->number, user->UID)) < 1)
+    tmp_msg->type = INIT; 
+    if ((n = asprintf(&tmp_msg->content, "%s %s %s %s", user->username, user->number, user->UID, key)) < 1)
         errx(1, "Weird error sending generated user data");
-    // 
-    write(fd, buf, n);
+    int l;
+    buf = genMessage(tmp_msg, &l);
+
+    write(fd, buf, l);
     free(user);
+    free(buf);
+    free(message);
+    free(key);
 }
 
 int main() 
