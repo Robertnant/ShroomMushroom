@@ -20,7 +20,7 @@
 #include "../messages/messages.h"
 #include "../security/elgamal.h"
 
-#define MAX 80 
+#define MAX 10000 
 #define PORT 8080 
 #define SA struct sockaddr 
 #define MESSAGE_SIZE sizeof(struct message)
@@ -147,7 +147,7 @@ void * listen_to_client( void * arg )
     int * sockfd = (int *) arg;
     char buff[MAX]; 
     int er;
-    printf("Listening to client...");
+    printf("Listening to client...\n");
 
     //char num[] = "0776727908";
     //char message[] = "HelloWorld!";
@@ -163,6 +163,10 @@ void * listen_to_client( void * arg )
             //send_to(num, buff, err);
             bzero(buff, MAX); 
         }
+
+        // Add newline.
+        printf("\n");
+
         if(er < 1)
             return NULL;
   
@@ -353,7 +357,7 @@ int main()
         curr->user = tmp_user;
         
 
-        connect_client(curr->user->UID, curr->fd);
+        // connect_client(curr->user->UID, curr->fd);
         // implement functions to get username, UID, and password
         // we'll need to get user from phone number and verify if UID matches (security)
         // 
@@ -374,7 +378,7 @@ int main()
 
 
         // To uncomment whenever we create the user identification procedure
-        //connect_client(user->UID, user->fd);
+        // connect_client(user->UID, user->fd);
         
         printf("New user connected!\n");
     }
