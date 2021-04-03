@@ -5,6 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <err.h>
 #include "elgamal.h"
 #include "tools.h"
 
@@ -168,6 +169,29 @@ void freeKeys(publicKey *pubkey)
     free(pubkey -> h);
 
     free(pubkey);
+}
+
+char *pubtoString(publicKey* key)
+{
+    char *res;
+    if (asprintf(&res, "%s-%s-%s", key->g, key->q, key->h) < 0)
+        errx(1, "Couldn't allocate for public key");
+    return res;
+}
+
+publicKey* stringtoPub(char *string)
+{
+    publicKey* key = (publicKey *) malloc(sizeof(publicKey));
+    char *token;
+
+    token = strtok(string, "-");
+    key->g = (char *) malloc(strlen(token) * sizeof(char) + 1);
+    token = strtok(NULL, "-");
+    key->q = (char *) malloc(strlen(token) * sizeof(char) + 1);
+    token = strtok(NULL, "-");
+    key->h = (char *) malloc(strlen(token) * sizeof(char) + 1);
+
+    return key;
 }
 
 int main()

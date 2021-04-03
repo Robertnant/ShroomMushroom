@@ -200,6 +200,9 @@ struct user* parseUser(char string[])
     
     token = strtok(NULL, " ");
     strcpy(res->UID, token);
+    
+    token = strtok(NULL, " ");
+    res->pub = stringtoPub(token);
 
     return res;
 }
@@ -301,7 +304,7 @@ int main()
         // printStruct(message);
         switch (message->type)
         {
-            case (IDENTIFICATION):
+            case IDENTIFICATION:
                 if(strcmp(message->sender,"(null)") != 0)
                 {   
                     tmp_user = get_user(message->sender);
@@ -322,6 +325,8 @@ int main()
 
             case INIT:
                 printf("Starting init procedure..\n");
+                tmp_user = parseUser(message->content);
+
                 break;
 
 

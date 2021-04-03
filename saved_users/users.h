@@ -11,8 +11,8 @@ struct user
     char username[17];
     char number[11];
     char UID[11];
-    privateKey priv;
-    publicKey pub;
+    privateKey* priv;
+    publicKey* pub;
 };
 
 char * get_filename(char directory[], char filename[]);
@@ -20,6 +20,8 @@ char * get_filename(char directory[], char filename[]);
 struct user* get_user(char number[]);
 
 struct user* get_user_path(char path[]);
+
+void save_user_path(struct user * user, char * path);
 
 struct user* init_user(char username[], char number[]);
 
