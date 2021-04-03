@@ -185,15 +185,12 @@ publicKey* stringtoPub(char *string)
     char *token;
 
     token = strtok(string, "-");
-    printf("Token: %s\n", token);
     key->g = token;
     
     token = strtok(NULL, "-");
-    printf("Token: %s\n", token);
     key->q = token;
 
     token = strtok(NULL, "-");
-    printf("Token: %s\n", token);
     key->h = token;
 
     return key;
@@ -230,6 +227,14 @@ int main()
     char *dr_msg = decrypt_gamal(dataCyphers, receiver_privkey);
     printf("\nDecrypted message: %s\n", dr_msg);
 
+    // Print public and private keys.
+    printf("g -> %s\n", receiver_pubkey->g);
+    printf("q -> %s\n", receiver_pubkey->q);
+    printf("h -> %s\n", receiver_pubkey->h);
+
+    // Private key.
+    printf("a -> %s\n", largenum_string(receiver_privkey->a));
+
     // Free memory space.
     free(dr_msg);
     freeKeys(receiver_pubkey);
@@ -240,3 +245,4 @@ int main()
 
 }
 */
+

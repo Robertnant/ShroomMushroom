@@ -51,7 +51,7 @@ struct publicKey *requestKey(struct message *message, int sockfd)
 char *requestKeyTmp(struct message *message, int sockfd)
 {
     char *key = calloc(120, sizeof(char));
-    strcpy(key, "288106915-100000000000288106913-60547751503877636969");
+    strcpy(key, "740367455-100000000000740367453-38155483981476724314");
 
     return key;
 }
@@ -87,16 +87,10 @@ void func(int sockfd, struct message *message)
         message->receiver = "077644562";
         char *key = requestKeyTmp(message, 2);
 
-        printf("Requested key: %s\n", key);
-
         struct publicKey *receiver_keys = stringtoPub(key);
 
         // Step 2: Encrypt message.
         struct cyphers *cyphers= malloc(sizeof(struct cyphers));
-
-        printf("g -> %s\n", receiver_keys -> g);
-        printf("q -> %s\n", receiver_keys -> q);
-        printf("h -> %s\n", receiver_keys -> h);
 
         encrypt_gamal(buff, receiver_keys, cyphers);
 
@@ -116,11 +110,13 @@ void func(int sockfd, struct message *message)
 
         int jsonSize;
         char *json = genMessage(message, &jsonSize);
-
-        printf("JSON: %s\n", json);
         
         // Step 4: Send JSON to server.
-        write(sockfd, json, jsonSize); 
+        int e = write(sockfd, json, jsonSize); 
+        if (e == -1)
+            errx(1, "Write error");
+        else
+            printf("Encrypted data (JSON) sent to server.\n");
         
         // Free json.
         free(json);
