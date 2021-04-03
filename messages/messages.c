@@ -26,30 +26,37 @@ void parseMessage(char *data, struct message *parsed)
     json_object_object_get_ex(parsed_json, "type", &type);
     json_object_object_get_ex(parsed_json, "filename", &filename);
 
+    size_t len;
     // Store objects from json.
     parsed -> type =  (enum MESSAGE_TYPE) json_object_get_int(type);
     free(type);
 
-    //parsed -> content = json_object_get_string(content);
-    if (content != NULL)
-    {
-        printf("string -> %s\n", json_object_get_string(content));
-        printf("Trying to copy it to address -> %p\n", parsed->content);
-        strcpy(parsed->content, json_object_get_string(content));
-        free(content);
-    }
-
+    len = strlen(json_object_get_string(content));
+    parsed->content = (char *) malloc(sizeof(char) * len + 1);
+    strcpy(parsed->content, json_object_get_string(content));
+    free(content);
+    
+    len = strlen(json_object_get_string(time));
+    parsed->time = (char *) malloc(sizeof(char) * len + 1);
     strcpy(parsed->time, json_object_get_string(time));
     free(time);
 
+    len = strlen(json_object_get_string(sender));
+    parsed->sender = (char *) malloc(sizeof(char) * len + 1);
     strcpy(parsed->sender, json_object_get_string(sender));
     free(sender);
 
+    len = strlen(json_object_get_string(receiver));
+    parsed->receiver = (char *) malloc(sizeof(char) * len + 1);
     strcpy(parsed->receiver, json_object_get_string(receiver));
     free(receiver);
 
+    len = strlen(json_object_get_string(filename));
+    parsed->filename = (char *) malloc(sizeof(char) * len + 1);
     strcpy(parsed->filename, json_object_get_string(filename));
     free(filename);
+
+    free(parsed_json);
 }
 
 /*
@@ -87,18 +94,18 @@ void printStruct(struct message *parsed)
             parsed->type, parsed->time, parsed->filename);
 }
 
-/*
-// Probably useless
+
+// Probably useful
 void freeMessage(struct message *message)
 {
-    free(message->type);
     free(message->content);
     free(message->time);
     free(message->sender);
     free(message->receiver);
     free(message->filename);
+    free(message);
 }
-*/
+
 
 
 /*

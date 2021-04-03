@@ -112,7 +112,7 @@ void interrupt(int err)
     pthread_mutex_lock(&mutex);
     free_clients(get_sentinel());
     pthread_mutex_unlock(&mutex);
-    free(message);
+    freeMessage(message);
     printf("Program interrupted with error %d\n", err);
 }
 
@@ -288,13 +288,11 @@ int main()
         if (r <= 0)
             errx(1, "Error with identification process");
         
-        printf("%s\n", buf); 
         parseMessage(buf, message);
-        printStruct(message);
+        //printStruct(message);
         if(strcmp(message->sender,"(null)") != 0)
         {   
             tmp_user = get_user(message->sender);
-            printf("Comapring content: %s to real UID: %s\n", message->content, tmp_user->UID);
             if (tmp_user!=NULL && strcmp(tmp_user->UID, message->content) == 0)
                 printf("USER %s IDENTIFIED SUCCESSFULLY\n", tmp_user->username);
             else
@@ -308,7 +306,6 @@ int main()
             printf("Weird error: couldn't read message\n");
 
 
-        // freeMessage(message); // doesn't work because of weird type issues
 
 
         struct client* user = (struct client*) malloc(sizeof(struct client));

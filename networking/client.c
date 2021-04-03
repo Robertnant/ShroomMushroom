@@ -34,10 +34,6 @@ void func(int sockfd)
         // Send buffer data to server.
         write(sockfd, buff, sizeof(buff)); 
 
-        // bzero(buff, sizeof(buff)); 
-        // read(sockfd, buff, sizeof(buff)); 
-        // printf("From Server : %s", buff); 
-
         // Check for exit signal.
         if ((strncmp(buff, "exit", 4)) == 0)
         { 
@@ -115,6 +111,7 @@ int main()
     struct message* message = (struct message*) calloc(1, sizeof(struct message));
     if (exists(".user"))
     {
+        printf("Starting identification procedure...\n");
         struct user* user = get_user_path(".user");
         // send simple message with UID as content (use the function robert will implement)
         message->type = IDENTIFICATION;
@@ -126,12 +123,12 @@ int main()
 
         int l;
         char *msg = genMessage(message, &l);
-        printf("%s\n", msg);
         write(sockfd, msg, l);
         free(msg);
     }
     else
     {
+        printf("USER CONFIGURATION NOT FOUND!\n");
         //fetch user and number data to run through this function
         // init_procedure(username, number);
     }
