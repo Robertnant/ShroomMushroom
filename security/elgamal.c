@@ -72,9 +72,9 @@ uint128_t mod_power(uint128_t a, uint128_t b, uint128_t m)
 void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data)
 {
     // Public keys.
-    uint128_t q = receiverKeys -> q;
-    uint128_t g = receiverKeys -> g;
-    uint128_t h = receiverKeys -> h;
+    uint128_t q = string_largenum(receiverKeys -> q);
+    uint128_t g = string_largenum(receiverKeys -> g);
+    uint128_t h = string_largenum(receiverKeys -> h);
 
     // Encrypted message initialization.
     size_t len = strlen(msg);
@@ -144,12 +144,11 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
     uint128_t h = mod_power(g, key, q);
 
     // Save receiver keys to structs.
-    pubKey -> q = q;
-    pubKey -> g = g;
-    pubKey -> h = h;
+    pubKey -> q = largenum_string(q);
+    pubKey -> g = largenum_string(g);
+    pubKey -> h = largenum_string(h);
     privKey -> a = key;
     privKey -> q = q;
-
 }
 
 // Free encrypted data memory.
@@ -159,6 +158,15 @@ void freeCyphers(cyphers *data)
 
     // Free entire struct.
     free(data);
+}
+
+void freeKeys(publicKey *pubkey)
+{
+    free(pubkey -> g);
+    free(pubkey -> q);
+    free(pubkey -> h);
+
+    free(pubkey);
 }
 
 int main()
@@ -193,7 +201,7 @@ int main()
 
     // Free memory space.
     free(dr_msg);
-    free(receiver_pubkey);
+    freeKeys(receiver_pubkey);
     free(receiver_privkey);
     freeCyphers(dataCyphers);
 

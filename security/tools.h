@@ -9,6 +9,7 @@ int largenum_len(uint128_t x);
 void print_largenum(uint128_t x); 
 char *toString(uint128_t *data, size_t len);
 char *largenum_string(uint128_t x);
+uint128_t string_largenum(char *str);
 uint128_t *fromString(char *enc, size_t finalLen);
 
 // Tools for uint128 to array of strings conversion.
