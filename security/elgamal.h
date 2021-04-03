@@ -5,11 +5,12 @@ typedef __int128 int128_t;
 typedef unsigned __int128 uint128_t;
 
 // Structures for Elgamal keys.
+// (Public key is saved as strings for JSON purposes).
 typedef struct publicKey
 {
-    uint128_t g;
-    uint128_t q;
-    uint128_t h;
+    char* g;
+    char* q;
+    char* h;
 
 } publicKey;
 

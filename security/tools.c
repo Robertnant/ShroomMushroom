@@ -64,6 +64,21 @@ char *largenum_string(uint128_t x)
     return res;
 }
 
+// Convert single string to uint128_t.
+uint128_t string_largenum(char *str)
+{
+    uint128_t res = 0;
+
+    size_t len = strlen(str);
+    for (size_t i = 0; i < len; i++)
+    {
+        res = res * 10 + (str[i] - '0');
+    }
+
+    return res;
+
+}
+
 // Convert array of large numbers to string.
 char *toString(uint128_t *data, size_t len)
 {
