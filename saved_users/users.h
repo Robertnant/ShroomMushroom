@@ -6,13 +6,27 @@
 
 #include "../security/elgamal.h"
 
+
+struct user_priv
+{
+    char a[40];
+    char q[40];
+};
+
+struct user_pub
+{
+    char g[40];
+    char q[40];
+    char h[40];
+};
+
 struct user
 {
     char username[17];
     char number[11];
     char UID[11];
-    privateKey* priv;
-    publicKey* pub;
+    struct user_priv priv;
+    struct user_pub pub;
 };
 
 char * get_filename(char directory[], char filename[]);

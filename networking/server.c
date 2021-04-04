@@ -194,7 +194,7 @@ void connect_client(char pipe[], int client)
 
 struct user* parseUser(char string[])
 {
-    struct user* res = (struct user *) malloc(sizeof(struct user));
+    struct user* res = (struct user *) calloc(1, sizeof(struct user));
     
     char *token = strtok(string, " ");
     strcpy(res->username, token);
@@ -206,7 +206,21 @@ struct user* parseUser(char string[])
     strcpy(res->UID, token);
     
     token = strtok(NULL, " ");
-    res->pub = stringtoPub(token);
+    
+    // Parsing the public key
+    token = strtok(token, "-");
+    strcpy(res->pub.g, token);
+
+    token = strtok(token, "-");
+    strcpy(res->pub.q, token);
+    
+
+    token = strtok(token, "-");
+    strcpy(res->pub.h, token);
+    
+    
+
+    // res->pub = stringtoPub(token);
 
     return res;
 }

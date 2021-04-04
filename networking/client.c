@@ -143,10 +143,12 @@ void init_procedure(int fd, char username[], char number[])
     struct user* user = init_user_path(username, number, ".user");
     struct message* tmp_msg = (struct message *) calloc(1, sizeof(struct message));
     char* buf;
-    char* key = pubtoString(user->pub);
+    //char* key = pubtoString(user->pub);
     int n;
     tmp_msg->type = INIT; 
-    if ((n = asprintf(&tmp_msg->content, "%s %s %s %s", user->username, user->number, user->UID, key)) < 1)
+    if ((n = asprintf(&tmp_msg->content, "%s %s %s %s-%s-%s", user->username,\
+                    user->number, user->UID,\
+                    user->pub.g, user->pub.q, user->pub.h)) < 1)
         errx(1, "Weird error sending generated user data");
     int l;
     buf = genMessage(tmp_msg, &l);
@@ -155,7 +157,7 @@ void init_procedure(int fd, char username[], char number[])
     free(user);
     free(buf);
     free(message);
-    free(key);
+    //free(key);
 }
 
 int main() 

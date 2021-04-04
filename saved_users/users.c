@@ -9,6 +9,9 @@
 #include <unistd.h>
 
 #include "users.h"
+#include "../security/elgamal.h"
+#include "../security/tools.h"
+
 
 unsigned int hash(char *key)
 {
@@ -135,7 +138,7 @@ struct user* init_user(char username[], char number[])
 //public key variable needs to be added 
 struct user* init_user_path(char username[], char number[], char path[])
 {
-    struct user* new =  malloc(sizeof(struct user));
+    struct user* new =  calloc(1, sizeof(struct user));
     if (new == NULL)
     {
         errx(2, "Could not create new user structure!");
@@ -150,11 +153,27 @@ struct user* init_user_path(char username[], char number[], char path[])
     privateKey* privKey = (privateKey *) malloc(sizeof(privateKey));
 
     generateKeys(pubKey, privKey);
+    printf("Generated new ElGammal key pair\n");
+    //printf("Generated keys pub -> %s-%s-%s and priv -> %lu-%lu\n", pubKey->g, pubKey->q, pubKey->h, privKey->a, privKey->q);
 
-    new->pub = pubKey;
-    user->priv = privKey;
+    printf("Saving public keys...\n");
+    strcpy(new->pub.g, pubKey->g);
+    strcpy(new->pub.q, pubKey->q);
+    strcpy(new->pub.h, pubKey->h);
+    
+    printf("Saving private keys...\n");
+    char *a = largenum_string(privKey->a); 
+    strcpy(new->priv.a, a);
+    strcpy(new->priv.q, pubKey->q);
+    
+    free(a);
+    free(pubKey);
+    free(privKey);
 
+    printf("Saving user data...\n");
     save_user_path(new, path);
+    printf("Saved user info for %s into .user file\n", new->username);
+
     //free(new);
     return new;
 }
