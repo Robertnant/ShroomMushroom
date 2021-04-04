@@ -138,7 +138,7 @@ int exists(char filename[])
     return (access(filename, F_OK ) == 0);
 }
 
-void init_procedure(int fd, char username[], char number[])
+struct user* init_procedure(int fd, char username[], char number[])
 {
     struct user* user = init_user_path(username, number, ".user");
     struct message* tmp_msg = (struct message *) calloc(1, sizeof(struct message));
@@ -154,10 +154,11 @@ void init_procedure(int fd, char username[], char number[])
     buf = genMessage(tmp_msg, &l);
 
     write(fd, buf, l);
-    free(user);
+    // free(user);
     free(buf);
-    free(message);
+    //free(message);
     //free(key);
+    return user;
 }
 
 int main() 
@@ -209,11 +210,12 @@ int main()
     
     */
     
+    struct user* user;
     message = (struct message*) calloc(1, sizeof(struct message));
     if (exists(".user"))
     {
         printf("Starting identification procedure...\n");
-        struct user* user = get_user_path(".user");
+        user = get_user_path(".user");
         // send simple message with UID as content (use the function robert will implement)
         message->type = IDENTIFICATION;
         message->content = user->UID;
@@ -226,6 +228,7 @@ int main()
         char *msg = genMessage(message, &l);
         write(sockfd, msg, l);
         free(msg);
+        printf("Identification done!\n");
 
         // TODO: This is a test (user was not freed).
         free(user);
@@ -236,14 +239,13 @@ int main()
         //fetch user and number data to run through this function
         char *username = "sergiombd";
         char number[] = "0776727908";         
-        init_procedure(sockfd, username, number);
+        user = init_procedure(sockfd, username, number);
     }
 
 
     func(sockfd, message); 
 
     // Free message structure.
-    free(message);
 
     // Close socket.
     close(sockfd); 
