@@ -13,6 +13,8 @@ client: client.c users.c messages.c tools.c elgamal.c
 
 clean:
 	${RM} client server
+
+remove:
 	${RM} saved_users/Pipes/*[0-9]* saved_users/Users/*[0-9]*
 	${RM} .user
 
