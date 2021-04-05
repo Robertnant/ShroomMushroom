@@ -243,9 +243,6 @@ struct user* parseUser(char string[])
 
 int main()
 {
-    char user[] = "sergiombd";
-    char number[] = "0776727908";
-    free(init_user(user, number));
 
     message = (struct message*) malloc(sizeof(struct message));
     //printf("address of message -> %p\n", message);
