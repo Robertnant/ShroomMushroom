@@ -14,7 +14,7 @@
 #include "../security/elgamal.h"
 #include "../security/tools.h"
 
-#define MAX 80 
+#define MAX 10000 
 #define PORT 8080 
 #define SA struct sockaddr 
 
@@ -51,26 +51,21 @@ char *requestKeyTmp(struct message *message, int sockfd)
 void func(int sockfd, struct message *message) 
 { 
     char buff[MAX]; 
-    int n;
-   
+    int n = 1;
 
-    for (;;) 
+    while (n) 
     { 
-        bzero(buff, sizeof(buff)); 
-        printf("Enter the string : "); 
-        n = 0;
+        n--;
+        bzero(buff, MAX); 
+        // printf("Enter the string : "); 
+        // n = 0;
 
         // Add text to buffer till newline is written.
-        while (n < MAX && (buff[n++] = getchar()) != '\n')
-            ;
-
-        // Check for exit signal.
-        if ((strncmp(buff, "exit", 4)) == 0)
-        {
-            printf("Client exited...\n"); 
-            break;
-        }
-
+        // while (n < MAX && (buff[n++] = getchar()) != '\n')
+        //    ;
+        
+        // scanf("%s", buff);
+ 
         // Step 0: Server asks for receiver and type (this is will be done with GTK).
         // of message that will be sent by user.
         // char *receiver = "Sergio";
@@ -101,7 +96,7 @@ void func(int sockfd, struct message *message)
         struct privateKey *privkey = malloc(sizeof(struct privateKey));
         privkey->a = a;    
         privkey->q = q;
- 
+
         printf("Received requested private key: a:%s q:%s\n", 
                 largenum_string(a), largenum_string(q));
         
@@ -131,22 +126,15 @@ void func(int sockfd, struct message *message)
             errx(1, "Write error");
         else
             printf("Encrypted data (JSON) sent to server: %s\n",
-                    json);
-        // New.
-        // parseMessage(json, message);
+                    json);       
+        // Check for exit signal.
+        if ((strncmp(buff, "exit", 4)) == 0)
+        {
+            printf("Client exited...\n"); 
+            break;
+        }
 
-        // struct cyphers *cyphers = malloc(sizeof(struct cyphers));
-        // cyphers->en_msg = message->content;
-        // cyphers->p = message->p;
-        // cyphers->size = message->size;
-
-
-        char *res = decrypt_gamal(cyphers, privkey);
-        printf("Decryption on client's side: %s\n", res);
-
-        // Free json.
-        free(json);
-
+        
         // TODO Read.
         // (For now the server won't send the data
         // to a receiver. It will have the private key of the "receiver". It will just decrypt and print it).

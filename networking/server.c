@@ -198,15 +198,9 @@ void * listen_to_client( void * arg )
         bzero(buff, MAX); 
  
         // read the message from client and copy it in buffer 
-        while((er = read(*sockfd, buff, sizeof(buff))) > 0)
+        while((er = read(*sockfd, buff, MAX)) > 0)
         {
-            // Test 3.
-            encrypt_gamal("This is the third test", pubkey, cyphers);
-            // Problem might be not reseting the cyphers.
-        
-            res = decrypt_gamal(cyphers, privkey);
-            printf("Decrypted message received 3: %s\n", res);
-
+            
 
             printf("From client: ");
             printf("%s\n", buff);
@@ -225,6 +219,12 @@ void * listen_to_client( void * arg )
             char *res = decrypt_gamal(cyphers, privkey);
             printf("Decrypted message received: %s\n", res);
 
+            // Test 3.
+            encrypt_gamal("This is the third test", pubkey, cyphers);
+            // Problem might be not reseting the cyphers.
+        
+            res = decrypt_gamal(cyphers, privkey);
+            printf("Decrypted message received 3: %s\n", res);
 
 
             // Create test JSON.
