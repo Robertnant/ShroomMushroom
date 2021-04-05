@@ -23,6 +23,10 @@ void on_send_text_button_activate(GtkWidget *widget, gpointer data)
 	app_widgets *widgets = (app_widgets*) data;
   	sprintf(tmp, "%s", gtk_entry_get_text(widgets->TextEntry));
   	gtk_label_set_text(widgets->textlabel, (const gchar*) tmp);
+
+  	if (widget){
+  		printf(" ");
+  	}
 }
 
 
@@ -32,6 +36,10 @@ void on_TextEntry_changed(GtkWidget *widget, gpointer data)
 	app_widgets *widgets = (app_widgets*) data;
   	sprintf(tmp, "%s", gtk_entry_get_text(widgets->TextEntry));
   	gtk_label_set_text(widgets->textlabel, (const gchar*) tmp);
+
+  	if (widget){
+  		printf(" ");
+  	}
 }
 
 int main()
