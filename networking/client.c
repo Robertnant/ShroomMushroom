@@ -12,46 +12,38 @@
 #include "../messages/messages.h"
 #include "../saved_users/users.h"
 #include "../security/elgamal.h"
+#include "../security/tools.h"
 
 #define MAX 80 
 #define PORT 8080 
 #define SA struct sockaddr 
 
 struct message *message;
+struct user* user;
 
-// TODO: Uncomment once request handling is implemented on server.
-/* Request receiver's public keys for encryption.
-struct publicKey *requestKey(struct message *message, int sockfd)
-{
-    // Create request.
-    // (Make request as JSON using ADD).
 
-    // Send query to server.
-    if (write(sockfd, query, strlen(json)) == -1)
-        errx(1, "Write error occured");
-
-    free(query);
-
-    // Read response and parse public key.
-    // (Size shouldn't exceed 150 bytes).
-    // Might need to use MAX instead but
-    // only after increase MAX value.
-    char buffer[150];
-    if (read(sockfd, buffer, 150) == -1)
-        errx(1, "Read error occured");
-
-    // TODO: Implement this return function.
-    // (Sergio is coding this function).
-    return parseKey(buffer);
-}
-*/
 
 // Temporary public key request function. Hardcoded keys.
 // (These harcoded keys will be temporary used by server as well).
 char *requestKeyTmp(struct message *message, int sockfd)
 {
-    char *key = calloc(120, sizeof(char));
-    strcpy(key, "740367455-100000000000740367453-38155483981476724314");
+    struct user *user = get_user_path(".user");
+    struct user_pub *pub = &(user->pub);
+
+    // Get public key from user file.
+    struct publicKey *pubkey = malloc(sizeof(struct publicKey));
+    pubkey->g = pub->g;
+    pubkey->q = pub->q;
+    pubkey->h = pub->h;
+
+    printf("Test: %s\n", pub->g);
+
+    char *key = pubtoString(pubkey);
+
+    printf("Received requested key: %s\n", key);
+
+    // Free memory.
+    free(pubkey);
 
     return key;
 }
@@ -85,18 +77,40 @@ void func(int sockfd, struct message *message)
 
         // Step 1: Get receiver's public key (hard coded for now).
         message->receiver = "077644562";
-        char *key = requestKeyTmp(message, 2);
+        // char *key = requestKeyTmp(message, 2);
+        // struct publicKey *receiver_keys = stringtoPub(key);
+        // New. Old above.
+        struct user *user = get_user_path(".user");
+        struct user_pub *pub = &(user->pub);
+        struct publicKey *receiver_keys = malloc(sizeof(struct publicKey));
+        receiver_keys->g = pub->g;
+        receiver_keys->q = pub->q;
+        receiver_keys->h = pub->h;
 
-        struct publicKey *receiver_keys = stringtoPub(key);
 
         // Step 2: Encrypt message.
         struct cyphers *cyphers= malloc(sizeof(struct cyphers));
 
-        encrypt_gamal(buff, receiver_keys, cyphers);
+        encrypt_gamal("This should work", receiver_keys, cyphers);
+
+        // Step 3: Decrypt own message. TODO Remove
+        struct user_priv *priv = &(user->priv);
+        uint128_t a = string_largenum(priv->a);
+        uint128_t q = string_largenum(priv->q);
+
+        struct privateKey *privkey = malloc(sizeof(struct privateKey));
+        privkey->a = a;    
+        privkey->q = q;
+ 
+        printf("Received requested private key: a:%s q:%s\n", 
+                largenum_string(a), largenum_string(q));
+        
+        // char *res = decrypt_gamal(cyphers, privKey);
+        // printf("Decryption on client's side: %s\n", res);
 
         // Free receiver public key.
-        free(key);
-        free(receiver_keys);
+        // free(key);
+        // free(receiver_keys);
 
         // Step 3: Generate JSON with cyphers (maybe hard code don't know yet).
         message->type = TEXT;
@@ -116,8 +130,20 @@ void func(int sockfd, struct message *message)
         if (e == -1)
             errx(1, "Write error");
         else
-            printf("Encrypted data (JSON) sent to server.\n");
-        
+            printf("Encrypted data (JSON) sent to server: %s\n",
+                    json);
+        // New.
+        // parseMessage(json, message);
+
+        // struct cyphers *cyphers = malloc(sizeof(struct cyphers));
+        // cyphers->en_msg = message->content;
+        // cyphers->p = message->p;
+        // cyphers->size = message->size;
+
+
+        char *res = decrypt_gamal(cyphers, privkey);
+        printf("Decryption on client's side: %s\n", res);
+
         // Free json.
         free(json);
 
@@ -210,7 +236,6 @@ int main()
     
     */
     
-    struct user* user;
     message = (struct message*) calloc(1, sizeof(struct message));
     if (exists(".user"))
     {

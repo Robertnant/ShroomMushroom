@@ -154,7 +154,14 @@ struct user* init_user_path(char username[], char number[], char path[])
 
     generateKeys(pubKey, privKey);
     printf("Generated new ElGammal key pair\n");
-    //printf("Generated keys pub -> %s-%s-%s and priv -> %lu-%lu\n", pubKey->g, pubKey->q, pubKey->h, privKey->a, privKey->q);
+    char *a_str = largenum_string(privKey->a);
+    char *q_str = largenum_string(privKey->q);
+    printf("Generated keys pub -> %s-%s-%s and priv -> %s-%s\n", 
+            pubKey->g, pubKey->q, pubKey->h, a_str, q_str);
+
+    // Free strings.
+    free(a_str);
+    free(q_str);
 
     printf("Saving public keys...\n");
     strcpy(new->pub.g, pubKey->g);

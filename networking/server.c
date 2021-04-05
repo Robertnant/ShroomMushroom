@@ -19,6 +19,7 @@
 #include "../saved_users/users.h"
 #include "../messages/messages.h"
 #include "../security/elgamal.h"
+#include "../security/tools.h"
 
 #define MAX 10000 
 #define PORT 8080 
@@ -149,17 +150,90 @@ void * listen_to_client( void * arg )
     int er;
     printf("Listening to client...\n");
 
+    // Store private key.
+    struct user *user = get_user_path(".user");
+    struct user_priv *priv = &(user->priv);
+    struct user_pub *pub = &(user->pub);
+
+    uint128_t a = string_largenum(priv->a);
+    uint128_t q = string_largenum(priv->q);
+
+    // Get public key from user file.
+    struct publicKey *pubkey = malloc(sizeof(struct publicKey));
+    pubkey->g = pub->g;
+    pubkey->q = pub->q;
+    pubkey->h = pub->h;
+
+    // Print keys. (Do same for client);
+    printf("a: %s\n", largenum_string(a));
+    printf("q: %s\n", largenum_string(q));
+    printf("g: %s\n", pubkey->g);
+    printf("q: %s\n", pubkey->q);
+    printf("h: %s\n", pubkey->h);
+
+    struct privateKey *privkey = malloc(sizeof(struct privateKey));
+    privkey->a = a;    
+    privkey->q = q;
+    struct cyphers *cyphers = malloc(sizeof(struct cyphers));
+    encrypt_gamal("This is another test", pubkey, cyphers);
+    // Problem might be using a string from a buffer.
+    
+
+    char *res = decrypt_gamal(cyphers, privkey);
+
+    printf("Decrypted message received: %s\n", res);
+
+
+    // Test 2.
+    encrypt_gamal("This is the second test", pubkey, cyphers);
+    // Problem might be not reseting the cyphers.
+    
+    res = decrypt_gamal(cyphers, privkey);
+    printf("Decrypted message received 2: %s\n", res);
+
     //char num[] = "0776727908";
     //char message[] = "HelloWorld!";
     for (;;) 
     { 
         bzero(buff, MAX); 
-  
+ 
         // read the message from client and copy it in buffer 
         while((er = read(*sockfd, buff, sizeof(buff))) > 0)
         {
+            // Test 3.
+            encrypt_gamal("This is the third test", pubkey, cyphers);
+            // Problem might be not reseting the cyphers.
+        
+            res = decrypt_gamal(cyphers, privkey);
+            printf("Decrypted message received 3: %s\n", res);
+
+
             printf("From client: ");
             printf("%s\n", buff);
+
+            // Decrypt message for proof of concept.
+            
+            // Parse cyphers.
+
+            parseMessage(buff, message);
+            
+            struct cyphers *cyphers = malloc(sizeof(struct cyphers));
+            cyphers->en_msg = message->content;
+            cyphers->p = message->p;
+            cyphers->size = message->size;
+
+            char *res = decrypt_gamal(cyphers, privkey);
+            printf("Decrypted message received: %s\n", res);
+
+
+
+            // Create test JSON.
+                        // Free memory.
+            // free(user);
+            // free(privkey);
+            // free(cyphers);
+            // free(res);
+
             //send_to(num, buff, err);
             bzero(buff, MAX); 
         }
