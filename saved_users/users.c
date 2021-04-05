@@ -159,7 +159,7 @@ struct user* init_user_path(char username[], char number[], char path[])
     privateKey* privKey = (privateKey *) malloc(sizeof(privateKey));
 
     generateKeys(pubKey, privKey);
-    printf("Generated new ElGammal key pair\n");
+    printf("Generated new ElGamal key pair\n");
     char *a_str = largenum_string(privKey->a);
     char *q_str = largenum_string(privKey->q);
     printf("Generated keys pub -> %s-%s-%s and priv -> %s-%s\n", 
@@ -169,12 +169,12 @@ struct user* init_user_path(char username[], char number[], char path[])
     free(a_str);
     free(q_str);
 
-    printf("Saving public keys...\n");
+    // Save public keys.
     strcpy(new->pub.g, pubKey->g);
     strcpy(new->pub.q, pubKey->q);
     strcpy(new->pub.h, pubKey->h);
     
-    printf("Saving private keys...\n");
+    // Save private keys.
     char *a = largenum_string(privKey->a); 
     strcpy(new->priv.a, a);
     strcpy(new->priv.q, pubKey->q);
@@ -183,7 +183,6 @@ struct user* init_user_path(char username[], char number[], char path[])
     free(pubKey);
     free(privKey);
 
-    printf("Saving user data...\n");
     save_user_path(new, path);
     printf("Saved user info for %s into .user file\n", new->username);
 
@@ -191,12 +190,3 @@ struct user* init_user_path(char username[], char number[], char path[])
     return new;
 }
 
-
-/*
-int main()
-{
-    init_user("sergiombd", "0776727908");
-
-    return 0;
-}
-*/
