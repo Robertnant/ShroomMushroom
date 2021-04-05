@@ -97,6 +97,9 @@ struct user* get_user(char number[])
     struct user* user = (struct user*) malloc(sizeof(struct user));
     fread(user, sizeof(struct user), 1, user_file);
 
+    // Close file.
+    fclose(user_file);
+
     return user;
 }
 
@@ -109,6 +112,9 @@ struct user* get_user_path(char path[])
     struct user* user = (struct user*) malloc(sizeof(struct user));
     fread(user, sizeof(struct user), 1, user_file);
 
+    // Close file.
+    fclose(user_file);
+    
     return user;
 }
 
