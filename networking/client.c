@@ -242,7 +242,7 @@ int main()
         printf("Identification done!\n");
 
         // TODO: This is a test (user was not freed).
-        free(user);
+        // free(user);
     }
     else
     {

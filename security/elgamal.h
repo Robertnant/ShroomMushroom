@@ -34,7 +34,7 @@ typedef struct cyphers
 // Tools for key generation.
 uint128_t gcd(uint128_t a, uint128_t b);
 uint128_t large_keygen(uint128_t lower, uint128_t upper);
-uint128_t coprime_key(double q);
+uint128_t coprime_key(uint128_t q);
 uint128_t mod_power(uint128_t a, uint128_t b, uint128_t m);
 
 // Tools to convert between strings and public key structures

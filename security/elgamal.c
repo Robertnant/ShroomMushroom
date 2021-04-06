@@ -32,13 +32,13 @@ uint128_t large_keygen(uint128_t lower, uint128_t upper)
     return a;
 }
 
-uint128_t coprime_key(double q)
+uint128_t coprime_key(uint128_t q)
 {
-    uint128_t a = large_keygen(pow(10,20), q);
+    uint128_t a = large_keygen(pow(10,19), q);
 
     // Check if values are coprime.
     while (gcd(a, q) != 1)
-        a = large_keygen(pow(10,20), q);
+        a = large_keygen(pow(10,19), q);
 
     return a;
 }
@@ -136,7 +136,7 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
 void generateKeys(publicKey *pubKey, privateKey *privKey)
 {
     // Receiver's public keys: q, g and h.
-    uint128_t q = large_keygen(pow(10,20), pow(10,38));
+    uint128_t q = large_keygen(pow(10,19), pow(10,20));
     uint128_t g = large_keygen(2, q);
 
     // Receiver's private key.
