@@ -23,4 +23,4 @@ bigclean:
 	${RM} saved_users/Pipes/*[0-9]* saved_users/Users/*[0-9]*
 	${RM} .user
 
-.PHONY: clean
+.PHONY: clean remove bigclean
