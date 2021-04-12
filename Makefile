@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS= -Wall -Wextra -g -lm -pthread
+CFLAGS= -Wall -Wextra -g -lm -pthread -std=c99
 LDLIBS= -ljson-c
 #CXXFLAGS= -Inetworking -Isaved_users
 VPATH=networking:saved_users:messages:security

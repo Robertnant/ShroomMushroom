@@ -9,17 +9,37 @@
 #include "elgamal.h"
 #include "tools.h"
 
+// Extended GCD.
+uint128_t gcdExtended(uint128_t a, uint128_t b, uint128_t *x, uint128_t *y)
+{
+    if (a == 0)
+    {
+        *x = 0;
+        *y = 1;
+        return b;
+    }
+
+    uint128_t x1, y1;
+    uint128_t gcd = gcdExtended(b % a, a, &x1, &y1);
+
+    // Update x and y using results of recursive
+    // call
+    *x = y1 - (b/a) * x1;
+    *y = x1;
+
+    return gcd;
+}
+
 // GCD function.
 uint128_t gcd(uint128_t a, uint128_t b)
 {
-    if (a < b)
-        return gcd(b, a);
+    uint128_t x;
+    uint128_t y;
     
-    if (a % b == 0)
-        return b;
-    
-    return gcd(b, a % b);
+    return gcdExtended(a, b, &x, &y); 
 }
+
+
 
 // Key generators.
 uint128_t large_keygen(uint128_t lower, uint128_t upper)

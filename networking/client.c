@@ -51,7 +51,7 @@ char *requestKey(struct message *message, int sockfd)
 void func(int sockfd, struct message *message) 
 { 
     char buff[MAX]; 
-    int n = 1;
+    int n;
 
     // Get private key.
     struct user_priv *priv = &(user->priv);
@@ -62,13 +62,21 @@ void func(int sockfd, struct message *message)
     privkey->a = a;    
     privkey->q = q;
 
-    while (n) 
+    while (1) 
     { 
-        n--;
+        // n--;
         bzero(buff, MAX); 
         // printf("Enter the string : "); 
-        // n = 0;
+        n = 0;
         
+        
+
+        printf("Enter message : ");
+
+        // Add text to buffer till newline is written.
+        while (n < MAX && (buff[n++] = getchar()) != '\n')
+            ;
+
         // Check for exit signal.
         if ((strncmp(buff, "exit", 4)) == 0)
         {
@@ -76,10 +84,6 @@ void func(int sockfd, struct message *message)
             break;
         }
 
-        // Add text to buffer till newline is written.
-        // while (n < MAX && (buff[n++] = getchar()) != '\n')
-        //    ;
- 
         // Step 1: Get receiver's public key (hard coded for now).
         message->receiver = "077644562";
         char *key = requestKey(message, sockfd);
@@ -88,10 +92,10 @@ void func(int sockfd, struct message *message)
                 receiver_keys->q, receiver_keys->h);
 
         // Step 2: Encrypt message.
-        printf("\nEncrypting message 'Hello world' using received key\n");
+        printf("\nEncrypting typed message using received key\n");
 
         struct cyphers *cyphers= malloc(sizeof(struct cyphers));
-        encrypt_gamal("Hello World!", receiver_keys, cyphers);
+        encrypt_gamal(buff, receiver_keys, cyphers);
 
         // Free receiver public key.
         free(key);
