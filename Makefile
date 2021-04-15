@@ -6,7 +6,7 @@ VPATH=networking:saved_users:messages:security
 
 all: server client
 
-server: server.c users.c messages.c tools.c elgamal.c
+server: server.c users.c messages.c tools.c elgamal.c client_list.c
 
 client: client.c users.c messages.c tools.c elgamal.c
 

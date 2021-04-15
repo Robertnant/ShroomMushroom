@@ -20,6 +20,7 @@
 #include "../messages/messages.h"
 #include "../security/elgamal.h"
 #include "../security/tools.h"
+#include "client_list.h"
 
 #define MAX 10000 
 #define PORT 8080 
@@ -32,56 +33,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 struct message* message; // = (struct message*) malloc(MESSAGE_SIZE);
 
-
-//#############################################################################
-//  CLIENT LIST (to put in a separare file? NO BECAUSE WE NEED GLOBAL MUTEX)
-//#############################################################################
-
-struct client
-{
-    int fd;
-    struct user* user;
-    struct client* next;
-    struct client* prev;
-};
-
-struct client * get_sentinel()
-{
-    static struct client * sentinel = NULL;
-    if (!sentinel)
-    {
-        sentinel = (struct client *) malloc(sizeof(struct client));
-        sentinel->next = NULL;
-        sentinel->prev = NULL;
-        sentinel->fd = -1;
-        sentinel->user = (struct user*) malloc(sizeof(struct user));
-    }
-    return sentinel;
-}
-
-void free_clients(struct client* sentinel)
-{
-    if(sentinel->next)
-        free_clients(sentinel->next);
-    free(sentinel->user);
-    free(sentinel);
-}
-
-void free_client(struct client* client)
-{
-    pthread_mutex_lock(&mutex);
-    // Remove the current client from the list
-    struct client* prev = client->prev;
-    struct client* next = client->next;
-    prev->next = next;
-    if (next)
-        next->prev = prev;
-    free(client->user);
-    free(client);
-    pthread_mutex_unlock(&mutex);
-}
-
-//#############################################################################
 
 void end_connection()
 {
@@ -115,7 +66,6 @@ void interrupt(int err)
     running = 0;
     end_connection();
     pthread_mutex_lock(&mutex);
-    free_clients(get_sentinel());
     pthread_mutex_unlock(&mutex);
     freeMessage(message);
     printf("Program interrupted with error %d\n", err);
