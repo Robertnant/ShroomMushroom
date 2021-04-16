@@ -67,7 +67,8 @@ void interrupt(int err)
     end_connection();
     pthread_mutex_lock(&mutex);
     pthread_mutex_unlock(&mutex);
-    freeMessage(message);
+    free(message);
+    //freeMessage(message);
     printf("Program interrupted with error %d\n", err);
     exit(0);
 }
@@ -120,13 +121,32 @@ void * listen_to_client( void * arg )
             printf("Sender: %s\n", message->sender);
             printf("Receiver: %s\n", message->receiver);
             printf("Type: %d\n", message->type);
+            
+            switch (message->type)
+            {
+                case TEXT:
+                    write(*sockfd, buff, er);
+                    break;
+                
+                case ADD:
+                    // TODO
+                    break;
 
+                case IDENTIFICATION: case INIT:
+                    printf("Attempting to identify/register at wrong moment!\n");
+                    break;
+                
+                default:
+                    printf("Feature not implemented yet!\n");
+                    break;
+
+            }
             // Send message back to receiver.
             // (For now send back to client).
-            write(*sockfd, buff, er);
             
             //send_to(num, buff, err);
             bzero(buff, MAX);
+            freeMessage(message);
         }
 
         // Add newline.
@@ -139,6 +159,7 @@ void * listen_to_client( void * arg )
     }
 
     // Free memory.
+    //freeMessage(message);
     free(message);
 
     return NULL;
@@ -314,6 +335,7 @@ int main()
                 continue;
             
         }
+        freeMessage(message);
         // Free user.
         // TODO: Remove this after Sergio implements function to handle this.
         //free(tmp_user);

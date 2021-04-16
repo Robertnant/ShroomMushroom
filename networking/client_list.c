@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "../saved_users/users.h"
-
+#include "client_list.h"
 
 
 struct client * get_sentinel()

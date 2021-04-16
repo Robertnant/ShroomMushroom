@@ -44,6 +44,7 @@ char *requestKey(struct message *message, int sockfd)
 
     // Free memory.
     free(pubkey);
+    free(user);
 
     return key;
 }
@@ -69,8 +70,6 @@ void func(int sockfd, struct message *message)
         // printf("Enter the string : "); 
         n = 0;
         
-        
-
         printf("Enter message : ");
 
         // Add text to buffer till newline is written.
@@ -103,7 +102,7 @@ void func(int sockfd, struct message *message)
 
         // Step 3: Generate JSON with cyphers.
         printf("\nConverting encryption into JSON\n");
-        sleep(2);
+        //sleep(0.5);
 
         message->type = TEXT;
         message->content = cyphers->en_msg;
@@ -118,7 +117,7 @@ void func(int sockfd, struct message *message)
         
         // Step 4: Send JSON to server.
         printf("Sending JSON to server\n");
-        sleep(2);
+        //sleep(2);
 
         int e = write(sockfd, json, jsonSize); 
         if (e == -1)
@@ -127,7 +126,10 @@ void func(int sockfd, struct message *message)
         // Step 5: Receive incoming message from other client.
         // (For now just itself).
         bzero(json, jsonSize);
-        free(message);
+        
+        // This was causing errors
+        // free(message);
+        
         if (read(sockfd, json, jsonSize) == -1)
             errx(1, "Error reading incoming messages");
 
@@ -136,8 +138,10 @@ void func(int sockfd, struct message *message)
         printf("\nReceived a message from %s\n", message->sender);
         sleep(2);
 
+        free(cyphers->en_msg);
+        //free(cyphers->p);
         free(cyphers);
-        cyphers = malloc(sizeof(struct message));
+        cyphers = malloc(sizeof(struct message)); // WARNING
         cyphers->en_msg = message->content;
         cyphers->p = message->p;
         cyphers->size = message->size;
@@ -145,6 +149,12 @@ void func(int sockfd, struct message *message)
         char *res = decrypt_gamal(cyphers, privkey);
         printf("Decrypting received message\n");
         printf("Received message: %s\n", res);
+       
+        free(res);
+        freeMessage(message);
+        //free(cyphers->en_msg);
+        //free(cyphers->p);
+        free(cyphers);
         
     } 
 }
@@ -172,7 +182,8 @@ struct user* init_procedure(int fd, char username[], char number[])
     write(fd, buf, l);
     // free(user);
     free(buf);
-    //free(message);
+    freeMessage(tmp_msg);
+    free(tmp_msg);
     //free(key);
     return user;
 }
