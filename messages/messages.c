@@ -123,12 +123,18 @@ void printStruct(struct message *parsed)
 // Probably useful
 void freeMessage(struct message *message)
 {
-    free(message->content);
-    free(message->p);
-    free(message->time);
-    free(message->sender);
-    free(message->receiver);
-    free(message->filename);
+    if (message->content)
+        free(message->content);
+    if (message->p)
+        free(message->p);
+    if (message->time)
+        free(message->time);
+    if (message->sender)
+        free(message->sender);
+    if (message->receiver)
+        free(message->receiver);
+    if (message->filename)
+        free(message->filename);
     //free(message);
 }
 

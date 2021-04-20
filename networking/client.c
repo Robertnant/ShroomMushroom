@@ -103,18 +103,28 @@ void func(int sockfd, struct message *message)
         // Step 3: Generate JSON with cyphers.
         printf("\nConverting encryption into JSON\n");
         //sleep(0.5);
+        
+        char * time = malloc(sizeof(char) * 5);
+        strcpy(time, "1010");
+        char * sender = malloc(sizeof(char) * 11);
+        strcpy(sender, "0776727908");
+        
 
         message->type = TEXT;
         message->content = cyphers->en_msg;
         message->p = cyphers->p;
         message->size = cyphers->size;
-        message->time = "1015";
-        message->sender = "077644562";
+        message->time = time; //"1010";
+        message->sender = sender; //"077644562";
+        message->receiver = NULL; 
         message->filename = 0;
 
         int jsonSize;
         char *json = genMessage(message, &jsonSize);
         
+
+        freeMessage(message);
+
         // Step 4: Send JSON to server.
         printf("Sending JSON to server\n");
         //sleep(2);
@@ -122,7 +132,7 @@ void func(int sockfd, struct message *message)
         int e = write(sockfd, json, jsonSize); 
         if (e == -1)
             errx(1, "Write error");
-
+        
         // Step 5: Receive incoming message from other client.
         // (For now just itself).
         bzero(json, jsonSize);
@@ -138,7 +148,7 @@ void func(int sockfd, struct message *message)
         printf("\nReceived a message from %s\n", message->sender);
         sleep(2);
 
-        free(cyphers->en_msg);
+        //free(cyphers->en_msg);
         //free(cyphers->p);
         free(cyphers);
         cyphers = malloc(sizeof(struct message)); // WARNING
