@@ -198,12 +198,29 @@ struct user* init_procedure(int fd, char username[], char number[])
     return user;
 }
 
+void request_key(int fd, char number[])
+{
+    message->type = ADD;
+    message->sender = user->number;
+    message->receiver = number;
+    message->filename = NULL;
+    message->content = NULL;
+    message->size = 0;
+    message->time = NULL;
+
+    int l;    
+    char * mess = genMessage(message, &l);
+    
+    write(fd, mess, l);
+
+    free(mess);
+}
+
 int main() 
 { 
     // Check if user is already initialized, if not create it
     
     // if initialized, open it and send identification
-
 
     int sockfd; 
     struct sockaddr_in servaddr; //, cli; 

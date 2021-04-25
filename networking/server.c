@@ -130,6 +130,8 @@ void * listen_to_client( void * arg )
                 
                 case ADD:
                     // TODO
+                    // get pub key and user
+                    // send the to "sender"
                     break;
 
                 case IDENTIFICATION: case INIT:
