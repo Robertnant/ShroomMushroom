@@ -39,6 +39,8 @@ void save_user(struct user* user);
 
 void save_user_path(struct user * user, char * path);
 
+struct user* parseUser(char string[]);
+
 struct user* init_user(char username[], char number[]);
 
 struct user* init_user_path(char username[], char number[], char path[]);
