@@ -14,6 +14,8 @@
 #include "../security/elgamal.h"
 #include "../security/tools.h"
 
+
+#define USER_PATH ".files/.user"
 #define MAX 10000 
 #define PORT 8080 
 #define SA struct sockaddr 
@@ -31,7 +33,7 @@ char *requestKey(struct message *message, int sockfd)
         printf("\n");
 
     printf("Requesting public key of: %s\n", message->receiver);
-    struct user *user = get_user_path(".user");
+    struct user *user = get_user_path(USER_PATH);
     struct user_pub *pub = &(user->pub);
 
     // Get public key from user file.
@@ -60,7 +62,7 @@ void func(int sockfd, struct message *message)
     uint128_t q = string_largenum(priv->q);
 
     struct privateKey *privkey = malloc(sizeof(struct privateKey));
-    privkey->a = a;    
+    privkey->a = a;
     privkey->q = q;
 
     while (1) 
@@ -176,7 +178,7 @@ int exists(char filename[])
 
 struct user* init_procedure(int fd, char username[], char number[])
 {
-    struct user* user = init_user_path(username, number, ".user");
+    struct user* user = init_user_path(username, number, USER_PATH);
     struct message* tmp_msg = (struct message *) calloc(1, sizeof(struct message));
     char* buf;
     //char* key = pubtoString(user->pub);
@@ -200,6 +202,7 @@ struct user* init_procedure(int fd, char username[], char number[])
 
 void request_key(int fd, char number[])
 {
+    // Sending the request
     message->type = ADD;
     message->sender = user->number;
     message->receiver = number;
@@ -212,8 +215,26 @@ void request_key(int fd, char number[])
     char * mess = genMessage(message, &l);
     
     write(fd, mess, l);
-
     free(mess);
+
+
+
+    // Waiting for a response
+    char buf[MAX];
+    read(fd, buf, MAX);
+    parseMessage(buf, message);
+    
+    if (strcmp(message->content, "(null)") == 0)
+        printf("USER NOT FOUND ERROR\n");
+
+    struct user* new_user = parseUser(message->content);
+    // Save to specific file
+    char *path;
+    asprintf(&path, ".files/contacts/%s", user->number);
+    save_user_path(new_user, path);
+    free(path);
+    free(user);
+
 }
 
 int main() 
@@ -265,10 +286,10 @@ int main()
     */
     
     message = (struct message*) calloc(1, sizeof(struct message));
-    if (exists(".user"))
+    if (exists(USER_PATH))
     {
         printf("Starting identification procedure...\n");
-        user = get_user_path(".user");
+        user = get_user_path(USER_PATH);
         // send simple message with UID as content (use the function robert will implement)
         message->type = IDENTIFICATION;
         message->content = user->UID;
@@ -282,9 +303,6 @@ int main()
         write(sockfd, msg, l);
         free(msg);
         printf("Identification done!\n");
-
-        // TODO: This is a test (user was not freed).
-        // free(user);
     }
     else
     {

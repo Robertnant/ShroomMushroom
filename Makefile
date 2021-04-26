@@ -21,6 +21,6 @@ remove:
 bigclean:
 	${RM} client server
 	${RM} saved_users/Pipes/*[0-9]* saved_users/Users/*[0-9]*
-	${RM} .user
+	${RM} .files/.user .files/contacts/*[0-9]*
 
-.PHONY: clean remove bigclean
+.PHONY: all clean remove bigclean

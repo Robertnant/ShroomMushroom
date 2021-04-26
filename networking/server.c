@@ -179,6 +179,7 @@ void connect_client(char pipe[], int client)
         errx(1, "Could not forward data to client");
 }
 
+/*
 struct user* parseUser(char string[])
 {
     struct user* res = (struct user *) calloc(1, sizeof(struct user));
@@ -211,7 +212,7 @@ struct user* parseUser(char string[])
 
     return res;
 }
-
+*/
 
 
 int main()

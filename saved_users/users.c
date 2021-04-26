@@ -140,6 +140,37 @@ struct user* init_user(char username[], char number[])
 }
 
 
+struct user* parseUser(char string[])
+{
+    struct user* res = (struct user *) calloc(1, sizeof(struct user));
+    
+    char *token = strtok(string, " ");
+    strcpy(res->username, token);
+
+    token = strtok(NULL, " ");
+    strcpy(res->number, token);
+    
+    token = strtok(NULL, " ");
+    strcpy(res->UID, token);
+    
+    token = strtok(NULL, " ");
+    
+    // Parsing the public key
+    token = strtok(token, "-");
+    strcpy(res->pub.g, token);
+
+    token = strtok(token, "-");
+    strcpy(res->pub.q, token);
+    
+
+    token = strtok(token, "-");
+    strcpy(res->pub.h, token);
+    
+    // res->pub = stringtoPub(token);
+
+    return res;
+}
+
 
 //public key variable needs to be added 
 struct user* init_user_path(char username[], char number[], char path[])
