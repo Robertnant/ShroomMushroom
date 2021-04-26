@@ -6,68 +6,66 @@
 #include <math.h>
 #include <time.h>
 #include <err.h>
+#include <gmp.h>
 #include "elgamal.h"
 #include "tools.h"
 
-// Extended GCD.
-uint128_t gcdExtended(uint128_t a, uint128_t b, uint128_t *x, uint128_t *y)
-{
-    if (a == 0)
-    {
-        *x = 0;
-        *y = 1;
-        return b;
-    }
-
-    uint128_t x1, y1;
-    uint128_t gcd = gcdExtended(b % a, a, &x1, &y1);
-
-    // Update x and y using results of recursive
-    // call
-    *x = y1 - (b/a) * x1;
-    *y = x1;
-
-    return gcd;
-}
-
-// GCD function.
-uint128_t gcd(uint128_t a, uint128_t b)
-{
-    uint128_t x;
-    uint128_t y;
-    
-    return gcdExtended(a, b, &x, &y); 
-}
-
+// TODO: Use GMP gcd.
+// TODO: Return mpz in argument (returning mpz_t not possible).
 
 
 // Key generators.
-uint128_t large_keygen(uint128_t lower, uint128_t upper)
+void large_keygen(mpz_t lower, mpz_t upper, mpz_t res)
 {
-    // Randomize value at each function call.
-    srand(time(0));
+    // Create random number generator, initialize and seed.
+    gmp_randstate_t state;
+    gmp_randinit_mt(state);
 
-    uint128_t a = (rand() % (upper - lower + 1)) + lower;
+    mpz_t seed;
+    gmp_randseed(state, seed);
 
-    return a;
+    // Initialise and generate random number.
+    mpz_t tmp;
+    mpz_init(tmp);
+
+    // Ensure that result is between lower and upper bounds.
+    mpz_sub(tmp, upper, lower);
+    mpz_urandomm(res, state, tmp);
+    mpz_add(res, res, lower);
+
 }
 
-uint128_t coprime_key(uint128_t q)
+void coprime_key(mpz_t q, mpz_t res)
 {
-    uint128_t a = large_keygen(pow(10,19), q);
+    // Initialize and set GMP numbers.
+    mpz_t low, tmp;
+    mpz_init(low);
+    mpz_init(tmp);
+    mpz_ui_pow_ui(low, 2, 65);
+
+    large_keygen(low, q, res);
+    // mpz_set(res, large_keygen(low, q));
+    mpz_gcd(tmp, res, q);
 
     // Check if values are coprime.
-    while (gcd(a, q) != 1)
-        a = large_keygen(pow(10,19), q);
+    while (mpz_cmp_ui(tmp, 1) != 0)
+    {
+        large_keygen(low, q, res);
+        mpz_gcd(tmp, res, q);
+    }
 
-    return a;
+    // Free memory.
+    mpz_clear(low);
+    mpz_clear(tmp);
+
 }
 
 // Modular exponential.
-uint128_t mod_power(uint128_t a, uint128_t b, uint128_t m)
+/*
+mpz_t mod_power(mpz_t a, mpz_t b, mpz_t m)
 {
     // Result initialization.
-    uint128_t res = 1;
+    mpz_t res = 1;
 
     a %= m;
 
@@ -88,66 +86,117 @@ uint128_t mod_power(uint128_t a, uint128_t b, uint128_t m)
 
     return res;
 }
+*/
 
 // Encryption and decryption.
 void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data)
 {
+    // Number variables.
+    mpz_t q, g, h, k, s, p;
+
     // Public keys.
-    uint128_t q = string_largenum(receiverKeys -> q);
-    uint128_t g = string_largenum(receiverKeys -> g);
-    uint128_t h = string_largenum(receiverKeys -> h);
+    mpz_init(q);
+    mpz_init(g);
+    mpz_init(h);
+    
+    string_largenum(receiverKeys -> q, q);
+    string_largenum(receiverKeys -> g, g);
+    string_largenum(receiverKeys -> h, h);
+    // mpz_set(q, string_largenum(receiverKeys -> q));
+    // mpz_set(g, string_largenum(receiverKeys -> g));
+    // mpz_set(h, string_largenum(receiverKeys -> h));
 
     // Encrypted message initialization.
     size_t len = strlen(msg);
     en_data->size = len;
-    uint128_t *encryption = malloc(len * sizeof(uint128_t));
+    mpz_t encryption[len];
+    // TODO: Will probably need to modify sizeof(mpz_t) to sizeof(2**70) 
+    // if fails.
 
     // Generate sender's private key.
-    uint128_t k = coprime_key(q);
+    mpz_init(k);
+    mpz_init(s);
+    mpz_init(p);
+    
+    coprime_key(q, k);
+    // mpz_set(k, coprime_key(q));
 
-    uint128_t s = mod_power(h, k, q);
-    uint128_t p = mod_power(g, k, q);
+    mpz_powm(s, h, k, q);
+    mpz_powm(p, g, k, q);
+    // mpz_set(s, mod_power(h, k, q));
+    // mpz_set(p, mod_power(g, k, q));
+    
     en_data -> p = largenum_string(p);
 
     for (size_t i = 0; i < len; i++)
     {
         int tmp = (int) msg[i];
-        encryption[i] = s * tmp;
+
+        // Initialize and set large number.
+        mpz_t tmpLarge;
+        mpz_init(tmpLarge);
+        mpz_mul_ui(tmpLarge, s, tmp);
+
+        mpz_init(encryption[i]);
+        mpz_set(encryption[i], tmpLarge);
     }
 
     // Save string conversion of encryption.
     en_data->en_msg = toString(encryption, len);
 
-    // Free encryption array.
-    free(encryption);
+    // Free memory.
+    mpz_clear(k);
+    mpz_clear(s);
+    mpz_clear(p);
+    mpz_clear(tmpLarge);
+
 }
 
 char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
 {
-    // Convert encrypted message to array of uint128 numbers.
+    // Convert encrypted message to array of GMP numbers.
     size_t len = en_data->size;
-    uint128_t *data = fromString(en_data->en_msg, len);
+    mpz_t *data = fromString(en_data->en_msg, len);
 
     // Decrypted message initialisation.
     char *res = malloc((len+1) * sizeof(char));
 
-    uint128_t p = string_largenum(en_data->p);
-    uint128_t key = privkey->a;
-    uint128_t q = privkey->q;
+    // Initialize GMP integers.
+    mpz_t p, key, q, h;
+    mpz_init(p);
+    mpz_init(key);
+    mpz_init(q);
+    
+    mpz_set(p, string_largenum(en_data->p));
+    mpz_set(key, privkey->a);
+    mpz_set(q, privkey->q);
 
-    uint128_t h = mod_power(p, key, q);
+    mpz_powm(h, p, key, q);
+    // mpz_set(h, mod_power(p, key, q));
 
+    mpz_t tmp_mpz;
+    mpz_init(tmp_mpz);
     for (size_t i = 0; i < len; i++)
     {
-        char tmp = (char) ((uint128_t) (data[i]/h));
+        mpz_tdiv_q(tmp_mpz, data[i], h);
+
+        char tmp = (char) (tmp_mpz);
         res[i] = tmp;
+
+        // Clear data at current index.
+        mpz_clear(data[i]);
     }
 
     // Null terminate result.
     res[len] = '\0';
 
-    // Free created array.
+    // Free data.
     free(data);
+    mpz_clear(p);
+    mpz_clear(key);
+    mpz_clear(q);
+    mpz_clear(h);
+    mpz_clear(tmp_mpz);
 
     return res;
 }
@@ -155,14 +204,37 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
 // Public and private keys generation for receiver.
 void generateKeys(publicKey *pubKey, privateKey *privKey)
 {
+    // Initialize GMP integers.
+    mpz_t q;
+    mpz_t g;
+    mpz_t key;
+    mpz_t h;
+
+    mpz_init(q);
+    mpz_init(g);
+    mpz_init(key);
+    mpz_init(h);
+
     // Receiver's public keys: q, g and h.
-    uint128_t q = large_keygen(pow(10,19), pow(10,20));
-    uint128_t g = large_keygen(2, q);
+    mpz_t low1, low2, high;
+    mpz_init(low1);
+    mpz_init(low2);
+    mpz_init(high);
+    mpz_ui_pow_ui(low1, 2, 65);
+    mpz_ui_pow_ui(high, 2, 70);
+    mpz_set_ui(low2, 2);
+
+    large_keygen(low1, high, q);
+    large_keygen(low2, q, g);
+    // mpz_set(q, large_keygen(pow(2,65), pow(2,70)));
+    // mpz_set(g, large_keygen(2, q));
 
     // Receiver's private key.
-    uint128_t key = coprime_key(q);
+    coprime_key(q, key);
+    // mpz_set(key, coprime_key(q));
 
-    uint128_t h = mod_power(g, key, q);
+    mpz_powm(h, g, key, q);
+    // mpz_set(h, mod_power(g, key, q));
 
     // Save receiver keys to structs.
     pubKey -> q = largenum_string(q);
@@ -170,6 +242,15 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
     pubKey -> h = largenum_string(h);
     privKey -> a = key;
     privKey -> q = q;
+
+    // Free GMP integers.
+    mpz_clear(q);
+    mpz_clear(g);
+    mpz_clear(key);
+    mpz_clear(h);
+    mpz_clear(low1);
+    mpz_clear(low2);
+    mpz_clear(high);
 }
 
 // Free encrypted data memory.
@@ -216,7 +297,7 @@ publicKey* stringtoPub(char *string)
     return key;
 }
 
-/*
+
 int main()
 {
     char *msg = "Black leather gloves, no sequins\n\
@@ -264,5 +345,5 @@ int main()
     return 0;
 
 }
-*/
+
 

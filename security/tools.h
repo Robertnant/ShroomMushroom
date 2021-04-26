@@ -1,19 +1,18 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
-typedef __int128 int128_t;
-typedef unsigned __int128 uint128_t;
+// Tools for mpz_t to string conversion (vice-versa) and display.
+int largenum_len(mpz_t x);
+void print_largenum(mpz_t x); 
+char *toString(mpz_t *data, size_t len);
+char *largenum_string(mpz_t x);
+void string_largenum(char *str, mpz_t res);
+void fromString(char *enc, size_t finalLen, mpz_t *res);
 
-// Tools for uint128 to string conversion (vice-versa) and display.
-int largenum_len(uint128_t x);
-void print_largenum(uint128_t x); 
-char *toString(uint128_t *data, size_t len);
-char *largenum_string(uint128_t x);
-uint128_t string_largenum(char *str);
-uint128_t *fromString(char *enc, size_t finalLen);
-
-// Tools for uint128 to array of strings conversion.
-uint128_t *fromStringArr(char **arr, size_t len);
-char **toStringArr(uint128_t *data, size_t len);
+/*
+// Tools for mpz_t to array of strings conversion.
+// mpz_t *fromStringArr(char **arr, size_t len);
+char **toStringArr(mpz_t *data, size_t len);
+*/
 
 #endif

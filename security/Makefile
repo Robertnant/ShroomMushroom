@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c99 -Wall -Wextra -Werror -fsanitize=address -lm -g
+CFLAGS = -std=c99 -Wall -Wextra -Werror -fsanitize=address -lm -lgmp -g
 
 all: elgamal
 
