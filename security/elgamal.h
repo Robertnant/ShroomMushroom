@@ -1,6 +1,8 @@
 #ifndef ELGAMAL_H
 #define ELGAMAL_H
 
+#include <gmp.h>
+
 // Structures for Elgamal keys.
 // (Public key is saved as strings for JSON purposes).
 typedef struct publicKey

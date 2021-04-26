@@ -6,7 +6,6 @@
 #include <math.h>
 #include <time.h>
 #include <err.h>
-#include <gmp.h>
 #include "elgamal.h"
 #include "tools.h"
 

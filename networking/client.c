@@ -56,14 +56,21 @@ void func(int sockfd, struct message *message)
     char buff[MAX]; 
     int n;
 
+    struct publicKey *receiver_keys;
+
     // Get private key.
     struct user_priv *priv = &(user->priv);
-    uint128_t a = string_largenum(priv->a);
-    uint128_t q = string_largenum(priv->q);
+    mpz_t a, q;
+    mpz_init(a);
+    mpz_init(q);
+    string_largenum(priv->a, a);
+    string_largenum(priv->q, q);
 
     struct privateKey *privkey = malloc(sizeof(struct privateKey));
-    privkey->a = a;
-    privkey->q = q;
+    mpz_init(privkey->a);
+    mpz_init(privkey->q);
+    mpz_set(privkey->a, a);
+    mpz_set(privkey->q, q);
 
     while (1) 
     { 
@@ -88,7 +95,7 @@ void func(int sockfd, struct message *message)
         // Step 1: Get receiver's public key (hard coded for now).
         message->receiver = "077644562";
         char *key = requestKey(message, sockfd);
-        struct publicKey *receiver_keys = stringtoPub(key);
+        receiver_keys = stringtoPub(key);
         printf("Received key: g->%s q->%s h->%s\n", receiver_keys->g, 
                 receiver_keys->q, receiver_keys->h);
 
@@ -169,6 +176,11 @@ void func(int sockfd, struct message *message)
         free(cyphers);
         
     } 
+
+    // Free memory.
+    mpz_clear(a);
+    mpz_clear(q);
+    freeKeys(receiver_keys, privkey);
 }
 
 int exists(char filename[])

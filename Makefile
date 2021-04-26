@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS= -Wall -Wextra -Werror -g -lm -pthread -std=c99 -fsanitize=address
-LDLIBS= -ljson-c
+LDLIBS= -ljson-c -lgmp
 #CXXFLAGS= -Inetworking -Isaved_users
 VPATH=networking:saved_users:messages:security
 
