@@ -1,31 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gmp.h>
 #include "tools.h"
-
-// Print a uint128 number.
-void print_largenum(mpz_t x) 
-{
-    if (x > 9)
-        print_largenum(x / 10);
-    
-    putchar(x % 10 + '0');
-}
 
 int largenum_len(mpz_t x)
 {
-    mpz_t tmp = x;
-
-    // Do conversion and get length of result.
-    int len = 0;
-    while (tmp)
-    {
-        tmp /= 10;
-
-        len++;
-    }
-
-    return len;
+    return (int) mpz_sizeinbase(x, 10);
 }
 
 // Convert mpz_t to string.
@@ -74,7 +55,10 @@ char *toString(mpz_t *data, size_t len)
 // Convert string to array of large numbers.
 void fromString(char *enc, size_t finalLen, mpz_t *res)
 {
+    // Initialize res array.
     // mpz_t *res = malloc(finalLen * sizeof(mpz_t));
+    for (size_t i = 0; i < finalLen; i++)
+        mpz_init(res[i]);
 
     size_t len = strlen(enc);
 
@@ -106,7 +90,7 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
                 for (size_t c = 0; c < count; c++)
                 {
                     mpz_mul_ui(current, current, 10);
-                    mpz_add_ui(current, tmp[c] - '0');
+                    mpz_add_ui(current, current, tmp[c] - '0');
                     // current = current * 10 + (tmp[c] - '0');
                 }
 
@@ -125,8 +109,6 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
 
     // Free memory.
     free(tmp);
-
-    return res;
 
 }
 

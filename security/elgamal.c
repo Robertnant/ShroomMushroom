@@ -10,8 +10,7 @@
 #include "elgamal.h"
 #include "tools.h"
 
-// TODO: Use GMP gcd.
-// TODO: Return mpz in argument (returning mpz_t not possible).
+// TODO: Create a function to free mpz_t(s) in structures.
 
 
 // Key generators.
@@ -128,13 +127,15 @@ void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data)
     
     en_data -> p = largenum_string(p);
 
+    // Initialize temporary large number.
+    mpz_t tmpLarge;
+    mpz_init(tmpLarge);
+
     for (size_t i = 0; i < len; i++)
     {
         int tmp = (int) msg[i];
 
-        // Initialize and set large number.
-        mpz_t tmpLarge;
-        mpz_init(tmpLarge);
+        // Set temporary large number.
         mpz_mul_ui(tmpLarge, s, tmp);
 
         mpz_init(encryption[i]);
@@ -156,7 +157,8 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
 {
     // Convert encrypted message to array of GMP numbers.
     size_t len = en_data->size;
-    mpz_t *data = fromString(en_data->en_msg, len);
+    mpz_t data[len];
+    fromString(en_data->en_msg, len, data);
 
     // Decrypted message initialisation.
     char *res = malloc((len+1) * sizeof(char));
@@ -167,7 +169,7 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
     mpz_init(key);
     mpz_init(q);
     
-    mpz_set(p, string_largenum(en_data->p));
+    string_largenum(en_data->p, p);
     mpz_set(key, privkey->a);
     mpz_set(q, privkey->q);
 
@@ -180,7 +182,7 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
     {
         mpz_tdiv_q(tmp_mpz, data[i], h);
 
-        char tmp = (char) (tmp_mpz);
+        char tmp = (char) (mpz_get_ui(tmp_mpz));
         res[i] = tmp;
 
         // Clear data at current index.
@@ -240,8 +242,11 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
     pubKey -> q = largenum_string(q);
     pubKey -> g = largenum_string(g);
     pubKey -> h = largenum_string(h);
-    privKey -> a = key;
-    privKey -> q = q;
+    
+    mpz_init(privKey -> a);
+    mpz_init(privKey -> q);
+    mpz_set(privKey -> a, key);
+    mpz_set(privKey -> q, q);
 
     // Free GMP integers.
     mpz_clear(q);

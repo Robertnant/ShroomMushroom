@@ -3,7 +3,6 @@
 
 // Tools for mpz_t to string conversion (vice-versa) and display.
 int largenum_len(mpz_t x);
-void print_largenum(mpz_t x); 
 char *toString(mpz_t *data, size_t len);
 char *largenum_string(mpz_t x);
 void string_largenum(char *str, mpz_t res);
