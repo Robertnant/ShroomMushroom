@@ -20,8 +20,7 @@ void large_keygen(mpz_t lower, mpz_t upper, mpz_t res)
     gmp_randstate_t state;
     gmp_randinit_mt(state);
 
-    mpz_t seed;
-    gmp_randseed(state, seed);
+    gmp_randseed_ui(state, time(NULL));
 
     // Initialise and generate random number.
     mpz_t tmp;
@@ -29,6 +28,7 @@ void large_keygen(mpz_t lower, mpz_t upper, mpz_t res)
 
     // Ensure that result is between lower and upper bounds.
     mpz_sub(tmp, upper, lower);
+    // gmp_printf("Upper - lower: %Zd\n", tmp);
     mpz_urandomm(res, state, tmp);
     mpz_add(res, res, lower);
 
@@ -226,8 +226,16 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
     mpz_ui_pow_ui(high, 2, 70);
     mpz_set_ui(low2, 2);
 
+    printf("Running keygen function.\n");
+    
     large_keygen(low1, high, q);
     large_keygen(low2, q, g);
+
+    printf("Finished running keygen function.\n");
+    // Print generated numbers.
+    gmp_printf("Generated q: %Zd\n", q);
+    gmp_printf("Generated g: %Zd\n", g);
+    
     // mpz_set(q, large_keygen(pow(2,65), pow(2,70)));
     // mpz_set(g, large_keygen(2, q));
 
@@ -256,6 +264,7 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
     mpz_clear(low1);
     mpz_clear(low2);
     mpz_clear(high);
+
 }
 
 // Free encrypted data memory.
