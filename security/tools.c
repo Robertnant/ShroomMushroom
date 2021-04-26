@@ -70,6 +70,9 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
     char *tmp = calloc(40, sizeof(char));
     size_t count = 0;
 
+    // Initialize memory for each number from string.
+    mpz_t current;
+    mpz_init(current);
     for (size_t i = 0; i < len; i++)
     {
         if (enc[i] != '-')
@@ -83,9 +86,7 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
             if (count != 0)
             {
                 // Convert substring to mpz_t.
-                mpz_t current;
-                mpz_init(current);
-                mpz_set(current, 0);
+                mpz_set_ui(current, 0);
 
                 for (size_t c = 0; c < count; c++)
                 {
@@ -108,6 +109,7 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
     }
 
     // Free memory.
+    mpz_clear(current);
     free(tmp);
 
 }

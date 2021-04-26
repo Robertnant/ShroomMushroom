@@ -32,6 +32,10 @@ void large_keygen(mpz_t lower, mpz_t upper, mpz_t res)
     mpz_urandomm(res, state, tmp);
     mpz_add(res, res, lower);
 
+    // Free memory.
+    mpz_clear(tmp);
+    gmp_randclear(state);
+
 }
 
 void coprime_key(mpz_t q, mpz_t res)
@@ -146,6 +150,9 @@ void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data)
     en_data->en_msg = toString(encryption, len);
 
     // Free memory.
+    mpz_clear(q);
+    mpz_clear(g);
+    mpz_clear(h);
     mpz_clear(k);
     mpz_clear(s);
     mpz_clear(p);
@@ -168,6 +175,7 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
     mpz_init(p);
     mpz_init(key);
     mpz_init(q);
+    mpz_init(h);
     
     string_largenum(en_data->p, p);
     mpz_set(key, privkey->a);
@@ -193,7 +201,7 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
     res[len] = '\0';
 
     // Free data.
-    free(data);
+    // free(data);
     mpz_clear(p);
     mpz_clear(key);
     mpz_clear(q);
@@ -226,21 +234,22 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
     mpz_ui_pow_ui(high, 2, 70);
     mpz_set_ui(low2, 2);
 
-    printf("Running keygen function.\n");
-    
     large_keygen(low1, high, q);
     large_keygen(low2, q, g);
 
-    printf("Finished running keygen function.\n");
-    // Print generated numbers.
-    gmp_printf("Generated q: %Zd\n", q);
-    gmp_printf("Generated g: %Zd\n", g);
-    
     // mpz_set(q, large_keygen(pow(2,65), pow(2,70)));
     // mpz_set(g, large_keygen(2, q));
 
     // Receiver's private key.
     coprime_key(q, key);
+    gmp_printf("Found coprime key to q: %Zd\n", key);
+    // Verify that keys are coprime.
+    mpz_t gcd_res;
+    mpz_init(gcd_res);
+    mpz_gcd(gcd_res, q, key);
+    if(mpz_cmp_ui(gcd_res, 1) == 0)
+        printf("Keys are coprime.\n");
+    mpz_clear(gcd_res);
     // mpz_set(key, coprime_key(q));
 
     mpz_powm(h, g, key, q);
@@ -251,11 +260,20 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
     pubKey -> g = largenum_string(g);
     pubKey -> h = largenum_string(h);
     
+    printf("Saved public keys.\n");
+    printf("g -> %s\n", pubKey -> g);
+    printf("q -> %s\n", pubKey -> q);
+    printf("h -> %s\n", pubKey -> h);
+
     mpz_init(privKey -> a);
     mpz_init(privKey -> q);
     mpz_set(privKey -> a, key);
     mpz_set(privKey -> q, q);
 
+    printf("Saved private keys.\n");
+    gmp_printf("a -> %Zd\n", privKey -> a);
+    gmp_printf("q -> %Zd\n", privKey -> q);
+    
     // Free GMP integers.
     mpz_clear(q);
     mpz_clear(g);
@@ -348,13 +366,15 @@ int main()
     printf("h -> %s\n", receiver_pubkey->h);
 
     // Private key.
-    printf("a -> %s\n", largenum_string(receiver_privkey->a));
+    char *a = largenum_string(receiver_privkey->a);
+    printf("a -> %s\n", a);
 
     // Free memory space.
     free(dr_msg);
     freeKeys(receiver_pubkey);
     free(receiver_privkey);
     freeCyphers(dataCyphers);
+    free(a);
 
     return 0;
 
