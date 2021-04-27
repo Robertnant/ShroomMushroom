@@ -234,18 +234,12 @@ void freeCyphers(cyphers *data)
     free(data);
 }
 
-void freeKeys(publicKey *pubkey, privateKey *privkey)
+void freeKey(privateKey *privkey)
 {
-    // Free public key.
-    free(pubkey -> g);
-    free(pubkey -> q);
-    free(pubkey -> h);
-
-    free(pubkey);
-
     // Free private key.
     mpz_clear(privkey -> a);
     mpz_clear(privkey -> q);
+    free(privkey);
 }
 
 char *pubtoString(publicKey* key)

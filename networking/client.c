@@ -107,6 +107,11 @@ void func(int sockfd, struct message *message)
 
         // Free receiver public key.
         free(key);
+        // free(receiver_keys);
+        // Free public key.
+        // free(receiver_keys -> g);
+        // free(receiver_keys -> q);
+        // free(receiver_keys -> h);
         free(receiver_keys);
 
         // Step 3: Generate JSON with cyphers.
@@ -174,13 +179,15 @@ void func(int sockfd, struct message *message)
         //free(cyphers->en_msg);
         //free(cyphers->p);
         free(cyphers);
+        free(json);
         
     } 
 
     // Free memory.
     mpz_clear(a);
     mpz_clear(q);
-    freeKeys(receiver_keys, privkey);
+    // Free private key.
+    freeKey(privkey);
 }
 
 int exists(char filename[])
