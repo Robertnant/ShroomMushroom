@@ -5,8 +5,8 @@
   <object class="GtkWindow" id="reg_page">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">reg_page</property>
-    <property name="default_width">600</property>
-    <property name="default_height">318</property>
+    <property name="default_width">800</property>
+    <property name="default_height">644</property>
     <child>
       <placeholder/>
     </child>
@@ -40,12 +40,12 @@
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="homogeneous">True</property>
+                    <property name="spacing">10</property>
                     <child>
-                      <object class="GtkLabel" id="username_label">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Username : </property>
+                        <property name="label" translatable="yes">Name : </property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -54,16 +54,15 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="username_textentry">
+                      <object class="GtkTextView" id="nametextentry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="max_length">16</property>
+                        <property name="justification">center</property>
                         <property name="input_purpose">name</property>
-                        <property name="input_hints">GTK_INPUT_HINT_NO_SPELLCHECK | GTK_INPUT_HINT_LOWERCASE | GTK_INPUT_HINT_NO_EMOJI | GTK_INPUT_HINT_NONE</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
-                        <property name="fill">False</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -78,15 +77,12 @@
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="homogeneous">True</property>
+                    <property name="spacing">10</property>
                     <child>
-                      <object class="GtkLabel" id="number_label">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Phone number: </property>
-                        <property name="justify">center</property>
-                        <property name="xalign">0.5</property>
-                        <property name="yalign">0.5</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -95,16 +91,15 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="number_textentry">
+                      <object class="GtkTextView" id="number_textentry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="max_length">10</property>
+                        <property name="justification">center</property>
                         <property name="input_purpose">phone</property>
-                        <property name="input_hints">GTK_INPUT_HINT_NO_SPELLCHECK | GTK_INPUT_HINT_NO_EMOJI | GTK_INPUT_HINT_NONE</property>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -170,7 +165,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="error_label">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
