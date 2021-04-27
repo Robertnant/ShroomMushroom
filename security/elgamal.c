@@ -9,9 +9,6 @@
 #include "elgamal.h"
 #include "tools.h"
 
-// TODO: Create a function to free mpz_t(s) in structures.
-
-
 // Key generators.
 void large_keygen(mpz_t lower, mpz_t upper, mpz_t res)
 {
@@ -195,7 +192,7 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
     mpz_init(low2);
     mpz_init(high);
     mpz_ui_pow_ui(low1, 2, 65);
-    mpz_ui_pow_ui(high, 2, 70);
+    mpz_ui_pow_ui(high, 2, 80);
     mpz_set_ui(low2, 2);
 
     large_keygen(low1, high, q);
