@@ -9,15 +9,15 @@
 
 struct user_priv
 {
-    char a[40];
-    char q[40];
+    char a[80];
+    char q[80];
 };
 
 struct user_pub
 {
-    char g[40];
-    char q[40];
-    char h[40];
+    char g[80];
+    char q[80];
+    char h[80];
 };
 
 struct user

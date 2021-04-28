@@ -9,6 +9,10 @@
 #include "elgamal.h"
 #include "tools.h"
 
+#define MIN_GAMAL 255
+#define MAX_GAMAL 256
+
+
 // Key generators.
 void large_keygen(mpz_t lower, mpz_t upper, mpz_t res)
 {
@@ -40,7 +44,7 @@ void coprime_key(mpz_t q, mpz_t res)
     mpz_t low, tmp;
     mpz_init(low);
     mpz_init(tmp);
-    mpz_ui_pow_ui(low, 2, 65);
+    mpz_ui_pow_ui(low, 2, MIN_GAMAL);
 
     large_keygen(low, q, res);
     // mpz_set(res, large_keygen(low, q));
@@ -191,8 +195,8 @@ void generateKeys(publicKey *pubKey, privateKey *privKey)
     mpz_init(low1);
     mpz_init(low2);
     mpz_init(high);
-    mpz_ui_pow_ui(low1, 2, 65);
-    mpz_ui_pow_ui(high, 2, 80);
+    mpz_ui_pow_ui(low1, 2, MIN_GAMAL);
+    mpz_ui_pow_ui(high, 2, MAX_GAMAL);
     mpz_set_ui(low2, 2);
 
     large_keygen(low1, high, q);

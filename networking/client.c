@@ -25,6 +25,7 @@ struct message *message;
 struct user* user;
 int sockfd; 
 
+// TODO: ADD THE USERNAME TO THE CONTACTS.TXT FILE: request_key func
 
 
 // Temporary public key request function. Hardcoded keys.
@@ -162,7 +163,7 @@ void func(int sockfd, struct message *message)
         parseMessage(json, message);
 
         printf("\nReceived a message from %s\n", message->sender);
-        sleep(2);
+        //sleep(2);
 
         //free(cyphers->en_msg);
         //free(cyphers->p);
@@ -221,7 +222,7 @@ struct user* init_procedure(int fd, char username[], char number[])
     return user;
 }
 
-void request_key(int fd, char number[])
+void addContact(int fd, char number[])
 {
     // Sending the request
     message->type = ADD;
@@ -238,8 +239,6 @@ void request_key(int fd, char number[])
     write(fd, mess, l);
     free(mess);
 
-
-
     // Waiting for a response
     char buf[MAX_BUFFER];
     read(fd, buf, MAX_BUFFER);
@@ -248,7 +247,15 @@ void request_key(int fd, char number[])
     if (strcmp(message->content, "(null)") == 0)
         printf("USER NOT FOUND ERROR\n");
 
+
     struct user* new_user = parseUser(message->content);
+   
+    // Saving user into contacts.txt
+    FILE * contacts = fopen(".files/contacts.txt", "a");
+    fprintf(contacts, "%s-%s\n", new_user->username, new_user->number);
+    fclose(contacts); 
+
+
     // Save to specific file
     char *path;
     asprintf(&path, ".files/contacts/%s", user->number);
@@ -258,13 +265,6 @@ void request_key(int fd, char number[])
 
 }
 
-void* wait_for_registration(void * argument)
-{
-    struct registration_data* arg = argument;
-    while (!arg->success);
-    user = init_procedure(sockfd, arg->username, arg->number);
-    return NULL;
-}
 
 int main() 
 { 
@@ -339,13 +339,6 @@ int main()
         //fetch user and number data to run through this function
         struct registration_data *reg_data = malloc(sizeof(struct registration_data));
         show_registration(reg_data);
-        //if(reg_data->success)
-        //    user = init_procedure(sockfd, reg_data->username, reg_data->number);
-        /*
-        char *username = "sergiombd";
-        char number[] = "0776727908";         
-        user = init_procedure(sockfd, username, number);
-        */
     }
 
     gtk_main();

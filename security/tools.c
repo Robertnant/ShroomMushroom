@@ -55,6 +55,7 @@ char *toString(mpz_t *data, size_t len)
 // Convert string to array of large numbers.
 void fromString(char *enc, size_t finalLen, mpz_t *res)
 {
+    int max_length = 80;
     // Initialize res array.
     // mpz_t *res = malloc(finalLen * sizeof(mpz_t));
     for (size_t i = 0; i < finalLen; i++)
@@ -67,7 +68,9 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
 
     // Get each substring.
     // (40 digits maximum for large number types).
-    char *tmp = calloc(40, sizeof(char));
+    //char *tmp = calloc(80, sizeof(char));
+    char tmp[max_length];
+
     size_t count = 0;
 
     // Initialize memory for each number from string.
@@ -100,7 +103,7 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
                 subIndex++;
 
                 // Reset data for next substring.
-                for (int i = 0; i < 40; i++)
+                for (int i = 0; i < max_length; i++)
                     tmp[i] = '\0';
 
                 count = 0;
@@ -110,7 +113,7 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
 
     // Free memory.
     mpz_clear(current);
-    free(tmp);
+    //free(tmp);
 
 }
 
