@@ -171,7 +171,7 @@ int main()
 	
     sendTextButton = GTK_BUTTON(gtk_builder_get_object(builder, "sendTextButton"));
     TextEntry = GTK_ENTRY(gtk_builder_get_object(builder, "TextEntry"));
-    send_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "send_textbuffer"));
+    //send_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "send_textbuffer"));
     textlabel = GTK_LABEL(gtk_builder_get_object(builder, "textlabel"));
 
 	fixed1 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed1"));
