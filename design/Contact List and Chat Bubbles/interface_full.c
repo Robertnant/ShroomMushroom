@@ -97,7 +97,7 @@ void chat_bubbles() //Display chat bubbles
 			tmp_chat[strlen(tmp_chat)-1] = 0; //remove newline byte 
 			const char s[2] = "]";
 			char *token; 
-			char *user = "ROBERT"; 
+			char *user = "ROBERT";  
 
 			token = strtok(tmp_chat, s); //[Username]
 
@@ -138,8 +138,7 @@ void contacts()
 	}
 	else
 	{
-		int row = 0; 
-		char *token; 
+		int row = 0;  
 
 		while (1) 
 		{ 
@@ -148,12 +147,12 @@ void contacts()
 			
 			else 
 			{
-				const char s[2] = "-"; 
+				//const char s[2] = "-";
 				tmp[strlen(tmp)-1] = 0; //remove newline byte 
-				token = strtok(tmp, s); //just extract the contact name
+				//token = strtok(tmp, s); //just extract the contact name
 
 				gtk_grid_insert_row(GTK_GRID(grid1), row);  
-				button[row] = gtk_button_new_with_label(token); 
+				button[row] = gtk_button_new_with_label(tmp); 
 				gtk_grid_attach (GTK_GRID(grid1), button[row], 1, row, 1, 1);
 				g_signal_connect(button[row], "clicked", G_CALLBACK(chat_bubbles), NULL); 
 				row ++;
@@ -168,7 +167,6 @@ int main()
     gtk_init(NULL, NULL);
 
     builder = gtk_builder_new_from_file("interface_full.glade");
-
     window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
 	
     sendTextButton = GTK_BUTTON(gtk_builder_get_object(builder, "sendTextButton"));
@@ -194,7 +192,7 @@ int main()
 	// CHAT BUBBLES  
 	chat_bubbles(); 
 
-    g_object_unref(builder);
+    //g_object_unref(builder);
 
     gtk_widget_show(window);                
     gtk_main(); 

@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.38.1 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
-  <object class="GtkWindow" id="main_window">
+  <object class="GtkWindow">
     <property name="can-focus">False</property>
     <child>
       <object class="GtkBox">
@@ -27,18 +27,15 @@
           </packing>
         </child>
         <child>
-          <object class="GtkPaned">
+          <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="position">116</property>
-            <property name="position-set">True</property>
-            <property name="wide-handle">True</property>
+            <property name="can-focus">False</property>
             <child>
               <object class="GtkViewport">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <child>
-                  <object class="GtkFixed" id="fixed1">
+                  <object class="GtkFixed" id="fixed3">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
@@ -62,7 +59,7 @@
                     </child>
                     <child>
                       <!-- n-columns=1 n-rows=11 -->
-                      <object class="GtkGrid" id="grid1">
+                      <object class="GtkGrid" id="grid4">
                         <property name="width-request">100</property>
                         <property name="height-request">80</property>
                         <property name="visible">True</property>
@@ -107,14 +104,13 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="addContactButton">
+                      <object class="GtkButton" id="addContactButton1">
                         <property name="label" translatable="yes">Add Contact</property>
                         <property name="width-request">100</property>
                         <property name="height-request">34</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
-                        <signal name="clicked" handler="add_contact" swapped="no"/>
                       </object>
                       <packing>
                         <property name="x">10</property>
@@ -125,8 +121,9 @@
                 </child>
               </object>
               <packing>
-                <property name="resize">False</property>
-                <property name="shrink">True</property>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -148,12 +145,12 @@
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
-                              <object class="GtkFixed" id="fixed2">
+                              <object class="GtkFixed" id="fixed4">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <child>
                                   <!-- n-columns=1 n-rows=12 -->
-                                  <object class="GtkGrid" id="grid2">
+                                  <object class="GtkGrid" id="grid5">
                                     <property name="width-request">152</property>
                                     <property name="height-request">80</property>
                                     <property name="visible">True</property>
@@ -202,7 +199,7 @@
                                 </child>
                                 <child>
                                   <!-- n-columns=1 n-rows=12 -->
-                                  <object class="GtkGrid" id="grid3">
+                                  <object class="GtkGrid" id="grid6">
                                     <property name="width-request">152</property>
                                     <property name="height-request">80</property>
                                     <property name="visible">True</property>
@@ -278,7 +275,7 @@
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <child>
-                                      <object class="GtkEntry" id="TextEntry">
+                                      <object class="GtkEntry" id="TextEntry1">
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
                                       </object>
@@ -289,7 +286,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkButton" id="sendTextButton">
+                                      <object class="GtkButton" id="sendTextButton1">
                                         <property name="label" translatable="yes">Send</property>
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
@@ -318,13 +315,14 @@
                 </child>
               </object>
               <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
