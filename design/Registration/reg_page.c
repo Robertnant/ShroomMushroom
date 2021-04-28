@@ -7,23 +7,6 @@
 #include "../../networking/client.h"
 #include "reg_page.h"
 
-GtkLabel *textlabel; // What is that?
-
-
-//Moved to header file
-/*
-typedef struct 
-{
-    int fd; //For communication with server
-    GtkButton *register_now_button;
-    GtkEntry *username;
-    GtkEntry *phonenumber;
-    GtkLabel *error_label;
-    
-} app_widgets;
-*/
-
-app_widgets *curr;
 
 
 void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
@@ -33,7 +16,7 @@ void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
 
         arg->data->success = 0;
 
-
+        gtk_label_set_text(arg->error_label, (const gchar*) "NO ERRORS");
         // Getting username into buffer
 	//char buffer_for_username[17]; // changed to structure so no need for that
 	strcpy(arg->data->username, gtk_entry_get_text(arg->username));
@@ -42,6 +25,7 @@ void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
         if (strlen(arg->data->username) < 6)
         {
 		printf("Wrong length username\n");
+                gtk_label_set_text(arg->error_label, (const gchar*) "Username should be between 6 and 16 characters long!");
                 return;
 	}
 
@@ -53,6 +37,7 @@ void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
 	if (strlen(arg->data->number) != 10)
         {
 		printf("Wrong length\n");
+                gtk_label_set_text(arg->error_label, (const gchar*) "Phone number should be 10 characters long!");
                 return;
 	}
 
@@ -61,6 +46,7 @@ void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
         {
 		if (!(arg->data->number[i] >= '0' && arg->data->number[i] <= '9'))
                 {
+                        gtk_label_set_text(arg->error_label, (const gchar*) "Phone number should only contain digits!");
 			printf("Wrong Format : Detected character %c\n", arg->data->number[i]);
 			return;
 		}
@@ -96,6 +82,7 @@ void show_registration(struct registration_data* data)
     widgets_registration->window = window_registration;
     widgets_registration->phonenumber = GTK_ENTRY(gtk_builder_get_object(builder_registration, "number_textentry"));
     widgets_registration->username = GTK_ENTRY(gtk_builder_get_object(builder_registration, "username_textentry"));
+    widgets_registration->error_label = GTK_LABEL(gtk_builder_get_object(builder_registration, "error_label"));
     widgets_registration->data = data;
     
     //widgets_registration->name_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder_registration, "name_textbuffer"));
