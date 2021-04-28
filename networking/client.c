@@ -8,20 +8,22 @@
 #include <sys/socket.h> 
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 
 #include "../messages/messages.h"
 #include "../saved_users/users.h"
 #include "../security/elgamal.h"
 #include "../security/tools.h"
-
+#include "../design/Registration/reg_page.h"
 
 #define USER_PATH ".files/.user"
-#define MAX 10000 
+#define MAX_BUFFER 10000 
 #define PORT 8080 
 #define SA struct sockaddr 
 
 struct message *message;
 struct user* user;
+int sockfd; 
 
 
 
@@ -53,7 +55,7 @@ char *requestKey(struct message *message, int sockfd)
 
 void func(int sockfd, struct message *message) 
 { 
-    char buff[MAX]; 
+    char buff[MAX_BUFFER]; 
     int n;
 
     struct publicKey *receiver_keys;
@@ -75,14 +77,14 @@ void func(int sockfd, struct message *message)
     while (1) 
     { 
         // n--;
-        bzero(buff, MAX); 
+        bzero(buff, MAX_BUFFER); 
         // printf("Enter the string : "); 
         n = 0;
         
         printf("Enter message : ");
 
         // Add text to buffer till newline is written.
-        while (n < MAX && (buff[n++] = getchar()) != '\n')
+        while (n < MAX_BUFFER && (buff[n++] = getchar()) != '\n')
             ;
 
         // Check for exit signal.
@@ -239,8 +241,8 @@ void request_key(int fd, char number[])
 
 
     // Waiting for a response
-    char buf[MAX];
-    read(fd, buf, MAX);
+    char buf[MAX_BUFFER];
+    read(fd, buf, MAX_BUFFER);
     parseMessage(buf, message);
     
     if (strcmp(message->content, "(null)") == 0)
@@ -256,13 +258,20 @@ void request_key(int fd, char number[])
 
 }
 
+void* wait_for_registration(void * argument)
+{
+    struct registration_data* arg = argument;
+    while (!arg->success);
+    user = init_procedure(sockfd, arg->username, arg->number);
+    return NULL;
+}
+
 int main() 
 { 
     // Check if user is already initialized, if not create it
     
     // if initialized, open it and send identification
 
-    int sockfd; 
     struct sockaddr_in servaddr; //, cli; 
     
     // Create and verify socket.
@@ -303,7 +312,8 @@ int main()
     // Chat function. 
     
     */
-    
+    gtk_init(NULL, NULL);
+
     message = (struct message*) calloc(1, sizeof(struct message));
     if (exists(USER_PATH))
     {
@@ -327,12 +337,18 @@ int main()
     {
         printf("USER CONFIGURATION NOT FOUND!\n");
         //fetch user and number data to run through this function
+        struct registration_data *reg_data = malloc(sizeof(struct registration_data));
+        show_registration(reg_data);
+        //if(reg_data->success)
+        //    user = init_procedure(sockfd, reg_data->username, reg_data->number);
+        /*
         char *username = "sergiombd";
         char number[] = "0776727908";         
         user = init_procedure(sockfd, username, number);
+        */
     }
 
-
+    gtk_main();
     func(sockfd, message); 
 
     // Free message structure.
