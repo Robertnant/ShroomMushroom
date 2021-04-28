@@ -39,7 +39,7 @@ char * to_string(unsigned int key)
 char* get_id(char num[])
 {
     // 07 76 72 79 08
-    if(num[0] != '0' || strlen(num) != 10)
+    if(strlen(num) != 10)
         errx(1, "Wrong phone number format!");
     return to_string(hash(num));
 }
