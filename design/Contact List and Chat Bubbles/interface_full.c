@@ -97,10 +97,11 @@ void chat_bubbles() //Display chat bubbles
 			tmp_chat[strlen(tmp_chat)-1] = 0; //remove newline byte 
 			const char s[2] = "]";
 			char *token; 
-			
+			char *user = "ROBERT"; 
+
 			token = strtok(tmp_chat, s); //[Username]
 
-			if (token == user) //User - right grid (grid3)
+			if (strcmp(token, user) == 0) //User - right grid (grid3)
 			{
 				token = strtok(NULL, s); 
 				gtk_grid_insert_row(GTK_GRID(grid3), row3);  
@@ -125,8 +126,6 @@ void add_contact() //on_add_contact_button_clicked()
 {
 	printf("clicked"); 
 }
-
-
 
 void contacts()
 {
@@ -168,7 +167,7 @@ int main()
 {
     gtk_init(NULL, NULL);
 
-    builder = gtk_builder_new_from_file("./interface_dual_grid.glade");
+    builder = gtk_builder_new_from_file("interface_full.glade");
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
 	
@@ -189,7 +188,7 @@ int main()
     gtk_widget_set_sensitive(GTK_WIDGET(sendTextButton), TRUE);
 
 	// CONTACTS 
-	add_contacts(); 
+	add_contact(); 
 	contacts(); 
 
 	// CHAT BUBBLES  
