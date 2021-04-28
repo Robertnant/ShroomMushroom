@@ -53,13 +53,14 @@ static void destroy(GtkWidget *widget, gpointer data){
 	gtk_main_quit();
 }
 
-int main()
+
+void show_registration()
 {
+
     GtkBuilder      *builder_registration;
     GtkWidget       *window_registration;
     app_widgets     *widgets_registration = malloc(sizeof(app_widgets));
     
-    gtk_init(NULL, NULL);
 
     builder_registration = gtk_builder_new_from_file("./reg_page.glade");
     window_registration = GTK_WIDGET(gtk_builder_get_object(builder_registration, "reg_page"));
@@ -78,6 +79,14 @@ int main()
     g_object_unref(builder_registration);
 
     gtk_widget_show(window_registration);                
+}
+
+int main()
+{
+    gtk_init(NULL, NULL);
+
+    show_registration();
+    
     gtk_main();
     //free(widgets_registration);
 
