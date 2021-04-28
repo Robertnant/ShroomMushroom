@@ -9,9 +9,8 @@
 #include "elgamal.h"
 #include "tools.h"
 
-#define MIN_GAMAL 255
-#define MAX_GAMAL 256
-
+#define MIN_GAMAL 511
+#define MAX_GAMAL 512
 
 // Key generators.
 void large_keygen(mpz_t lower, mpz_t upper, mpz_t res)
@@ -238,6 +237,20 @@ void freeCyphers(cyphers *data)
     free(data);
 }
 
+void freeKeys(publicKey *pubkey, privateKey *privkey)
+{
+    // Free public key.
+    free(pubkey -> q);
+    free(pubkey -> g);
+    free(pubkey -> h);
+    free(pubkey);
+    
+    // Free private key.
+    mpz_clear(privkey -> a);
+    mpz_clear(privkey -> q);
+    free(privkey);
+}
+
 void freeKey(privateKey *privkey)
 {
     // Free private key.
@@ -314,7 +327,8 @@ int main()
     // Free memory space.
     free(dr_msg);
     freeKeys(receiver_pubkey, receiver_privkey);
-    free(receiver_privkey);
+    // freeKey(receiver_privkey);
+    // free(receiver_privkey);
     freeCyphers(dataCyphers);
     free(a);
 
@@ -322,4 +336,3 @@ int main()
 
 }
 */
-

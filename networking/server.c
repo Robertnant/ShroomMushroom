@@ -22,9 +22,9 @@
 #include "../security/tools.h"
 #include "client_list.h"
 
-#define MAX 10000 
-#define PORT 8080 
-#define SA struct sockaddr 
+#define MAX 10000
+#define PORT 8080
+#define SA struct sockaddr
 #define MESSAGE_SIZE sizeof(struct message)
 
 int running = 1;

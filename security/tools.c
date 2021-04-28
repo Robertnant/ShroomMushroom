@@ -4,21 +4,25 @@
 #include <gmp.h>
 #include "tools.h"
 
+#define BASE 62
+#define MAX_LENGTH 156   // Maximum number of digits in base 512.
+
 int largenum_len(mpz_t x)
 {
-    return (int) mpz_sizeinbase(x, 10);
+    // printf("Size in base 10: %d\n", mpz_sizeinbase(x,10));
+    return (int) mpz_sizeinbase(x, BASE);
 }
 
 // Convert mpz_t to string.
 char *largenum_string(mpz_t x)
 {
-    return mpz_get_str(NULL, 10, x);
+    return mpz_get_str(NULL, BASE, x);
 }
 
 // Convert single string to mpz_t.
 void string_largenum(char *str, mpz_t res)
 {
-    mpz_set_str(res, str, 10);
+    mpz_set_str(res, str, BASE);
 }
 
 // Convert array of large numbers to string.
@@ -55,9 +59,6 @@ char *toString(mpz_t *data, size_t len)
 // Convert string to array of large numbers.
 void fromString(char *enc, size_t finalLen, mpz_t *res)
 {
-    int max_length = 80;
-    // Initialize res array.
-    // mpz_t *res = malloc(finalLen * sizeof(mpz_t));
     for (size_t i = 0; i < finalLen; i++)
         mpz_init(res[i]);
 
@@ -67,15 +68,10 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
     size_t subIndex = 0;
 
     // Get each substring.
-    // (40 digits maximum for large number types).
-    //char *tmp = calloc(80, sizeof(char));
-    char tmp[max_length];
+    char *tmp = calloc(MAX_LENGTH, sizeof(char));
 
     size_t count = 0;
 
-    // Initialize memory for each number from string.
-    mpz_t current;
-    mpz_init(current);
     for (size_t i = 0; i < len; i++)
     {
         if (enc[i] != '-')
@@ -89,21 +85,11 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
             if (count != 0)
             {
                 // Convert substring to mpz_t.
-                mpz_set_ui(current, 0);
-
-                for (size_t c = 0; c < count; c++)
-                {
-                    mpz_mul_ui(current, current, 10);
-                    mpz_add_ui(current, current, tmp[c] - '0');
-                    // current = current * 10 + (tmp[c] - '0');
-                }
-
-                mpz_set(res[subIndex], current);
-                // res[subIndex] = current;
+                mpz_set_str(res[subIndex], tmp, BASE);
                 subIndex++;
 
                 // Reset data for next substring.
-                for (int i = 0; i < max_length; i++)
+                for (int i = 0; i < MAX_LENGTH; i++)
                     tmp[i] = '\0';
 
                 count = 0;
@@ -112,41 +98,7 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
     }
 
     // Free memory.
-    mpz_clear(current);
-    //free(tmp);
+    free(tmp);
 
 }
 
-/*
-// Convert array of large numbers to array of strings.
-char **toStringArr(mpz_t *data, size_t len)
-{
-    char **res = malloc(len * sizeof(char*));
-
-    for (size_t i = 0; i < len; i++)
-    {
-        res[i] = largenum_string(data[i]);
-    }
-
-    return res;
-}
-
-// Convert array of strings to array of large numbers.
-mpz_t *fromStringArr(char **arr, size_t len)
-{
-    mpz_t *res = malloc(len * sizeof(mpz_t));
-
-    for (size_t i = 0; i < len; i++)
-    {
-        mpz_t current = 0;
-        for (size_t c = 0; c < strlen(arr[i]); c++)
-        {
-            current = current * 10 + (arr[i][c] - '0');
-        }
-
-        res[i] = current;
-    }
-
-    return res;
-}
-*/

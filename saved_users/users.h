@@ -6,18 +6,19 @@
 
 #include "../security/elgamal.h"
 
+#define MAX_BUFF 87
 
 struct user_priv
 {
-    char a[80];
-    char q[80];
+    char a[MAX_BUFF];
+    char q[MAX_BUFF];
 };
 
 struct user_pub
 {
-    char g[80];
-    char q[80];
-    char h[80];
+    char g[MAX_BUFF];
+    char q[MAX_BUFF];
+    char h[MAX_BUFF];
 };
 
 struct user
