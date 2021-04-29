@@ -21,6 +21,6 @@ bigclean:
 	${RM} client server *.d *.o
 	${RM} design/Registration/reg_*~
 	${RM} saved_users/Pipes/*[0-9]* saved_users/Users/*[0-9]*
-	${RM} .files/.user .files/contacts/*[0-9]*
+	${RM} .files/.user .files/contacts/*[0-9]* .files/contacts.txt
 
 .PHONY: all clean remove bigclean

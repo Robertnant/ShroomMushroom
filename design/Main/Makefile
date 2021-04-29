@@ -11,4 +11,4 @@ all: interface_full
 interface: interface_full.c
 
 clean:
-	${RM} interface_full interface_full.o interface_full.d
+	${RM} interface_full *.o *.d *.glade~
