@@ -210,9 +210,9 @@ struct user* init_user_path(char username[], char number[], char path[])
     strcpy(new->priv.a, a);
     strcpy(new->priv.q, pubKey->q);
     
+    // Free memory.
     free(a);
-    free(pubKey);
-    free(privKey);
+    freeKeys(pubKey, privKey);
 
     save_user_path(new, path);
     printf("Saved user info for %s into .user file\n", new->username);

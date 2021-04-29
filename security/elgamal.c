@@ -251,12 +251,21 @@ void freeKeys(publicKey *pubkey, privateKey *privkey)
     free(privkey);
 }
 
-void freeKey(privateKey *privkey)
+void freePriv(privateKey *privkey)
 {
     // Free private key.
     mpz_clear(privkey -> a);
     mpz_clear(privkey -> q);
     free(privkey);
+}
+
+void freePub(publicKey *pubkey)
+{
+    // Free public key.
+    free(pubkey -> q);
+    free(pubkey -> g);
+    free(pubkey -> h);
+    free(pubkey);
 }
 
 char *pubtoString(publicKey* key)

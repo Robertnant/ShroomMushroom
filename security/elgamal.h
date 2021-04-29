@@ -38,8 +38,10 @@ void coprime_key(mpz_t q, mpz_t res);
 char * pubtoString(publicKey* key);
 publicKey* stringtoPub(char* string);
 
-// Tool to free private key.
-void freeKey(privateKey *privkey);
+// Tool to free keys.
+void freePub(publicKey *pubkey);
+void freePriv(privateKey *privkey);
+void freeKeys(publicKey *pubkey, privateKey *privkey);
 
 // Key generation
 void generateKeys(publicKey *pubKey, privateKey *privKey);
