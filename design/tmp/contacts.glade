@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.1 -->
+<interface>
+  <requires lib="gtk+" version="3.24"/>
+  <object class="GtkWindow" id="window">
+    <property name="name">window1</property>
+    <property name="can-focus">False</property>
+    <property name="resizable">False</property>
+    <child>
+      <object class="GtkFixed" id="fixed">
+        <property name="name">fixed1</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel" id="label">
+            <property name="name">label</property>
+            <property name="width-request">100</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">CONTACTS</property>
+            <attributes>
+              <attribute name="font-desc" value="Zilla Slab Bold Oblique 13"/>
+              <attribute name="foreground" value="#769c67fb67fb"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="x">11</property>
+            <property name="y">8</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrollbar" id="scroll">
+            <property name="width-request">15</property>
+            <property name="height-request">261</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="orientation">vertical</property>
+          </object>
+          <packing>
+            <property name="x">220</property>
+            <property name="y">69</property>
+          </packing>
+        </child>
+        <child>
+          <!-- n-columns=1 n-rows=6 -->
+          <object class="GtkGrid" id="grid">
+            <property name="width-request">200</property>
+            <property name="height-request">270</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="x">17</property>
+            <property name="y">70</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
