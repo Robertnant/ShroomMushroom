@@ -9,7 +9,7 @@
 GtkLabel *textlabel;
 
 GtkBuilder      *builder;
-GtkWidget       *window;
+GtkWidget       *main_window;
 GtkWidget		*fixed1;
 GtkWidget		*fixed2;
 GtkWidget		*grid1; 
@@ -50,7 +50,6 @@ void on_TextEntry_changed()
   	sprintf(tmp, "%s", gtk_entry_get_text(TextEntry));
   	gtk_label_set_text(textlabel, (const gchar*) tmp);
 }
-
 
 /*
 char* get_name(char* tmp) //determine user or contact 
@@ -167,7 +166,7 @@ int main()
     gtk_init(NULL, NULL);
 
     builder = gtk_builder_new_from_file("interface_full.glade");
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
+    main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
 	
     sendTextButton = GTK_BUTTON(gtk_builder_get_object(builder, "sendTextButton"));
     TextEntry = GTK_ENTRY(gtk_builder_get_object(builder, "TextEntry"));
@@ -194,7 +193,7 @@ int main()
 
     //g_object_unref(builder);
 
-    gtk_widget_show(window);                
+    gtk_widget_show_all(main_window);                
     gtk_main(); 
 
     return 0;
