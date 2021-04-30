@@ -1,9 +1,15 @@
 #ifndef CLIENT_LIST_H
 #define CLIENT_LIST_H
 
+
+#include <pthread.h>
+
+
 struct client
 {
     int fd;
+    pthread_t listening;
+    pthread_t sending;
     struct user* user;
     struct client* next;
     struct client* prev;
