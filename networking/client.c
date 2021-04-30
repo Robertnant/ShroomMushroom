@@ -17,16 +17,17 @@
 #include "../design/Registration/reg_page.h"
 
 #define USER_PATH ".files/.user"
-#define MAX_BUFFER 10000 
-#define PORT 8080 
+#define CHAT_PATH "design/Main/chat.txt"
+#define MAX_BUFFER 10000
+#define PORT 8080
 #define SA struct sockaddr 
 
 struct message *message;
 struct user* user;
 int sockfd; 
 
-// TODO: ADD THE USERNAME TO THE CONTACTS.TXT FILE: request_key func
-
+// TODO: Make step 0 of "func" method use input from GTK text entry.
+// TODO: Make "saveMessage" function use client username.
 
 // Temporary public key request function. Hardcoded keys.
 // (These harcoded keys will be temporary used by server as well).
@@ -54,6 +55,12 @@ char *requestKey(struct message *message, int sockfd)
     return key;
 }
 
+// Function to save message to chat log.
+void saveMessage(char *msg, FILE *file)
+{
+    fprintf(file, "[ROBERT]%s", msg);
+}
+
 void func(int sockfd, struct message *message) 
 { 
     char buff[MAX_BUFFER]; 
@@ -75,13 +82,17 @@ void func(int sockfd, struct message *message)
     mpz_set(privkey->a, a);
     mpz_set(privkey->q, q);
 
+    // Open chat file.
+    FILE * contacts = fopen(CHAT_PATH, "a");
+    if (!contacts)
+        errx(EXIT_FAILURE, "Failed to open chat file");
+
     while (1) 
     { 
-        // n--;
         bzero(buff, MAX_BUFFER); 
-        // printf("Enter the string : "); 
         n = 0;
         
+        // Step 0: Type message.
         printf("Enter message : ");
 
         // Add text to buffer till newline is written.
@@ -110,8 +121,6 @@ void func(int sockfd, struct message *message)
 
         // Free receiver public key.
         free(key);
-        // free(receiver_keys);
-        // Free public key.
         free(receiver_keys);
 
         // Step 3: Generate JSON with cyphers.
@@ -137,6 +146,7 @@ void func(int sockfd, struct message *message)
         char *json = genMessage(message, &jsonSize);
         
 
+        // Reset message structure for next step.
         freeMessage(message);
 
         // Step 4: Send JSON to server.
@@ -151,9 +161,6 @@ void func(int sockfd, struct message *message)
         // (For now just itself).
         bzero(json, jsonSize);
         
-        // This was causing errors
-        // free(message);
-        
         if (read(sockfd, json, jsonSize) == -1)
             errx(1, "Error reading incoming messages");
 
@@ -162,22 +169,21 @@ void func(int sockfd, struct message *message)
         printf("\nReceived a message from %s\n", message->sender);
         //sleep(2);
 
-        //free(cyphers->en_msg);
-        //free(cyphers->p);
         free(cyphers);
         cyphers = malloc(sizeof(struct message)); // WARNING
         cyphers->en_msg = message->content;
         cyphers->p = message->p;
         cyphers->size = message->size;
 
+        // Step 6: Decrypt message and save to chat file.
         char *res = decrypt_gamal(cyphers, privkey);
         printf("Decrypting received message\n");
         printf("Received message: %s\n", res);
-       
+        saveMessage(res, contacts);
+
+        // Free memory.
         free(res);
         freeMessage(message);
-        //free(cyphers->en_msg);
-        //free(cyphers->p);
         free(cyphers);
         free(json);
         
@@ -186,9 +192,8 @@ void func(int sockfd, struct message *message)
     // Free memory.
     mpz_clear(a);
     mpz_clear(q);
-    // Free keys.
     freePriv(privkey);
-    // freeKeys(receiver_keys, privkey);
+    fclose(contacts);
 }
 
 int exists(char filename[])
@@ -295,21 +300,7 @@ int main()
         printf("Connection to server successful...\n"); 
 
 
-    /*
-    char *json_test = "{\"sender\": \"0776727909\",\
-    \"receiver\": \"0776727908\",\
-    \"type\": 5,\
-    \"content\": \"1005838116\",\
-    \"time\": \"1845689\",\
-    \"filename\": \"file.txt\"\
-    }";
-    
-
-    //size_t len = strlen(json_test);
-    //write(sockfd, json_test, len);
-    // Chat function. 
-    
-    */
+    // Run interface.
     gtk_init(NULL, NULL);
 
     message = (struct message*) calloc(1, sizeof(struct message));
@@ -321,9 +312,6 @@ int main()
         message->type = IDENTIFICATION;
         message->content = user->UID;
         message->sender = user->number;
-        //message->receiver[0] = 0;
-        //message->time[0] = 0;
-        //message->filename[0] = 0;
 
         int l;
         char *msg = genMessage(message, &l);
@@ -340,9 +328,9 @@ int main()
     }
 
     gtk_main();
+    
+    // Chatting function.
     func(sockfd, message); 
-
-    // Free message structure.
 
     // Close socket.
     close(sockfd); 
