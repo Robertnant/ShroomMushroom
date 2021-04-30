@@ -23,11 +23,17 @@
 #define SA struct sockaddr 
 
 struct message *message;
+struct publicKey *receiver_keys;
+struct privateKey *privkey;
 struct user* user;
+struct user* target_user;
 int sockfd; 
 
-// TODO: Make step 0 of "func" method use input from GTK text entry.
-// TODO: Make "saveMessage" function use client username.
+// TODO: 1. Make step 0 of "func" method use input from GTK text entry.
+// TODO: 2. Make "saveMessage" function use client username.
+// TODO: 3. Make new "getReceiverInfo" function in GTK file which will be called when 
+//          the interface contact button for the user will be selected.
+//          Return type: either struct user or struct *publickey.
 
 // Temporary public key request function. Hardcoded keys.
 // (These harcoded keys will be temporary used by server as well).
@@ -61,12 +67,110 @@ void saveMessage(char *msg, FILE *file)
     fprintf(file, "[ROBERT]%s", msg);
 }
 
-void func(int sockfd, struct message *message) 
-{ 
-    char buff[MAX_BUFFER]; 
-    int n;
+// Function to send message.
+void sendMessage(char *buff)
+{
+    // Step 1: Get receiver's public key (HARDCODED FOR NOW).
+    message->receiver = user->number;   // TODO: "user" should be changed to "target_user"
+    char *key = requestKey(message, sockfd);
+    receiver_keys = stringtoPub(key);
+    printf("Received key: g->%s q->%s h->%s\n", receiver_keys->g, 
+            receiver_keys->q, receiver_keys->h);
 
-    struct publicKey *receiver_keys;
+    // Step 2: Encrypt message.
+    printf("\nEncrypting typed message using received key\n");
+
+    struct cyphers *cyphers= malloc(sizeof(struct cyphers));
+    encrypt_gamal(buff, receiver_keys, cyphers);
+
+    // Free receiver public key.
+    free(key);
+    free(receiver_keys);
+
+
+    // Step 3: Generate JSON with cyphers.
+    printf("\nConverting encryption into JSON\n");
+    //sleep(0.5);
+    
+    char * time = malloc(sizeof(char) * 5);
+    strcpy(time, "1010");
+    char * sender = malloc(sizeof(char) * 11);
+    strcpy(sender, "0776727908");
+    
+
+    message->type = TEXT;
+    message->content = cyphers->en_msg;
+    message->p = cyphers->p;
+    message->size = cyphers->size;
+    message->time = time; //"1010";
+    message->sender = sender; //"077644562";
+    message->receiver = NULL; 
+    message->filename = 0;
+
+    int jsonSize;
+    char *json = genMessage(message, &jsonSize);
+    
+
+    // Reset message structure for next incoming message.
+    freeMessage(message);
+
+    // Step 4: Send JSON to server.
+    printf("Sending JSON to server\n");
+    //sleep(2);
+
+    int e = write(sockfd, json, jsonSize); 
+    if (e == -1)
+        errx(1, "Write error");
+
+    // Free memory.
+    // free(cyphers->en_msg);
+    // free(cyphers->p);
+    free(cyphers);
+    free(json);
+}
+
+// Function to retrieve incoming message.
+void retrieveMessage(FILE *contacts)
+{
+    // Step 5: Receive incoming message from other client.
+    // (For now just itself).
+    // bzero(json, jsonSize);
+    
+    int jsonSize = MAX_BUFFER;
+    char json[MAX_BUFFER];
+
+    if (read(sockfd, json, jsonSize) == -1)
+        errx(1, "Error reading incoming messages");
+
+    parseMessage(json, message);
+
+    printf("\nReceived a message from %s\n", message->sender);
+    //sleep(2);
+
+    // free(cyphers);
+    struct cyphers *cyphers = malloc(sizeof(struct message)); // WARNING
+    cyphers->en_msg = message->content;
+    cyphers->p = message->p;
+    cyphers->size = message->size;
+
+    // Step 6: Decrypt message and save to chat file.
+    char *res = decrypt_gamal(cyphers, privkey);
+    printf("Decrypting received message\n");
+    printf("Received message: %s\n", res);
+    saveMessage(res, contacts);
+
+    // Free memory.
+    free(res);
+    freeMessage(message);
+    free(cyphers);
+    // free(json);
+}
+
+void func() 
+{ 
+    // char buff[MAX_BUFFER]; 
+    // int n;
+    // n = 0;
 
     // Get private key.
     struct user_priv *priv = &(user->priv);
@@ -76,7 +180,7 @@ void func(int sockfd, struct message *message)
     string_largenum(priv->a, a);
     string_largenum(priv->q, q);
 
-    struct privateKey *privkey = malloc(sizeof(struct privateKey));
+    privkey = malloc(sizeof(struct privateKey));
     mpz_init(privkey->a);
     mpz_init(privkey->q);
     mpz_set(privkey->a, a);
@@ -87,107 +191,12 @@ void func(int sockfd, struct message *message)
     if (!contacts)
         errx(EXIT_FAILURE, "Failed to open chat file");
 
-    while (1) 
-    { 
-        bzero(buff, MAX_BUFFER); 
-        n = 0;
-        
-        // Step 0: Type message.
-        printf("Enter message : ");
+    // Send message.
+    char buff[MAX_BUFFER] = "My name is Roberto.\n";
+    sendMessage(buff);
 
-        // Add text to buffer till newline is written.
-        while (n < MAX_BUFFER && (buff[n++] = getchar()) != '\n')
-            ;
-
-        // Check for exit signal.
-        if ((strncmp(buff, "exit", 4)) == 0)
-        {
-            printf("Client exited...\n"); 
-            break;
-        }
-
-        // Step 1: Get receiver's public key (hard coded for now).
-        message->receiver = "077644562";
-        char *key = requestKey(message, sockfd);
-        receiver_keys = stringtoPub(key);
-        printf("Received key: g->%s q->%s h->%s\n", receiver_keys->g, 
-                receiver_keys->q, receiver_keys->h);
-
-        // Step 2: Encrypt message.
-        printf("\nEncrypting typed message using received key\n");
-
-        struct cyphers *cyphers= malloc(sizeof(struct cyphers));
-        encrypt_gamal(buff, receiver_keys, cyphers);
-
-        // Free receiver public key.
-        free(key);
-        free(receiver_keys);
-
-        // Step 3: Generate JSON with cyphers.
-        printf("\nConverting encryption into JSON\n");
-        //sleep(0.5);
-        
-        char * time = malloc(sizeof(char) * 5);
-        strcpy(time, "1010");
-        char * sender = malloc(sizeof(char) * 11);
-        strcpy(sender, "0776727908");
-        
-
-        message->type = TEXT;
-        message->content = cyphers->en_msg;
-        message->p = cyphers->p;
-        message->size = cyphers->size;
-        message->time = time; //"1010";
-        message->sender = sender; //"077644562";
-        message->receiver = NULL; 
-        message->filename = 0;
-
-        int jsonSize;
-        char *json = genMessage(message, &jsonSize);
-        
-
-        // Reset message structure for next step.
-        freeMessage(message);
-
-        // Step 4: Send JSON to server.
-        printf("Sending JSON to server\n");
-        //sleep(2);
-
-        int e = write(sockfd, json, jsonSize); 
-        if (e == -1)
-            errx(1, "Write error");
-        
-        // Step 5: Receive incoming message from other client.
-        // (For now just itself).
-        bzero(json, jsonSize);
-        
-        if (read(sockfd, json, jsonSize) == -1)
-            errx(1, "Error reading incoming messages");
-
-        parseMessage(json, message);
-
-        printf("\nReceived a message from %s\n", message->sender);
-        //sleep(2);
-
-        free(cyphers);
-        cyphers = malloc(sizeof(struct message)); // WARNING
-        cyphers->en_msg = message->content;
-        cyphers->p = message->p;
-        cyphers->size = message->size;
-
-        // Step 6: Decrypt message and save to chat file.
-        char *res = decrypt_gamal(cyphers, privkey);
-        printf("Decrypting received message\n");
-        printf("Received message: %s\n", res);
-        saveMessage(res, contacts);
-
-        // Free memory.
-        free(res);
-        freeMessage(message);
-        free(cyphers);
-        free(json);
-        
-    } 
+    // Receive message.
+    retrieveMessage(contacts);
 
     // Free memory.
     mpz_clear(a);
@@ -330,7 +339,7 @@ int main()
     gtk_main();
     
     // Chatting function.
-    func(sockfd, message); 
+    func();
 
     // Close socket.
     close(sockfd); 
