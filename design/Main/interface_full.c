@@ -1,45 +1,141 @@
 #include <gtk/gtk.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <err.h>
 
-//#include "client.c"
+#include "../../networking/client.h"
+#include "../../messages/messages.h"
+#include "../../saved_users/users.h"
+#include "../../security/elgamal.h"
+#include "../../security/tools.h"
+#include "interface_full.h"
 
-GtkLabel *textlabel;
+#define MAX_BUFFER 10000
 
-GtkBuilder      *builder;
-GtkWidget       *main_window;
-GtkWidget		*fixed1;
-GtkWidget		*fixed2;
-GtkWidget		*grid1; 
-GtkWidget		*grid2; 
-GtkWidget		*grid3; 
+// TODO: "user->number" in "sendMessage" should be changed to "target_user->number" later.
 
-char			tmp[1024];
-char			tmp_chat[1024]; 
-GtkWidget		*button[1000];
-GtkWidget		*button_chat[1000]; 
-
-GtkButton *sendTextButton;
-GtkEntry *TextEntry;
-GtkTextBuffer *send_textbuffer;
-GtkLabel *textlabel;
-
-FILE *f_con = NULL; //ccontacts.txt 
-FILE *f_chat = NULL; //chat2 (contact)
 
 //struct *user user = get_user_path(".files/.user"); //name of the user 
-
 void on_row();
+
+// Function to save message to chat log.
+void saveMessage(char *msg, FILE *file)
+{
+    fprintf(file, "[ROBERT]%s", msg);
+}
+
+// Function to send message.
+void sendMessage(char *buff)
+{
+    // Step 1: Get receiver's public key (HARDCODED FOR NOW).
+    message->receiver = user->number;   
+    char *key = requestKey(message, sockfd);
+    receiver_keys = stringtoPub(key);
+    printf("Received key: g->%s q->%s h->%s\n", receiver_keys->g,
+            receiver_keys->q, receiver_keys->h);
+
+    // Step 2: Encrypt message.
+    printf("\nEncrypting typed message using received key\n");
+
+    struct cyphers *cyphers= malloc(sizeof(struct cyphers));
+    encrypt_gamal(buff, receiver_keys, cyphers);
+
+    // Free receiver public key.
+    free(key);
+    free(receiver_keys);
+
+
+    // Step 3: Generate JSON with cyphers.
+    printf("\nConverting encryption into JSON\n");
+    //sleep(0.5);
+
+    char * time = malloc(sizeof(char) * 5);
+    strcpy(time, "1010");
+    char * sender = malloc(sizeof(char) * 11);
+    strcpy(sender, "0776727908");
+
+
+    message->type = TEXT;
+    message->content = cyphers->en_msg;
+    message->p = cyphers->p;
+    message->size = cyphers->size;
+    message->time = time; //"1010";
+    message->sender = sender; //"077644562";
+    message->receiver = NULL;
+    message->filename = 0;
+
+    int jsonSize;
+    char *json = genMessage(message, &jsonSize);
+
+
+    // Reset message structure for next incoming message.
+    freeMessage(message);
+
+    // Step 4: Send JSON to server.
+    printf("Sending JSON to server\n");
+    //sleep(2);
+
+    int e = write(sockfd, json, jsonSize);
+    if (e == -1)
+        errx(1, "Write error");
+
+    // Free memory.
+    free(cyphers);
+    free(json);
+}
+
+// Function to retrieve incoming message.
+void retrieveMessage(FILE *contacts)
+{
+    // Step 5: Receive incoming message from other client.
+    // (For now just itself).
+    // bzero(json, jsonSize);
+
+    int jsonSize = MAX_BUFFER;
+    char json[MAX_BUFFER];
+
+    if (read(sockfd, json, jsonSize) == -1)
+        errx(1, "Error reading incoming messages");
+
+    parseMessage(json, message);
+
+    printf("\nReceived a message from %s\n", message->sender);
+    //sleep(2);
+
+    // free(cyphers);
+    struct cyphers *cyphers = malloc(sizeof(struct message)); // WARNING
+    cyphers->en_msg = message->content;
+    cyphers->p = message->p;
+    cyphers->size = message->size;
+
+    // Step 6: Decrypt message and save to chat file.
+    char *res = decrypt_gamal(cyphers, privkey);
+    printf("Decrypting received message\n");
+    printf("Received message: %s\n", res);
+    saveMessage(res, contacts);
+
+    // Free memory.
+    free(res);
+    freeMessage(message);
+    free(cyphers);
+    // free(json);
+}
 
 void on_send_text_button_activate()
 {
-	char tmp[128];
-	//app_widgets *widgets = (app_widgets*) data;
+    // int len = gtk_entry_get_text_length(TextEntry);
+	char *tmp = (char*) gtk_entry_get_text(TextEntry);
+    sendMessage(tmp);
+    retrieveMessage(f_con);
+    chat_bubbles();
+
+	/*
+    //app_widgets *widgets = (app_widgets*) data;
   	sprintf(tmp, "%s", gtk_entry_get_text(TextEntry));
   	gtk_label_set_text(textlabel, (const gchar*) tmp); 
 	//add it on chat.txt 
+    */
 
 }
 
@@ -128,7 +224,7 @@ void add_contact() //on_add_contact_button_clicked()
 
 void contacts()
 {
-        char * username;
+    char * username;
 	f_con = fopen("contacts.txt", "r");   
 	
 	if (f_con == NULL) 
@@ -167,10 +263,8 @@ void contacts()
 	}
 }
 
-int main()
+void show_interface()
 {
-    gtk_init(NULL, NULL);
-
     builder = gtk_builder_new_from_file("interface_full.glade");
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
 	
@@ -200,8 +294,12 @@ int main()
     //g_object_unref(builder);
 
     gtk_widget_show_all(main_window);                
+}
 
-    gtk_main(); 
+/*
+int main()
+{
 
     return 0;
 }
+*/

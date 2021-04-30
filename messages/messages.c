@@ -77,8 +77,8 @@ void parseMessage(char *data, struct message *parsed)
     json_object_put(filename);
     //free(filename);
 
-    json_object_put(parsed_json);
-    //free(parsed_json);
+    // json_object_put(parsed_json);
+    free(parsed_json);
 }
 
 /*

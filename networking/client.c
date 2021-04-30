@@ -15,19 +15,14 @@
 #include "../security/elgamal.h"
 #include "../security/tools.h"
 #include "../design/Registration/reg_page.h"
+#include "../design/Main/interface_full.h"
+#include "client.h"
 
 #define USER_PATH ".files/.user"
 #define CHAT_PATH "design/Main/chat.txt"
 #define MAX_BUFFER 10000
 #define PORT 8080
 #define SA struct sockaddr 
-
-struct message *message;
-struct publicKey *receiver_keys;
-struct privateKey *privkey;
-struct user* user;
-struct user* target_user;
-int sockfd; 
 
 // TODO: 1. Make step 0 of "func" method use input from GTK text entry.
 // TODO: 2. Make "saveMessage" function use client username.
@@ -61,150 +56,6 @@ char *requestKey(struct message *message, int sockfd)
     return key;
 }
 
-// Function to save message to chat log.
-void saveMessage(char *msg, FILE *file)
-{
-    fprintf(file, "[ROBERT]%s", msg);
-}
-
-// Function to send message.
-void sendMessage(char *buff)
-{
-    // Step 1: Get receiver's public key (HARDCODED FOR NOW).
-    message->receiver = user->number;   // TODO: "user" should be changed to "target_user"
-    char *key = requestKey(message, sockfd);
-    receiver_keys = stringtoPub(key);
-    printf("Received key: g->%s q->%s h->%s\n", receiver_keys->g, 
-            receiver_keys->q, receiver_keys->h);
-
-    // Step 2: Encrypt message.
-    printf("\nEncrypting typed message using received key\n");
-
-    struct cyphers *cyphers= malloc(sizeof(struct cyphers));
-    encrypt_gamal(buff, receiver_keys, cyphers);
-
-    // Free receiver public key.
-    free(key);
-    free(receiver_keys);
-
-
-    // Step 3: Generate JSON with cyphers.
-    printf("\nConverting encryption into JSON\n");
-    //sleep(0.5);
-    
-    char * time = malloc(sizeof(char) * 5);
-    strcpy(time, "1010");
-    char * sender = malloc(sizeof(char) * 11);
-    strcpy(sender, "0776727908");
-    
-
-    message->type = TEXT;
-    message->content = cyphers->en_msg;
-    message->p = cyphers->p;
-    message->size = cyphers->size;
-    message->time = time; //"1010";
-    message->sender = sender; //"077644562";
-    message->receiver = NULL; 
-    message->filename = 0;
-
-    int jsonSize;
-    char *json = genMessage(message, &jsonSize);
-    
-
-    // Reset message structure for next incoming message.
-    freeMessage(message);
-
-    // Step 4: Send JSON to server.
-    printf("Sending JSON to server\n");
-    //sleep(2);
-
-    int e = write(sockfd, json, jsonSize); 
-    if (e == -1)
-        errx(1, "Write error");
-
-    // Free memory.
-    // free(cyphers->en_msg);
-    // free(cyphers->p);
-    free(cyphers);
-    free(json);
-}
-
-// Function to retrieve incoming message.
-void retrieveMessage(FILE *contacts)
-{
-    // Step 5: Receive incoming message from other client.
-    // (For now just itself).
-    // bzero(json, jsonSize);
-    
-    int jsonSize = MAX_BUFFER;
-    char json[MAX_BUFFER];
-
-    if (read(sockfd, json, jsonSize) == -1)
-        errx(1, "Error reading incoming messages");
-
-    parseMessage(json, message);
-
-    printf("\nReceived a message from %s\n", message->sender);
-    //sleep(2);
-
-    // free(cyphers);
-    struct cyphers *cyphers = malloc(sizeof(struct message)); // WARNING
-    cyphers->en_msg = message->content;
-    cyphers->p = message->p;
-    cyphers->size = message->size;
-
-    // Step 6: Decrypt message and save to chat file.
-    char *res = decrypt_gamal(cyphers, privkey);
-    printf("Decrypting received message\n");
-    printf("Received message: %s\n", res);
-    saveMessage(res, contacts);
-
-    // Free memory.
-    free(res);
-    freeMessage(message);
-    free(cyphers);
-    // free(json);
-}
-
-void func() 
-{ 
-    // char buff[MAX_BUFFER]; 
-    // int n;
-    // n = 0;
-
-    // Get private key.
-    struct user_priv *priv = &(user->priv);
-    mpz_t a, q;
-    mpz_init(a);
-    mpz_init(q);
-    string_largenum(priv->a, a);
-    string_largenum(priv->q, q);
-
-    privkey = malloc(sizeof(struct privateKey));
-    mpz_init(privkey->a);
-    mpz_init(privkey->q);
-    mpz_set(privkey->a, a);
-    mpz_set(privkey->q, q);
-
-    // Open chat file.
-    FILE * contacts = fopen(CHAT_PATH, "a");
-    if (!contacts)
-        errx(EXIT_FAILURE, "Failed to open chat file");
-
-    // Send message.
-    char buff[MAX_BUFFER] = "My name is Roberto.\n";
-    sendMessage(buff);
-
-    // Receive message.
-    retrieveMessage(contacts);
-
-    // Free memory.
-    mpz_clear(a);
-    mpz_clear(q);
-    freePriv(privkey);
-    fclose(contacts);
-}
-
 int exists(char filename[])
 {
     return (access(filename, F_OK ) == 0);
@@ -215,7 +66,7 @@ struct user* init_procedure(int fd, char username[], char number[])
     struct user* user = init_user_path(username, number, USER_PATH);
     struct message* tmp_msg = (struct message *) calloc(1, sizeof(struct message));
     char* buf;
-    //char* key = pubtoString(user->pub);
+
     int n;
     tmp_msg->type = INIT; 
     if ((n = asprintf(&tmp_msg->content, "%s %s %s %s-%s-%s", user->username,\
@@ -226,11 +77,10 @@ struct user* init_procedure(int fd, char username[], char number[])
     buf = genMessage(tmp_msg, &l);
 
     write(fd, buf, l);
-    // free(user);
     free(buf);
     freeMessage(tmp_msg);
     free(tmp_msg);
-    //free(key);
+
     return user;
 }
 
@@ -277,11 +127,30 @@ void addContact(int fd, char number[])
 
 }
 
+// Get private key.
+void getPrivKey() 
+{ 
+    struct user_priv *priv = &(user->priv);
+    mpz_t a, q;
+    mpz_init(a);
+    mpz_init(q);
+    string_largenum(priv->a, a);
+    string_largenum(priv->q, q);
+
+    privkey = malloc(sizeof(struct privateKey));
+    mpz_init(privkey->a);
+    mpz_init(privkey->q);
+    mpz_set(privkey->a, a);
+    mpz_set(privkey->q, q);
+
+    // Free memory.
+    mpz_clear(a);
+    mpz_clear(q);
+}
 
 int main() 
 { 
     // Check if user is already initialized, if not create it
-    
     // if initialized, open it and send identification
 
     struct sockaddr_in servaddr; //, cli; 
@@ -336,10 +205,17 @@ int main()
         show_registration(reg_data);
     }
 
+    // Get private key.
+    getPrivKey();
+
+    // Show main interface.
+    show_interface();
+
+    // Launch graphical user interfaces.
     gtk_main();
     
-    // Chatting function.
-    func();
+    // Free private key.
+    freePriv(privkey);
 
     // Close socket.
     close(sockfd); 
