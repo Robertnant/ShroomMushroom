@@ -96,9 +96,13 @@ void send_to(char number[], char buffer[], size_t buf_size)
 
 void * listen_to_client( void * arg )
 {
+
+
+
     int * sockfd = (int *) arg;
     char buff[MAX]; 
     int er;
+
     printf("Listening to client...\n");
 
     for (;;) 
@@ -121,17 +125,26 @@ void * listen_to_client( void * arg )
             printf("Sender: %s\n", message->sender);
             printf("Receiver: %s\n", message->receiver);
             printf("Type: %d\n", message->type);
+
+            struct user* receiver = get_user(message->receiver);
+            int file_fd;
             
+            char * user_message;
+            size_t l;
+
             switch (message->type)
             {
                 case TEXT:
-                    write(*sockfd, buff, er);
+                    file_fd = open(receiver->UID, O_WRONLY);
+                    write(file_fd, buff, er);
+                    close(file_fd);
                     break;
                 
                 case ADD:
-                    // TODO
                     // get pub key and user
                     // send the to "sender"
+                    user_message = user_to_string(receiver, &l);
+                    write(*sockfd, user_message, l);
                     break;
 
                 case IDENTIFICATION: case INIT:
