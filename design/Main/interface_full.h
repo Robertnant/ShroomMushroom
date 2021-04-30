@@ -26,7 +26,7 @@ FILE *f_con; //contacts.txt
 FILE *f_chat; //chat2 (contact)
 
 // Functions.
-void show_interface(char *path);
+void show_interface(char *interface_path, char *contacts_path);
 void chat_bubbles();
 
 #endif

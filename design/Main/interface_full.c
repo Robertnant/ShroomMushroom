@@ -219,13 +219,13 @@ void chat_bubbles() //Display chat bubbles
 
 void add_contact() //on_add_contact_button_clicked() 
 {
-	printf("clicked"); 
+	printf("clicked\n"); 
 }
 
-void contacts()
+void contacts(char *contacts_path)
 {
     char * username;
-	f_con = fopen("contacts.txt", "r");   
+	f_con = fopen(contacts_path, "r");   
 	
 	if (f_con == NULL) 
 	{ 
@@ -263,9 +263,9 @@ void contacts()
 	}
 }
 
-void show_interface(char *path)
+void show_interface(char *interface_path, char *contacts_path)
 {
-    builder = gtk_builder_new_from_file(path);
+    builder = gtk_builder_new_from_file(interface_path);
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
 	
     sendTextButton = GTK_BUTTON(gtk_builder_get_object(builder, "sendTextButton"));
@@ -285,8 +285,8 @@ void show_interface(char *path)
     gtk_widget_set_sensitive(GTK_WIDGET(sendTextButton), TRUE);
 
 	// CONTACTS 
-	add_contact(); 
-	contacts(); 
+	add_contact();
+	contacts(contacts_path); 
 
 	// CHAT BUBBLES  
 	chat_bubbles(); 

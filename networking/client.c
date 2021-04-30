@@ -21,6 +21,7 @@
 #define USER_PATH ".files/.user"
 #define CHAT_PATH "design/Main/chat.txt"
 #define INTERFACE_PATH "design/Main/interface_full.glade"
+#define CONTACTS_PATH "design/Main/contacts.txt"
 #define MAX_BUFFER 10000
 #define PORT 8080
 #define SA struct sockaddr 
@@ -213,8 +214,9 @@ int main()
     getPrivKey();
 
     // Show main interface.
-    show_interface(INTERFACE_PATH);
-    
+    show_interface(INTERFACE_PATH, CONTACTS_PATH);
+    gtk_main();
+
     // Free private key.
     freePriv(privkey);
 
