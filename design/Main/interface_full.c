@@ -263,9 +263,9 @@ void contacts()
 	}
 }
 
-void show_interface()
+void show_interface(char *path)
 {
-    builder = gtk_builder_new_from_file("interface_full.glade");
+    builder = gtk_builder_new_from_file(path);
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
 	
     sendTextButton = GTK_BUTTON(gtk_builder_get_object(builder, "sendTextButton"));
