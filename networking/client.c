@@ -214,7 +214,7 @@ int main()
     getPrivKey();
 
     // Show main interface.
-    show_interface(INTERFACE_PATH, CONTACTS_PATH);
+    show_interface(INTERFACE_PATH, CONTACTS_PATH, CHAT_PATH);
     gtk_main();
 
     // Free private key.

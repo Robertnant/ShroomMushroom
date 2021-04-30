@@ -171,8 +171,6 @@ void chat_bubbles() //Display chat bubbles
 	//[USER1] --- 
 	//[USER2] --- 
 
-	f_chat = fopen("chat.txt", "r"); 
-
 	if (f_chat == NULL)
 	{ 
 		printf("File not found");
@@ -214,7 +212,7 @@ void chat_bubbles() //Display chat bubbles
 			} 
 		} 
 	}
-	fclose(f_chat); 
+	// fclose(f_chat); 
 }
 
 void add_contact() //on_add_contact_button_clicked() 
@@ -259,11 +257,10 @@ void contacts(char *contacts_path)
 		
                     //} 
 		} 
-		fclose(f_con); 
 	}
 }
 
-void show_interface(char *interface_path, char *contacts_path)
+void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 {
     builder = gtk_builder_new_from_file(interface_path);
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
@@ -288,12 +285,16 @@ void show_interface(char *interface_path, char *contacts_path)
 	add_contact();
 	contacts(contacts_path); 
 
-	// CHAT BUBBLES  
+	// CHAT BUBBLES
+	f_chat = fopen(chat_path, "r"); 
 	chat_bubbles(); 
 
     //g_object_unref(builder);
 
     gtk_widget_show_all(main_window);                
+
+    // Close.
+    fclose(f_con);
 }
 
 /*
