@@ -194,8 +194,8 @@ int main()
     //g_object_unref(builder);
 
     gtk_widget_show_all(main_window);                
+
     gtk_main(); 
 
     return 0;
-} 
-
+}
