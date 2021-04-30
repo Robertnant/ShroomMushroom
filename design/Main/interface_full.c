@@ -128,6 +128,7 @@ void add_contact() //on_add_contact_button_clicked()
 
 void contacts()
 {
+        char * username;
 	f_con = fopen("contacts.txt", "r");   
 	
 	if (f_con == NULL) 
@@ -139,23 +140,28 @@ void contacts()
 	{
 		int row = 0;  
 
-		while (1) 
-		{ 
-			if (fgets(tmp, 1024, f_con) == NULL) //reads a line 
+		while (fgets(tmp, 28, f_con)) 
+		{       
+                    /*
+			if () //reads a line 
 			{ break; } 
 			
 			else 
 			{
-				//const char s[2] = "-";
-				tmp[strlen(tmp)-1] = 0; //remove newline byte 
-				//token = strtok(tmp, s); //just extract the contact name
+                        */
 
-				gtk_grid_insert_row(GTK_GRID(grid1), row);  
-				button[row] = gtk_button_new_with_label(tmp); 
-				gtk_grid_attach (GTK_GRID(grid1), button[row], 1, row, 1, 1);
-				g_signal_connect(button[row], "clicked", G_CALLBACK(chat_bubbles), NULL); 
-				row ++;
-			} 
+                    //const char s[2] = "-";
+                    //tmp[strlen(tmp)-1] = 0; //remove newline byte 
+                    //token = strtok(tmp, s); //just extract the contact name
+                    
+                    username = strtok(tmp, "-");
+                    gtk_grid_insert_row(GTK_GRID(grid1), row);  
+                    button[row] = gtk_button_new_with_label(username); 
+                    gtk_grid_attach (GTK_GRID(grid1), button[row], 1, row, 1, 1);
+                    g_signal_connect(button[row], "clicked", G_CALLBACK(chat_bubbles), NULL); 
+                    row ++;
+		
+                    //} 
 		} 
 		fclose(f_con); 
 	}
