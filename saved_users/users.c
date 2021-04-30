@@ -171,6 +171,17 @@ struct user* parseUser(char string[])
     return res;
 }
 
+char* user_to_string(struct user* user, size_t * l)
+{
+    char * res;
+    size_t tmp;
+    tmp = asprintf(&res, "%s %s %s %s-%s-%s", user->username, user->number, user->UID,
+            user->pub.g, user->pub.q, user->pub.h);
+    if (l)
+        *l = tmp;
+    return res;
+}
+
 
 //public key variable needs to be added 
 struct user* init_user_path(char username[], char number[], char path[])

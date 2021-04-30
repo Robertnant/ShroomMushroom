@@ -96,9 +96,13 @@ void send_to(char number[], char buffer[], size_t buf_size)
 
 void * listen_to_client( void * arg )
 {
+
+
+
     int * sockfd = (int *) arg;
     char buff[MAX]; 
     int er;
+
     printf("Listening to client...\n");
 
     for (;;) 
@@ -121,17 +125,26 @@ void * listen_to_client( void * arg )
             printf("Sender: %s\n", message->sender);
             printf("Receiver: %s\n", message->receiver);
             printf("Type: %d\n", message->type);
+
+            struct user* receiver = get_user(message->receiver);
+            int file_fd;
             
+            char * user_message;
+            size_t l;
+
             switch (message->type)
             {
                 case TEXT:
-                    write(*sockfd, buff, er);
+                    file_fd = open(receiver->UID, O_WRONLY);
+                    write(file_fd, buff, er);
+                    close(file_fd);
                     break;
                 
                 case ADD:
-                    // TODO
                     // get pub key and user
                     // send the to "sender"
+                    user_message = user_to_string(receiver, &l);
+                    write(*sockfd, user_message, l);
                     break;
 
                 case IDENTIFICATION: case INIT:
@@ -169,50 +182,29 @@ void * listen_to_client( void * arg )
 
 void connect_client(char pipe[], int client)
 {
+    char buf[MAX];
     char * filename = get_filename(PIPES_FILE, pipe);
-    int fd = open(filename, O_RDONLY | O_NONBLOCK);
+    int fd = open(filename, O_RDONLY);
     if (fd < 0)
         errx(1, "Couldn't open pipe for client redirection");
     free(filename);
     //printf("FD IS %d\n", fd);
-    if (dup2(fd, client) < 0)
-        errx(1, "Could not forward data to client");
+    //if (dup2(fd, client) < 0)
+    //    errx(1, "Could not forward data to client");
+    int r;
+    while (1)
+    {
+        while ((r = read(fd, buf, MAX)) > 0)
+            write(client, buf, r);
+    }
 }
 
-/*
-struct user* parseUser(char string[])
+void * sending_from_pipe(void * arg)
 {
-    struct user* res = (struct user *) calloc(1, sizeof(struct user));
-    
-    char *token = strtok(string, " ");
-    strcpy(res->username, token);
-
-    token = strtok(NULL, " ");
-    strcpy(res->number, token);
-    
-    token = strtok(NULL, " ");
-    strcpy(res->UID, token);
-    
-    token = strtok(NULL, " ");
-    
-    // Parsing the public key
-    token = strtok(token, "-");
-    strcpy(res->pub.g, token);
-
-    token = strtok(token, "-");
-    strcpy(res->pub.q, token);
-    
-
-    token = strtok(token, "-");
-    strcpy(res->pub.h, token);
-    
-    
-
-    // res->pub = stringtoPub(token);
-
-    return res;
+    struct client* user = arg;
+    connect_client(user->user->UID, user->fd);
+    return NULL;
 }
-*/
 
 
 int main()
@@ -372,8 +364,9 @@ int main()
         user->user->number = ;
         */
         
-        pthread_t id;
-        pthread_create(&id, NULL, listen_to_client, &(user->fd));
+        //pthread_t id;
+        pthread_create(&curr->listening, NULL, listen_to_client, &(user->fd));
+        pthread_create(&curr->sending, NULL, listen_to_client, &(user->fd));
         
 
 

@@ -46,4 +46,6 @@ struct user* init_user(char username[], char number[]);
 
 struct user* init_user_path(char username[], char number[], char path[]);
 
+char* user_to_string(struct user* user, size_t * l);
+
 #endif
