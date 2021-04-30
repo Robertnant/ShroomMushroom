@@ -14,19 +14,19 @@ void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
 	printf("register_now_button pressed\n");
 	app_widgets *arg = data;
 
-        arg->data->success = 0;
+    arg->data->success = 0;
 
-        gtk_label_set_text(arg->error_label, (const gchar*) "NO ERRORS");
+    gtk_label_set_text(arg->error_label, (const gchar*) "NO ERRORS");
         // Getting username into buffer
 	//char buffer_for_username[17]; // changed to structure so no need for that
 	strcpy(arg->data->username, gtk_entry_get_text(arg->username));
 	
         // Verifying buffer length
-        if (strlen(arg->data->username) < 6)
-        {
-		printf("Wrong length username\n");
-                gtk_label_set_text(arg->error_label, (const gchar*) "Username should be between 6 and 16 characters long!");
-                return;
+    if (strlen(arg->data->username) < 6)
+    {
+        printf("Wrong length username\n");
+        gtk_label_set_text(arg->error_label, (const gchar*) "Username should be between 6 and 16 characters long!");
+        return;
 	}
 
         // Getting number into buffer
@@ -35,26 +35,26 @@ void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
 
         // Verifying buffer length
 	if (strlen(arg->data->number) != 10)
-        {
+    {
 		printf("Wrong length\n");
-                gtk_label_set_text(arg->error_label, (const gchar*) "Phone number should be 10 characters long!");
-                return;
+        gtk_label_set_text(arg->error_label, (const gchar*) "Phone number should be 10 characters long!");
+        return;
 	}
 
         // Verifying format for number
 	for (int i = 0; i < 10; i++)
-        {
+    {
 		if (!(arg->data->number[i] >= '0' && arg->data->number[i] <= '9'))
-                {
-                        gtk_label_set_text(arg->error_label, (const gchar*) "Phone number should only contain digits!");
-			printf("Wrong Format : Detected character %c\n", arg->data->number[i]);
-			return;
+            {
+                gtk_label_set_text(arg->error_label, (const gchar*) "Phone number should only contain digits!");
+                printf("Wrong Format : Detected character %c\n", arg->data->number[i]);
+                return;
 		}
 	}
 
-        arg->data->success = 1;
-        user = init_procedure(sockfd, arg->data->username, arg->data->number);
-        gtk_window_close(GTK_WINDOW(arg->window));
+    arg->data->success = 1;
+    user = init_procedure(sockfd, arg->data->username, arg->data->number);
+    gtk_window_close(GTK_WINDOW(arg->window));
 }
 
 static void destroy(GtkWidget *widget, gpointer data)
