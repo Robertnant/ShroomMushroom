@@ -9,23 +9,158 @@
 #include "../../saved_users/users.h"
 #include "../../security/elgamal.h"
 #include "../../security/tools.h"
+#include "../../design/addcontact/add_contact.h"
 #include "interface_full.h"
 
 #define MAX_BUFFER 10000
 
-// TODO: "user->number" in "sendMessage" should be changed to "target_user->number" later.
+int row = 0;    //grid row counter (contact)
+int row2 = 0;   //grid row counter (contact, not really for now)  
+int row3 = 0;   //grid row counter (user)
 
+// TODO: "user->number" in "sendMessage" should be changed to "target_user->number" later.
+// TODO: Label for new contact should be username associated to that contact and not phone number.
 
 //struct *user user = get_user_path(".files/.user"); //name of the user 
 void on_row();
 
+void on_add_contact_button_selected() 
+{
+    // Display New Contact page.
+    show_addContact(builder);
+}
+
+void contacts(char *contacts_path)
+{
+    char * username;
+	f_con = fopen(contacts_path, "r");   
+	
+	if (f_con == NULL) 
+	{ 
+		printf("File contacts.txt not found\n");
+		return ;
+	}
+	else
+	{
+		while (fgets(tmp, 28, f_con)) 
+		{       
+                    /*
+			if () //reads a line 
+			{ break; } 
+			
+			else 
+			{
+                        */
+
+                    //const char s[2] = "-";
+                    //tmp[strlen(tmp)-1] = 0; //remove newline byte 
+                    //token = strtok(tmp, s); //just extract the contact name
+                    
+                    username = strtok(tmp, "-");
+                    gtk_grid_insert_row(GTK_GRID(grid1), row);  
+                    button[row] = gtk_button_new_with_label(username); 
+                    gtk_grid_attach (GTK_GRID(grid1), button[row], 1, row, 1, 1);
+                    g_signal_connect(button[row], "clicked", G_CALLBACK(chat_bubbles), NULL); 
+                    row ++;
+		
+                    //} 
+		} 
+	}
+}
+
+void chat_bubbles() //Display chat bubbles 
+{
+	//Chat Bubbles -> row-=2 
+	//[USER1] --- 
+	//[USER2] --- 
+
+	f_chat = fopen("design/Main/chat.txt", "a+"); 
+
+	if (f_chat == NULL)
+	{ 
+		printf("File not found");
+		return; 
+	}
+
+	while(1) 
+	{
+		if ( fgets(tmp_chat, 1024, f_chat) == NULL) 
+		{ break; } 
+		
+		else 
+		{
+            // TODO Remove.
+            printf("%s\n", tmp_chat);
+
+			tmp_chat[strlen(tmp_chat)-1] = 0; //remove newline byte 
+			const char s[2] = "]"; 
+			char *token; 
+			char *user = "ROBERT";  
+
+			token = strtok(tmp_chat, s); //[Username]
+
+			if (strcmp(token, user) == 0) //User - right grid (grid3)
+			{
+				token = strtok(NULL, s); 
+				gtk_grid_insert_row(GTK_GRID(grid3), row3);  
+				button_chat[row3] = gtk_button_new_with_label(token); 
+				gtk_grid_attach (GTK_GRID(grid3), button_chat[row3], 1, row3, 1, 1);
+				row3+=2; 
+			}
+			else //contact - left grid (grid2)
+			{
+				token = strtok(NULL, s); 
+				gtk_grid_insert_row(GTK_GRID(grid2), row2);  
+				button_chat[row2] = gtk_button_new_with_label(token); 
+				gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 1, row2, 1, 1);
+				row2+=2; 
+			} 
+		} 
+	}
+	fclose(f_chat); 
+}
+
+/* char* string_linebreak(char *msg)
+{
+	int l = strlen(msg); 
+	int n = l/30; 
+
+	char string = malloc(sizeof(l+n+1)); 
+
+	for(int i=0; i<strlen(string); i++)
+	{
+		if (i%n == 0)
+		{ string[i] = msg[i]; }
+		else
+		{ string[i] = msg[i]; } 
+	}
+
+	return string;
+}
+*/ 
+
+void addBubble(char* msg) 
+{
+	gtk_grid_insert_row(GTK_GRID(grid2), row2);  
+	bubble_chat[row2] = gtk_button_new_with_label(msg); 
+	gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);  
+
+    row2+=2;
+
+	gtk_widget_show_all(grid2); 
+}   
+
 // Function to save message to chat log.
 void saveMessage(char *msg)
 {
+	//TO DO : Later change "ROBERT" -> username
 	f_chat = fopen("design/Main/chat.txt", "a+"); 
-    fprintf(f_chat, "[ROBERT]%s\n", msg);
+    fprintf(f_chat, "[ROBERT]%s\n", msg); 
+	//display bubble 
+	addBubble(msg); 
     fclose(f_chat);
 }
+
 
 // Function to send message.
 void sendMessage(char *buff)
@@ -169,129 +304,35 @@ char* get_name(char* tmp) //determine user or contact
 }
 */ 
 
-void chat_bubbles() //Display chat bubbles 
-{
-	//Chat Bubbles -> row-=2 
-	//[USER1] --- 
-	//[USER2] --- 
-
-	f_chat = fopen("design/Main/chat.txt", "a+"); 
-
-	if (f_chat == NULL)
-	{ 
-		printf("File not found");
-		return; 
-	}
-
-	int row2 = 0; 
-	int row3 = 0; 
-
-	while(1) 
-	{
-		if ( fgets(tmp_chat, 1024, f_chat) == NULL) 
-		{ break; } 
-		
-		else 
-		{
-            // TODO Remove.
-            printf("%s\n", tmp_chat);
-
-			tmp_chat[strlen(tmp_chat)-1] = 0; //remove newline byte 
-			const char s[2] = "]";
-			char *token; 
-			char *user = "ROBERT";  
-
-			token = strtok(tmp_chat, s); //[Username]
-
-			if (strcmp(token, user) == 0) //User - right grid (grid3)
-			{
-				token = strtok(NULL, s); 
-				gtk_grid_insert_row(GTK_GRID(grid3), row3);  
-				button_chat[row3] = gtk_button_new_with_label(token); 
-				gtk_grid_attach (GTK_GRID(grid3), button_chat[row3], 1, row3, 1, 1);
-				row3+=2; 
-			}
-			else //contact - left grid (grid2)
-			{
-				token = strtok(NULL, s); 
-				gtk_grid_insert_row(GTK_GRID(grid2), row2);  
-				button_chat[row2] = gtk_button_new_with_label(token); 
-				gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 1, row2, 1, 1);
-				row2+=2; 
-			} 
-		} 
-	}
-	fclose(f_chat); 
-}
-
-void add_contact() //on_add_contact_button_clicked() 
-{
-	printf("clicked\n"); 
-}
-
-void contacts(char *contacts_path)
-{
-    char * username;
-	f_con = fopen(contacts_path, "r");   
-	
-	if (f_con == NULL) 
-	{ 
-		printf("File contacts.txt not found\n");
-		return ;
-	}
-	else
-	{
-		int row = 0;  
-
-		while (fgets(tmp, 28, f_con)) 
-		{       
-                    /*
-			if () //reads a line 
-			{ break; } 
-			
-			else 
-			{
-                        */
-
-                    //const char s[2] = "-";
-                    //tmp[strlen(tmp)-1] = 0; //remove newline byte 
-                    //token = strtok(tmp, s); //just extract the contact name
-                    
-                    username = strtok(tmp, "-");
-                    gtk_grid_insert_row(GTK_GRID(grid1), row);  
-                    button[row] = gtk_button_new_with_label(username); 
-                    gtk_grid_attach (GTK_GRID(grid1), button[row], 1, row, 1, 1);
-                    g_signal_connect(button[row], "clicked", G_CALLBACK(chat_bubbles), NULL); 
-                    row ++;
-		
-                    //} 
-		} 
-	}
-}
 
 void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 {
+    // Get Widgets.
     builder = gtk_builder_new_from_file(interface_path);
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
-	
+
+    addContactButton = GTK_BUTTON(gtk_builder_get_object(builder, "addContactButton"));
+    
     sendTextButton = GTK_BUTTON(gtk_builder_get_object(builder, "sendTextButton"));
     TextEntry = GTK_ENTRY(gtk_builder_get_object(builder, "TextEntry"));
     //send_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "send_textbuffer"));
     textlabel = GTK_LABEL(gtk_builder_get_object(builder, "textlabel"));
-
-	fixed1 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed1"));
-	grid1 = GTK_WIDGET(gtk_builder_get_object(builder, "grid1"));
-	fixed2 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed2"));
-	grid2 = GTK_WIDGET(gtk_builder_get_object(builder, "grid2"));
-	grid3 = GTK_WIDGET(gtk_builder_get_object(builder, "grid3"));
-
-    g_signal_connect(sendTextButton, "clicked", G_CALLBACK(on_send_text_button_activate), NULL); 
-
+    
+    fixed1 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed1"));
+    grid1 = GTK_WIDGET(gtk_builder_get_object(builder, "grid1"));
+    fixed2 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed2"));
+    grid2 = GTK_WIDGET(gtk_builder_get_object(builder, "grid2"));
+    grid3 = GTK_WIDGET(gtk_builder_get_object(builder, "grid3"));
+    
+    // Connect signals.
+    g_signal_connect(sendTextButton, "clicked", G_CALLBACK(on_send_text_button_activate), NULL);
+    g_signal_connect(addContactButton, "clicked", G_CALLBACK(on_add_contact_button_selected), NULL);
+    
+    // Set Widget sensitivity.
     gtk_widget_set_sensitive(GTK_WIDGET(TextEntry), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(sendTextButton), TRUE);
-
 	// CONTACTS 
-	add_contact();
+	// add_contact();
 	contacts(contacts_path); 
 
 	// CHAT BUBBLES
