@@ -118,7 +118,7 @@ void chat_bubbles() //Display chat bubbles
 	fclose(f_chat); 
 }
 
-char* string_linebreak(char *msg)
+/* char* string_linebreak(char *msg)
 {
 	int l = strlen(msg); 
 	int n = l/30; 
@@ -135,6 +135,7 @@ char* string_linebreak(char *msg)
 
 	return string; 
 }
+*/ 
 
 void addBubble(char* msg) 
 {
