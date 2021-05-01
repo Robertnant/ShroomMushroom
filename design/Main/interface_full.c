@@ -131,7 +131,8 @@ void on_send_text_button_activate()
 	char *tmp = (char*) gtk_entry_get_text(TextEntry);
     sendMessage(tmp);
     retrieveMessage();
-    chat_bubbles();
+    // chat_bubbles();
+    // gtk_widget_show_all(main_window);                
 
 	/*
     //app_widgets *widgets = (app_widgets*) data;
