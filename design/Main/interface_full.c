@@ -9,21 +9,25 @@
 #include "../../saved_users/users.h"
 #include "../../security/elgamal.h"
 #include "../../security/tools.h"
+#include "../../design/addcontact/add_contact.h"
 #include "interface_full.h"
 
 #define MAX_BUFFER 10000
 
-int row2 = 0; //grid row counter (contact)  
-int row3 = 0; //grid row counter (user)
+int row = 0;    //grid row counter (contact)
+int row2 = 0;   //grid row counter (contact, not really for now)  
+int row3 = 0;   //grid row counter (user)
 
 // TODO: "user->number" in "sendMessage" should be changed to "target_user->number" later.
+// TODO: Label for new contact should be username associated to that contact and not phone number.
 
 //struct *user user = get_user_path(".files/.user"); //name of the user 
 void on_row();
 
-void add_contact() //on_add_contact_button_clicked() 
+void on_add_contact_button_selected() 
 {
-	printf("clicked\n"); 
+    // Display New Contact page.
+    show_addContact(builder);
 }
 
 void contacts(char *contacts_path)
@@ -38,8 +42,6 @@ void contacts(char *contacts_path)
 	}
 	else
 	{
-		int row = 0;  
-
 		while (fgets(tmp, 28, f_con)) 
 		{       
                     /*
@@ -133,7 +135,7 @@ void chat_bubbles() //Display chat bubbles
 		{ string[i] = msg[i]; } 
 	}
 
-	return string; 
+	return string;
 }
 */ 
 
@@ -303,30 +305,34 @@ char* get_name(char* tmp) //determine user or contact
 */ 
 
 
-
 void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 {
+    // Get Widgets.
     builder = gtk_builder_new_from_file(interface_path);
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
-	
+
+    addContactButton = GTK_BUTTON(gtk_builder_get_object(builder, "addContactButton"));
+    
     sendTextButton = GTK_BUTTON(gtk_builder_get_object(builder, "sendTextButton"));
     TextEntry = GTK_ENTRY(gtk_builder_get_object(builder, "TextEntry"));
     //send_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "send_textbuffer"));
     textlabel = GTK_LABEL(gtk_builder_get_object(builder, "textlabel"));
-
-	fixed1 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed1"));
-	grid1 = GTK_WIDGET(gtk_builder_get_object(builder, "grid1"));
-	fixed2 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed2"));
-	grid2 = GTK_WIDGET(gtk_builder_get_object(builder, "grid2"));
-	grid3 = GTK_WIDGET(gtk_builder_get_object(builder, "grid3"));
-
-    g_signal_connect(sendTextButton, "clicked", G_CALLBACK(on_send_text_button_activate), NULL); 
-
+    
+    fixed1 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed1"));
+    grid1 = GTK_WIDGET(gtk_builder_get_object(builder, "grid1"));
+    fixed2 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed2"));
+    grid2 = GTK_WIDGET(gtk_builder_get_object(builder, "grid2"));
+    grid3 = GTK_WIDGET(gtk_builder_get_object(builder, "grid3"));
+    
+    // Connect signals.
+    g_signal_connect(sendTextButton, "clicked", G_CALLBACK(on_send_text_button_activate), NULL);
+    g_signal_connect(addContactButton, "clicked", G_CALLBACK(on_add_contact_button_selected), NULL);
+    
+    // Set Widget sensitivity.
     gtk_widget_set_sensitive(GTK_WIDGET(TextEntry), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(sendTextButton), TRUE);
-
 	// CONTACTS 
-	add_contact();
+	// add_contact();
 	contacts(contacts_path); 
 
 	// CHAT BUBBLES

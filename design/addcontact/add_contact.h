@@ -20,6 +20,7 @@ typedef struct
     
 } app_widgets;
 
+void show_addContact();
 
 //void show_registration(struct registration_data * data);
 

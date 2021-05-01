@@ -24,6 +24,7 @@ GtkWidget		*bubble_chat[1000];
 // int row3 = 0; //grid row counter (user)
 
 GtkButton *sendTextButton;
+GtkButton *addContactButton;
 GtkEntry *TextEntry;
 GtkTextBuffer *send_textbuffer;
 GtkLabel *textlabel;
