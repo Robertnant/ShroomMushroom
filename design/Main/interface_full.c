@@ -20,9 +20,11 @@
 void on_row();
 
 // Function to save message to chat log.
-void saveMessage(char *msg, FILE *file)
+void saveMessage(char *msg)
 {
-    fprintf(file, "[ROBERT]%s", msg);
+	f_chat = fopen("design/Main/chat.txt", "a+"); 
+    fprintf(f_chat, "[ROBERT]%s\n", msg);
+    fclose(f_chat);
 }
 
 // Function to send message.
@@ -86,7 +88,7 @@ void sendMessage(char *buff)
 }
 
 // Function to retrieve incoming message.
-void retrieveMessage(FILE *contacts)
+void retrieveMessage()
 {
     // Step 5: Receive incoming message from other client.
     // (For now just itself).
@@ -113,7 +115,8 @@ void retrieveMessage(FILE *contacts)
     char *res = decrypt_gamal(cyphers, privkey);
     printf("Decrypting received message\n");
     printf("Received message: %s\n", res);
-    saveMessage(res, contacts);
+
+    saveMessage(res);
 
     // Free memory.
     free(res);
@@ -127,7 +130,7 @@ void on_send_text_button_activate()
     // int len = gtk_entry_get_text_length(TextEntry);
 	char *tmp = (char*) gtk_entry_get_text(TextEntry);
     sendMessage(tmp);
-    retrieveMessage(f_con);
+    retrieveMessage();
     chat_bubbles();
 
 	/*
@@ -171,6 +174,8 @@ void chat_bubbles() //Display chat bubbles
 	//[USER1] --- 
 	//[USER2] --- 
 
+	f_chat = fopen("design/Main/chat.txt", "a+"); 
+
 	if (f_chat == NULL)
 	{ 
 		printf("File not found");
@@ -187,6 +192,9 @@ void chat_bubbles() //Display chat bubbles
 		
 		else 
 		{
+            // TODO Remove.
+            printf("%s\n", tmp_chat);
+
 			tmp_chat[strlen(tmp_chat)-1] = 0; //remove newline byte 
 			const char s[2] = "]";
 			char *token; 
@@ -212,7 +220,7 @@ void chat_bubbles() //Display chat bubbles
 			} 
 		} 
 	}
-	// fclose(f_chat); 
+	fclose(f_chat); 
 }
 
 void add_contact() //on_add_contact_button_clicked() 
@@ -286,7 +294,6 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 	contacts(contacts_path); 
 
 	// CHAT BUBBLES
-	f_chat = fopen(chat_path, "r"); 
 	chat_bubbles(); 
 
     //g_object_unref(builder);
@@ -294,7 +301,8 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
     gtk_widget_show_all(main_window);                
 
     // Close.
-    fclose(f_con);
+    // fclose(f_con);
+    // fclose(f_chat);
 }
 
 /*

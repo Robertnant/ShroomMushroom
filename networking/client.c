@@ -207,13 +207,13 @@ int main()
         show_registration(reg_data);
     }
 
-    // Launch graphical user interfaces.
+    // Display registration page.
     gtk_main();
 
     // Get private key.
     getPrivKey();
 
-    // Show main interface.
+    // Display main interface.
     show_interface(INTERFACE_PATH, CONTACTS_PATH, CHAT_PATH);
     gtk_main();
 
