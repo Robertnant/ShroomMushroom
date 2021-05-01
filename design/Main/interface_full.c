@@ -166,7 +166,7 @@ void saveMessage(char *msg)
 void sendMessage(char *buff)
 {
     // Step 1: Get receiver's public key (HARDCODED FOR NOW).
-    //message->receiver = user->number;   
+    message->receiver = user->number;   // To modify to target_user.   
     char *key = requestKey(message, sockfd);
     receiver_keys = stringtoPub(key);
     printf("Received key: g->%s q->%s h->%s\n", receiver_keys->g,
