@@ -18,11 +18,8 @@ int row3 = 0; //grid row counter (user)
 
 // TODO: "user->number" in "sendMessage" should be changed to "target_user->number" later.
 
-
 //struct *user user = get_user_path(".files/.user"); //name of the user 
 void on_row();
-
-
 
 void add_contact() //on_add_contact_button_clicked() 
 {
@@ -121,13 +118,30 @@ void chat_bubbles() //Display chat bubbles
 	fclose(f_chat); 
 }
 
+char* string_linebreak(char *msg)
+{
+	int l = strlen(msg); 
+	int n = l/30; 
+
+	char string = malloc(sizeof(l+n+1)); 
+
+	for(int i=0; i<strlen(string); i++)
+	{
+		if (i%n == 0)
+		{ string[i] = msg[i]; }
+		else
+		{ string[i] = msg[i]; } 
+	}
+
+	return string; 
+}
 
 void addBubble(char* msg) 
 {
 	gtk_grid_insert_row(GTK_GRID(grid2), row2);  
 	bubble_chat[row2] = gtk_button_new_with_label(msg); 
 	gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);  
-
+	row2++; 
 	gtk_widget_show_all(grid2); 
 }   
 
