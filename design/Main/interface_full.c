@@ -141,7 +141,9 @@ void addBubble(char* msg)
 	gtk_grid_insert_row(GTK_GRID(grid2), row2);  
 	bubble_chat[row2] = gtk_button_new_with_label(msg); 
 	gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);  
-	row2++; 
+
+    row2+=2;
+
 	gtk_widget_show_all(grid2); 
 }   
 
