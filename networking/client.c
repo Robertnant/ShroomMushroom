@@ -183,6 +183,8 @@ int main()
     // Run interface.
     gtk_init(NULL, NULL);
 
+    int registered = 0;
+
     message = (struct message*) calloc(1, sizeof(struct message));
     if (exists(USER_PATH))
     {
@@ -198,6 +200,7 @@ int main()
         write(sockfd, msg, l);
         free(msg);
         printf("Identification done!\n");
+        show_interface(INTERFACE_PATH, CONTACTS_PATH, CHAT_PATH);
     }
     else
     {
@@ -205,17 +208,22 @@ int main()
         //fetch user and number data to run through this function
         struct registration_data *reg_data = malloc(sizeof(struct registration_data));
         show_registration(reg_data);
+        registered = 1;
     }
 
+    
     // Display registration page.
     gtk_main();
-
+    
     // Get private key.
     getPrivKey();
 
-    // Display main interface.
-    show_interface(INTERFACE_PATH, CONTACTS_PATH, CHAT_PATH);
-    gtk_main();
+    if (registered)
+    {
+        // Display main interface.
+        show_interface(INTERFACE_PATH, CONTACTS_PATH, CHAT_PATH);
+        gtk_main();
+    }
 
     // Free private key.
     freePriv(privkey);

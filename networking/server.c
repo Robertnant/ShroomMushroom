@@ -74,21 +74,40 @@ void interrupt(int err)
 }
 
 
-void send_to(char number[], char buffer[], size_t buf_size)
+struct pipe_content
 {
+    char * message;
+    size_t size;
+    char * number;
+};
+
+void * send_to(void* arg)
+{
+    struct pipe_content* args = arg;
+    
     int fd;
-    
-    struct user* user = get_user(number);
-    
-    char* filename = get_filename(PIPES_FILE, user->UID);
+
+    struct user* tmp_target_user = get_user(args->number);
+    char* filename = get_filename(PIPES_FILE, tmp_target_user->UID);
 
     fd = open(filename, O_WRONLY);
-    free(user);
+    free(tmp_target_user);
     free(filename);
 
-    write(fd, buffer, buf_size);
+    write(fd, args->message, args->size);
+                    //printf("Attempting to open pipe\n");
+                    //file_fd = open(receiver->UID, O_WRONLY);
+                    //printf("Pipe opened!\n");
+                    //write(file_fd, buff, er);
+                    //printf("Write successfull!\n");
+                    //close(file_fd);
+                    //printf("Pipe closed!\n");
 
+    free(args->message);
+    free(args->number);
+    free(args);
     close(fd);
+    return NULL;
 }
 
 
@@ -96,9 +115,6 @@ void send_to(char number[], char buffer[], size_t buf_size)
 
 void * listen_to_client( void * arg )
 {
-
-
-
     int * sockfd = (int *) arg;
     char buff[MAX]; 
     int er;
@@ -121,23 +137,38 @@ void * listen_to_client( void * arg )
 
             // printf("From client: ");
             parseMessage(buff, message);
-
             printf("Sender: %s\n", message->sender);
             printf("Receiver: %s\n", message->receiver);
             printf("Type: %d\n", message->type);
 
             struct user* receiver = get_user(message->receiver);
-            int file_fd;
-            
+
             char * user_message;
             size_t l;
+            char *tmp_buf;
+            char *tmp_number;
+            pthread_t id;
+            struct pipe_content* content;
 
             switch (message->type)
             {
                 case TEXT:
-                    file_fd = open(receiver->UID, O_WRONLY);
-                    write(file_fd, buff, er);
-                    close(file_fd);
+                    l = strlen(buff) + 1;
+                    
+                    content = malloc(sizeof(struct pipe_content));
+                    
+                    tmp_buf = malloc(l * sizeof(char));
+                    tmp_number = malloc(11 * sizeof(char));
+                    
+                    strcpy(tmp_buf, buff);
+                    strcpy(tmp_number, message->receiver);
+                    
+                    content->message = tmp_buf;
+                    content->number = tmp_number;
+                    content->size = l;
+                    
+                    pthread_create(&id, NULL, send_to, (void*) content);
+                    
                     break;
                 
                 case ADD:
@@ -184,19 +215,25 @@ void connect_client(char pipe[], int client)
 {
     char buf[MAX];
     char * filename = get_filename(PIPES_FILE, pipe);
-    int fd = open(filename, O_RDONLY);
-    if (fd < 0)
-        errx(1, "Couldn't open pipe for client redirection");
-    free(filename);
+    //if (fd < 0)
+    //    errx(1, "Couldn't open pipe for client redirection");
     //printf("FD IS %d\n", fd);
     //if (dup2(fd, client) < 0)
     //    errx(1, "Could not forward data to client");
     int r;
+    int fd;
     while (1)
     {
-        while ((r = read(fd, buf, MAX)) > 0)
-            write(client, buf, r);
+        fd = open(filename, O_RDONLY);
+        if (fd > 0)
+        {
+            while ((r = read(fd, buf, MAX)) > 0)
+            {
+                write(client, buf, r);
+            }
+        }
     }
+    free(filename);
 }
 
 void * sending_from_pipe(void * arg)
@@ -331,9 +368,7 @@ int main()
             
         }
         freeMessage(message);
-        // Free user.
         // TODO: Remove this after Sergio implements function to handle this.
-        //free(tmp_user);
         
 
         struct client* user = (struct client*) malloc(sizeof(struct client));
@@ -349,29 +384,8 @@ int main()
         curr->user = tmp_user;
         
 
-        // connect_client(curr->user->UID, curr->fd);
-        // implement functions to get username, UID, and password
-        // we'll need to get user from phone number and verify if UID matches (security)
-        // 
-         
-        //struct user* real_user = get_user(number); // do that instead of the thing below
-
-
-        /*
-        // Might need to literally copy the memory
-        user->user->username = ;
-        user->user->UID = ;
-        user->user->number = ;
-        */
-        
-        //pthread_t id;
-        pthread_create(&curr->listening, NULL, listen_to_client, &(user->fd));
-        pthread_create(&curr->sending, NULL, listen_to_client, &(user->fd));
-        
-
-
-        // To uncomment whenever we create the user identification procedure
-        // connect_client(user->UID, user->fd);
+        pthread_create(&curr->listening, NULL, listen_to_client, (void *) &(user->fd));
+        pthread_create(&curr->sending, NULL, sending_from_pipe, (void *) user);
         
         printf("New user connected!\n");
     }
