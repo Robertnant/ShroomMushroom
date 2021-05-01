@@ -118,6 +118,7 @@ void * listen_to_client( void * arg )
     int * sockfd = (int *) arg;
     char buff[MAX]; 
     int er;
+
     printf("Listening to client...\n");
 
     for (;;) 
@@ -167,12 +168,14 @@ void * listen_to_client( void * arg )
                     content->size = l;
                     
                     pthread_create(&id, NULL, send_to, (void*) content);
+                    
                     break;
                 
                 case ADD:
-                    // TODO
                     // get pub key and user
                     // send the to "sender"
+                    user_message = user_to_string(receiver, &l);
+                    write(*sockfd, user_message, l);
                     break;
 
                 case IDENTIFICATION: case INIT:
@@ -210,13 +213,13 @@ void * listen_to_client( void * arg )
 
 void connect_client(char pipe[], int client)
 {
+    char buf[MAX];
     char * filename = get_filename(PIPES_FILE, pipe);
     //if (fd < 0)
     //    errx(1, "Couldn't open pipe for client redirection");
     //printf("FD IS %d\n", fd);
     //if (dup2(fd, client) < 0)
     //    errx(1, "Could not forward data to client");
-    char buf[MAX];
     int r;
     int fd;
     while (1)
@@ -233,40 +236,12 @@ void connect_client(char pipe[], int client)
     free(filename);
 }
 
-/*
-struct user* parseUser(char string[])
+void * sending_from_pipe(void * arg)
 {
-    struct user* res = (struct user *) calloc(1, sizeof(struct user));
-    
-    char *token = strtok(string, " ");
-    strcpy(res->username, token);
-
-    token = strtok(NULL, " ");
-    strcpy(res->number, token);
-    
-    token = strtok(NULL, " ");
-    strcpy(res->UID, token);
-    
-    token = strtok(NULL, " ");
-    
-    // Parsing the public key
-    token = strtok(token, "-");
-    strcpy(res->pub.g, token);
-
-    token = strtok(token, "-");
-    strcpy(res->pub.q, token);
-    
-
-    token = strtok(token, "-");
-    strcpy(res->pub.h, token);
-    
-    
-
-    // res->pub = stringtoPub(token);
-
-    return res;
+    struct client* user = arg;
+    connect_client(user->user->UID, user->fd);
+    return NULL;
 }
-*/
 
 
 int main()
@@ -411,6 +386,7 @@ int main()
 
         pthread_create(&curr->listening, NULL, listen_to_client, (void *) &(user->fd));
         pthread_create(&curr->sending, NULL, sending_from_pipe, (void *) user);
+        
         printf("New user connected!\n");
     }
 }

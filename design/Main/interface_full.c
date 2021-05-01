@@ -166,7 +166,7 @@ void saveMessage(char *msg)
 void sendMessage(char *buff)
 {
     // Step 1: Get receiver's public key (HARDCODED FOR NOW).
-    message->receiver = user->number;   
+    //message->receiver = user->number;   
     char *key = requestKey(message, sockfd);
     receiver_keys = stringtoPub(key);
     printf("Received key: g->%s q->%s h->%s\n", receiver_keys->g,
@@ -189,9 +189,12 @@ void sendMessage(char *buff)
 
     char * time = malloc(sizeof(char) * 5);
     strcpy(time, "1010");
-    char * sender = malloc(sizeof(char) * 11);
-    strcpy(sender, "0776727908");
 
+    char * sender = malloc(sizeof(char) * 11);
+    strcpy(sender, user->number);
+
+    char * receiver = malloc(sizeof(char) * 11);
+    strcpy(receiver, user->number);
 
     message->type = TEXT;
     message->content = cyphers->en_msg;
@@ -199,7 +202,7 @@ void sendMessage(char *buff)
     message->size = cyphers->size;
     message->time = time; //"1010";
     message->sender = sender; //"077644562";
-    message->receiver = NULL;
+    message->receiver = receiver;
     message->filename = 0;
 
     int jsonSize;
