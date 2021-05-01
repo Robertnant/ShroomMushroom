@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
   <object class="GtkWindow" id="main_window">
-    <property name="width-request">600</property>
-    <property name="height-request">200</property>
-    <property name="can-focus">False</property>
+    <property name="width_request">600</property>
+    <property name="height_request">200</property>
+    <property name="can_focus">False</property>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
+        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes">Avocado</property>
             <attributes>
               <attribute name="font-desc" value="Fredoka One 10"/>
@@ -31,35 +34,40 @@
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkViewport">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkViewport">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkViewport">
                             <property name="visible">True</property>
-                            <property name="can-focus">False</property>
+                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkFixed" id="fixed1">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
+                                <property name="can_focus">False</property>
                                 <child>
-                                  <!-- n-columns=1 n-rows=7 -->
                                   <object class="GtkGrid" id="grid1">
-                                    <property name="width-request">100</property>
-                                    <property name="height-request">80</property>
+                                    <property name="width_request">100</property>
+                                    <property name="height_request">80</property>
                                     <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
                                     <child>
                                       <placeholder/>
                                     </child>
@@ -89,10 +97,10 @@
                                 </child>
                                 <child>
                                   <object class="GtkLabel">
-                                    <property name="width-request">100</property>
-                                    <property name="height-request">80</property>
+                                    <property name="width_request">100</property>
+                                    <property name="height_request">80</property>
                                     <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
+                                    <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">CONTACTS</property>
                                     <attributes>
                                       <attribute name="font-desc" value="Fredoka One 10"/>
@@ -117,8 +125,8 @@
                           <object class="GtkButton" id="addContactButton">
                             <property name="label" translatable="yes">Add Contact</property>
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -140,41 +148,31 @@
             <child>
               <object class="GtkViewport">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="shadow-type">in</property>
+                        <property name="can_focus">True</property>
+                        <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkViewport">
                             <property name="visible">True</property>
-                            <property name="can-focus">False</property>
+                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkFixed" id="fixed2">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
+                                <property name="can_focus">False</property>
                                 <child>
-                                  <!-- n-columns=1 n-rows=12 -->
                                   <object class="GtkGrid" id="grid2">
-                                    <property name="width-request">152</property>
-                                    <property name="height-request">80</property>
+                                    <property name="width_request">152</property>
+                                    <property name="height_request">80</property>
                                     <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
+                                    <property name="can_focus">False</property>
                                     <child>
                                       <placeholder/>
                                     </child>
@@ -209,21 +207,11 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <!-- n-columns=1 n-rows=12 -->
                                   <object class="GtkGrid" id="grid3">
-                                    <property name="width-request">152</property>
-                                    <property name="height-request">240</property>
+                                    <property name="width_request">152</property>
+                                    <property name="height_request">240</property>
                                     <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
+                                    <property name="can_focus">False</property>
                                     <child>
                                       <placeholder/>
                                     </child>
@@ -271,24 +259,25 @@
                     <child>
                       <object class="GtkViewport">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkScrolledWindow">
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="shadow-type">in</property>
+                            <property name="can_focus">True</property>
+                            <property name="shadow_type">in</property>
                             <child>
                               <object class="GtkViewport">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
+                                <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
+                                    <property name="can_focus">False</property>
                                     <child>
                                       <object class="GtkEntry" id="TextEntry">
                                         <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="show_emoji_icon">True</property>
                                       </object>
                                       <packing>
                                         <property name="expand">True</property>
@@ -300,8 +289,8 @@
                                       <object class="GtkButton" id="sendTextButton">
                                         <property name="label" translatable="yes">Send</property>
                                         <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
