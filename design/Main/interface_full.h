@@ -16,6 +16,12 @@ char			tmp[1024];
 char			tmp_chat[1024]; 
 GtkWidget		*button[1000];
 GtkWidget		*button_chat[1000]; 
+GtkWidget		*bubble_chat[1000]; 
+
+//char *user = ; 
+
+// int row2 = 0; //grid row counter (contact)  
+// int row3 = 0; //grid row counter (user)
 
 GtkButton *sendTextButton;
 GtkEntry *TextEntry;
