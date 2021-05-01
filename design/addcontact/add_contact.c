@@ -53,7 +53,14 @@ static void destroy(GtkWidget *widget, gpointer data)
 }
 
 
-void main()
+/*
+void show_addContacts()
+{
+
+}
+*/
+
+int main()
 {
     gtk_init(NULL,NULL);
 
@@ -88,19 +95,7 @@ void main()
     gtk_widget_show(window_add_contact);
     gtk_main();
 
-}
-
-/*
-int main()
-{
-    gtk_init(NULL, NULL);
-
-    struct registration_data* data = malloc(sizeof(struct registration_data));
-    show_registration(data);
-    
-    gtk_main();
-    //free(widgets_registration);
-
     return 0;
+
 }
-*/
+
