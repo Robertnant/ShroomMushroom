@@ -268,8 +268,9 @@ void retrieveMessage()
 void on_send_text_button_activate()
 {
     // int len = gtk_entry_get_text_length(TextEntry);
-	char *tmp = (char*) gtk_entry_get_text(TextEntry);
+    char *tmp = (char*) gtk_entry_get_text(TextEntry);
     sendMessage(tmp);
+    gtk_entry_set_text(TextEntry, "");
     retrieveMessage();
     // chat_bubbles();
     // gtk_widget_show_all(main_window);                
