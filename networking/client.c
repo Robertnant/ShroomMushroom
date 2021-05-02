@@ -179,7 +179,6 @@ int main()
     else
         printf("Connection to server successful...\n"); 
 
-
     // Run interface.
     gtk_init(NULL, NULL);
 
@@ -201,6 +200,8 @@ int main()
         free(msg);
         printf("Identification done!\n");
         show_interface(INTERFACE_PATH, CONTACTS_PATH, CHAT_PATH);
+        // Get private key.
+        getPrivKey();
     }
     else
     {
@@ -210,16 +211,18 @@ int main()
         show_registration(reg_data);
         registered = 1;
     }
+    
 
     
     // Display registration page.
     gtk_main();
     
-    // Get private key.
-    getPrivKey();
 
     if (registered)
     {
+        // Get private key.
+        getPrivKey();
+        
         // Display main interface.
         show_interface(INTERFACE_PATH, CONTACTS_PATH, CHAT_PATH);
         gtk_main();

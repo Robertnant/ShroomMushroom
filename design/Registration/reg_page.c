@@ -7,12 +7,14 @@
 #include "../../networking/client.h"
 #include "reg_page.h"
 
+#define UNUSED(x) (void)(x)
 
 
 void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
 {
-	printf("register_now_button pressed\n");
-	app_widgets *arg = data;
+    UNUSED(widget);    
+    printf("register_now_button pressed\n");
+    app_widgets *arg = data;
 
     arg->data->success = 0;
 
@@ -60,6 +62,7 @@ void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
 static void destroy(GtkWidget *widget, gpointer data)
 {
 	app_widgets *dest = data;
+        UNUSED(dest);
 	free(data);
 	//gtk_widget_destroy(widget);
 	gtk_window_close((GTK_WINDOW(widget)));

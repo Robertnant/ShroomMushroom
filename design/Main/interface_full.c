@@ -12,6 +12,7 @@
 #include "../../design/addcontact/add_contact.h"
 #include "interface_full.h"
 
+#define UNUSED(x) (void)(x)
 #define MAX_BUFFER 10000
 
 int row = 0;    //grid row counter (contact)
@@ -244,7 +245,8 @@ void retrieveMessage()
     cyphers->en_msg = message->content;
     cyphers->p = message->p;
     cyphers->size = message->size;
-
+    
+    printf("Private key: %p\n", privkey);
     // Step 6: Decrypt message and save to chat file.
     char *res = decrypt_gamal(cyphers, privkey);
     printf("Decrypting received message\n");
@@ -306,6 +308,7 @@ char* get_name(char* tmp) //determine user or contact
 
 void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 {
+    UNUSED(chat_path);
     // Get Widgets.
     builder = gtk_builder_new_from_file(interface_path);
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
