@@ -6,6 +6,7 @@
 
 //#include "../../networking/client.h"
 #include "add_contact.h"
+#define UNUSED(x) (void)(x)
 
 GtkBuilder *main_builder;   // Builder of main interface.
 
@@ -13,8 +14,9 @@ GtkBuilder *main_builder;   // Builder of main interface.
 
 void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
 {
-	printf("register_now_button pressed\n");
-	app_widgets *arg = data;
+    UNUSED(widget);
+    printf("register_now_button pressed\n");
+    app_widgets *arg = data;
 
     arg->data->success = 0;
 
@@ -68,11 +70,14 @@ void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
 
 static void destroy(GtkWidget *widget, gpointer data)
 {
-	app_widgets *dest = data;
-	free(data);
-	//gtk_widget_destroy(widget);
-	// gtk_window_close((GTK_WINDOW(widget)));
-	// gtk_main_quit();
+    UNUSED(widget);
+
+    app_widgets *dest = data;
+    UNUSED(dest);
+    free(data);
+    //gtk_widget_destroy(widget);
+    // gtk_window_close((GTK_WINDOW(widget)));
+    // gtk_main_quit();
 }
 
 
