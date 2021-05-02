@@ -248,7 +248,8 @@ void retrieveMessage()
     cyphers->en_msg = message->content;
     cyphers->p = message->p;
     cyphers->size = message->size;
-
+    
+    printf("Private key: %p\n", privkey);
     // Step 6: Decrypt message and save to chat file.
     char *res = decrypt_gamal(cyphers, privkey);
     printf("Decrypting received message\n");
