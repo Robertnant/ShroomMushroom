@@ -16,12 +16,13 @@
 #include "../security/tools.h"
 #include "../design/Registration/reg_page.h"
 #include "../design/Main/interface_full.h"
+#include "../design/addcontact/add_contact.h"
 #include "client.h"
 
 #define USER_PATH ".files/.user"
 #define CHAT_PATH "design/Main/chat.txt"
 #define INTERFACE_PATH "design/Main/interface_full.glade"
-#define CONTACTS_PATH "design/Main/contacts.txt"
+#define CONTACTS_PATH ".files/contacts.txt"
 #define MAX_BUFFER 10000
 #define PORT 8080
 #define SA struct sockaddr 
@@ -86,7 +87,7 @@ struct user* init_procedure(int fd, char username[], char number[])
     return user;
 }
 
-void addContact(int fd, char number[])
+int addContact(int fd, char number[])
 {
     // Sending the request
     message->type = ADD;
@@ -106,14 +107,17 @@ void addContact(int fd, char number[])
     // Waiting for a response
     char buf[MAX_BUFFER];
     read(fd, buf, MAX_BUFFER);
-    parseMessage(buf, message);
+    printf("BUFFER => %s\n", buf);
+    //parseMessage(buf, message);
     
-    if (strcmp(message->content, "(null)") == 0)
-        printf("USER NOT FOUND ERROR\n");
+    if (strcmp(buf, "(null)") == 0)
+        return 0;
 
+    struct user* new_user = parseUser(buf);
+    
+    if(!new_user)
+        return 0;
 
-    struct user* new_user = parseUser(message->content);
-   
     // Saving user into contacts.txt
     FILE * contacts = fopen(".files/contacts.txt", "a");
     fprintf(contacts, "%s-%s\n", new_user->username, new_user->number);
@@ -126,6 +130,7 @@ void addContact(int fd, char number[])
     save_user_path(new_user, path);
     free(path);
     free(user);
+    return 1;
 
 }
 

@@ -4,11 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#include "../../networking/client.h"
+#include "../../networking/client.h"
 #include "add_contact.h"
 #define UNUSED(x) (void)(x)
 
 GtkBuilder *main_builder;   // Builder of main interface.
+//app_widgets_add_contacts     *widgets_add_contact;
+
+
 
 // TODO: Implement mechanism to save new contact to txt file.
 
@@ -16,7 +19,7 @@ void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
 {
     UNUSED(widget);
     printf("register_now_button pressed\n");
-    app_widgets *arg = data;
+    app_widgets_add_contacts *arg = data;
 
     arg->data->success = 0;
 
@@ -24,30 +27,43 @@ void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
 
     // Getting number into buffer
 	// char buffer_for_phone[11]; // changed to structure so no need for that
-	strcpy(arg->data->number, gtk_entry_get_text(arg->phonenumber)); //TODO: might need to free it 
+    strcpy(arg->data->number, gtk_entry_get_text(arg->phonenumber)); //TODO: might need to free it 
 
     // Verifying buffer length
-	if (strlen(arg->data->number) != 10)
+    if (strlen(arg->data->number) != 10)
     {
-		printf("Wrong length\n");
+        printf("Wrong length\n");
         gtk_label_set_text(arg->error_label, (const gchar*) "Phone number should be 10 characters long!");
         return;
-	}
+    }
 
     // Verifying format for number
-	for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++)
     {
-		if (!(arg->data->number[i] >= '0' && arg->data->number[i] <= '9'))
-            {
-                gtk_label_set_text(arg->error_label, (const gchar*) "Phone number should only contain digits!");
-                printf("Wrong Format : Detected character %c\n", arg->data->number[i]);
-                return;
-		}
-	}
+        if (!(arg->data->number[i] >= '0' && arg->data->number[i] <= '9'))
+        {
+            gtk_label_set_text(arg->error_label, (const gchar*) "Phone number should only contain digits!");
+            printf("Wrong Format : Detected character %c\n", arg->data->number[i]);
+            return;
+        }
+    }
+    if (!addContact(sockfd, arg->data->number))
+    {
+        gtk_label_set_text(arg->error_label, (const gchar*) "Woops! Who's that?");
+        return;
+    }
+
+    struct user * new_user = get_contact(arg->data->number);
+    
+    if(!new_user)
+    {
+        gtk_label_set_text(arg->error_label, (const gchar*) "Woops! Who's that?");
+        return;
+    }
 
     // Add phone number to string for main interface.
-    char *newContact;
-    asprintf(&newContact, "NewUser-%s", arg->data->number);
+    //char *newContact;
+    //asprintf(&newContact, "NewUser-%s", arg->data->number);
 
     arg->data->success = 1;
 
@@ -56,12 +72,12 @@ void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
     int row = 0;
     // Display new conctact on list.
     gtk_grid_insert_row(GTK_GRID(grid1), row);
-    GtkWidget *button = gtk_button_new_with_label(newContact); 
+    GtkWidget *button = gtk_button_new_with_label(new_user->username); 
     gtk_grid_attach (GTK_GRID(grid1), button, 1, row, 1, 1);
     gtk_widget_show_all(grid1);
 
     // Free memory.
-    free(newContact);
+    //free(newContact);
 
     //user = init_procedure(sockfd, arg->data->username, arg->data->number);
     gtk_window_close(GTK_WINDOW(arg->window));
@@ -72,7 +88,7 @@ static void destroy(GtkWidget *widget, gpointer data)
 {
     UNUSED(widget);
 
-    app_widgets *dest = data;
+    app_widgets_add_contacts *dest = data;
     UNUSED(dest);
     free(data);
     //gtk_widget_destroy(widget);
@@ -89,7 +105,7 @@ void show_addContact(GtkBuilder *data)
 
     GtkBuilder      *builder_add_contact;
     GtkWidget       *window_add_contact;
-    app_widgets     *widgets_add_contact = malloc(sizeof(app_widgets));
+    widgets_add_contact = malloc(sizeof(app_widgets_add_contacts));
 
     struct add_contact_data *data1 = malloc(sizeof(struct add_contact_data));
     widgets_add_contact->data = data1;
@@ -127,7 +143,7 @@ int main()
 
     GtkBuilder      *builder_add_contact;
     GtkWidget       *window_add_contact;
-    app_widgets     *widgets_add_contact = malloc(sizeof(app_widgets));
+    app_widgets_add_contacts     *widgets_add_contact = malloc(sizeof(app_widgets));
 
     struct add_contact_data *data1 = malloc(sizeof(struct add_contact_data));
     widgets_add_contact->data = data1;

@@ -107,9 +107,13 @@ struct user* get_user_path(char path[])
 {
     FILE* user_file = fopen(path, "r");
     if (!user_file)
-        errx(3, "USER DOES NOT EXIST!");
+        return NULL;
 
     struct user* user = (struct user*) malloc(sizeof(struct user));
+    
+    if (!user)
+        return NULL;
+    
     fread(user, sizeof(struct user), 1, user_file);
 
     // Close file.
@@ -119,6 +123,13 @@ struct user* get_user_path(char path[])
 }
 
 
+struct user* get_contact(char number[])
+{
+    char * path = get_filename(".files/contacts", number);
+    struct user* res = get_user_path(path);
+    free(path);
+    return res;
+}
 
 
 struct user* init_user(char username[], char number[])
@@ -175,8 +186,12 @@ char* user_to_string(struct user* user, size_t * l)
 {
     char * res;
     size_t tmp;
-    tmp = asprintf(&res, "%s %s %s %s-%s-%s", user->username, user->number, user->UID,
+    if (user)
+        tmp = asprintf(&res, "%s %s %s %s-%s-%s", user->username, user->number, user->UID,
             user->pub.g, user->pub.q, user->pub.h);
+    else
+        tmp = asprintf(&res, "(null)");
+
     if (l)
         *l = tmp;
     return res;

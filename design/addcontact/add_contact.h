@@ -18,9 +18,12 @@ typedef struct
     GtkLabel *error_label;
     struct add_contact_data * data;
     
-} app_widgets;
+} app_widgets_add_contacts;
 
 void show_addContact();
+
+app_widgets_add_contacts *widgets_add_contact;
+
 
 //void show_registration(struct registration_data * data);
 
