@@ -108,7 +108,6 @@ struct user* get_user_path(char path[])
     FILE* user_file = fopen(path, "r");
     if (!user_file)
         return NULL;
-
     struct user* user = (struct user*) malloc(sizeof(struct user));
     
     if (!user)

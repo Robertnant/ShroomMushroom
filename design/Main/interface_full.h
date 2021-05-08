@@ -34,6 +34,9 @@ FILE *f_chat; //chat2 (contact)
 
 // Functions.
 void show_interface(char *interface_path, char *contacts_path, char *chat_path);
-void chat_bubbles();
+void chat_bubbles(char path[]);
+void select_contact(GtkWidget * widget, gpointer arg);
+
+
 
 #endif

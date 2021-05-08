@@ -6,6 +6,7 @@
 
 #include "../../networking/client.h"
 #include "add_contact.h"
+#include "../Main/interface_full.h"
 #define UNUSED(x) (void)(x)
 
 GtkBuilder *main_builder;   // Builder of main interface.
@@ -72,7 +73,9 @@ void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
     int row = 0;
     // Display new conctact on list.
     gtk_grid_insert_row(GTK_GRID(grid1), row);
-    GtkWidget *button = gtk_button_new_with_label(new_user->username); 
+    GtkWidget *button = gtk_button_new_with_label(new_user->username);
+    gtk_widget_set_name(button, new_user->number);
+    g_signal_connect(button, "clicked", G_CALLBACK(select_contact), NULL);
     gtk_grid_attach (GTK_GRID(grid1), button, 1, row, 1, 1);
     gtk_widget_show_all(grid1);
 

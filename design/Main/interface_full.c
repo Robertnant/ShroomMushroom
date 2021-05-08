@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +25,7 @@ int row3 = 0;   //grid row counter (user)
 
 //struct *user user = get_user_path(".files/.user"); //name of the user 
 void on_row();
+void chat_bubbles(char path[]);
 
 void on_add_contact_button_selected() 
 {
@@ -31,9 +33,39 @@ void on_add_contact_button_selected()
     show_addContact(builder);
 }
 
+void select_contact(GtkWidget * widget, gpointer arg)
+{
+    UNUSED(arg);
+
+    if(target_user)
+        free(target_user);
+
+    char * path;
+    asprintf(&path, ".files/contacts/%s", gtk_widget_get_name(widget));
+    path[26] = 0;
+    target_user = get_user_path(path);
+    if(!target_user)
+    {
+        printf("FAILED TO FETCH CONTACT\n");
+        return;
+    }
+    free(path);
+    asprintf(&path, ".files/chats/%s", target_user->number);
+    chat_bubbles(path);
+    free(path);
+
+    printf("SELECTED USER:\n\
+            username: %s,\n\
+            number: %s\n\
+            public key: %s-%s-%s\n",
+            target_user->username, target_user->number, target_user->pub.g,
+            target_user->pub.q, target_user->pub.h); 
+}
+
 void contacts(char *contacts_path)
 {
     char * username;
+    char * number;
 	f_con = fopen(contacts_path, "r");   
 	
 	if (f_con == NULL) 
@@ -56,22 +88,25 @@ void contacts(char *contacts_path)
                     //token = strtok(tmp, s); //just extract the contact name 
                     username = strtok(tmp, "-");
                     gtk_grid_insert_row(GTK_GRID(grid1), row);  
-                    button[row] = gtk_button_new_with_label(username); 
+                    button[row] = gtk_button_new_with_label(username);
+                    number = strtok(NULL, "-");
+                    gtk_widget_set_name(button[row], number);
                     gtk_grid_attach (GTK_GRID(grid1), button[row], 1, row, 1, 1);
-                    g_signal_connect(button[row], "clicked", G_CALLBACK(chat_bubbles), NULL); 
+                    g_signal_connect(button[row], "clicked", G_CALLBACK(select_contact), NULL); 
                     row ++;
                     //} 
 		} 
 	}
 }
 
-void chat_bubbles() //Display chat bubbles 
+void chat_bubbles(char path[]) //Display chat bubbles 
 {
 	//Chat Bubbles -> row-=2 
 	//[USER1] --- 
 	//[USER2] --- 
 
-	f_chat = fopen("design/Main/chat.txt", "a+"); 
+	//f_chat = fopen("design/Main/chat.txt", "a+"); 
+	f_chat = fopen(path, "a+"); 
 
 	if (f_chat == NULL)
 	{ 
@@ -81,25 +116,27 @@ void chat_bubbles() //Display chat bubbles
 
 	while(1) 
 	{
+            printf("Got into the loop\n");
 		if ( fgets(tmp_chat, 1024, f_chat) == NULL) 
 		{ break; } 
 		
 		else 
 		{
-            // TODO Remove.
-            printf("%s\n", tmp_chat);
+                        // TODO Remove.
+                        printf("%s\n", tmp_chat);
 
 			tmp_chat[strlen(tmp_chat)-1] = 0; //remove newline byte 
 			const char s[2] = "]"; 
 			char *token; 
-			char *user = "ROBERT";  
+			//char *user = "ROBERT";  
 
 			token = strtok(tmp_chat, s); //[Username]
 
-			if (strcmp(token, user) == 0) //User - right grid (grid3)
+			if (strcmp(token + 1, user->username) == 0) //User - right grid (grid3)
 			{
-				token = strtok(NULL, s); 
-				gtk_grid_insert_row(GTK_GRID(grid3), row3);  
+				token = strtok(NULL, s);
+                                printf("TEXT: %s\n", token);
+				gtk_grid_insert_row(GTK_GRID(grid3), row3);
 				button_chat[row3] = gtk_button_new_with_label(token); 
 				gtk_grid_attach (GTK_GRID(grid3), button_chat[row3], 1, row3, 1, 1);
 				row3+=2; 
@@ -150,11 +187,13 @@ void addBubble(char* msg)
 // Function to save message to chat log.
 void saveMessage(char *msg)
 {
-	//TO DO : Later change "ROBERT" -> username
-	f_chat = fopen("design/Main/chat.txt", "a+"); 
-    fprintf(f_chat, "[ROBERT]%s\n", msg); 
-	//display bubble 
-	addBubble(msg); 
+    char * path;
+    asprintf(&path, ".files/chats/%s", target_user->number);
+    f_chat = fopen(path, "a+"); 
+    free(path);
+    fprintf(f_chat, "[%s]%s\n", target_user->username, msg); 
+    //display bubble 
+    addBubble(msg); 
     fclose(f_chat);
 }
 
@@ -339,7 +378,7 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 	contacts(contacts_path); 
 
 	// CHAT BUBBLES
-	chat_bubbles(); 
+	//chat_bubbles(); 
 
     //g_object_unref(builder);
 
