@@ -41,20 +41,22 @@ char *requestKey(struct message *message, int sockfd)
         printf("\n");
 
     printf("Requesting public key of: %s\n", message->receiver);
-    struct user *user = get_user_path(USER_PATH);
-    struct user_pub *pub = &(user->pub);
+    //struct user *user = get_user_path(USER_PATH);
+    struct user_pub *pub = &(target_user->pub);
 
+    printf("Target user is %s (%s)\n", target_user->username, target_user->number);
+    
     // Get public key from user file.
     struct publicKey *pubkey = malloc(sizeof(struct publicKey));
     pubkey->g = pub->g;
     pubkey->q = pub->q;
     pubkey->h = pub->h;
-
+    
     char *key = pubtoString(pubkey);
 
     // Free memory.
-    free(pubkey);
-    free(user);
+    //free(pubkey);
+    //free(user);
 
     return key;
 }
@@ -129,7 +131,7 @@ int addContact(int fd, char number[])
     asprintf(&path, ".files/contacts/%s", user->number);
     save_user_path(new_user, path);
     free(path);
-    free(user);
+    free(new_user);
     return 1;
 
 }

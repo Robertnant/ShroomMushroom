@@ -66,37 +66,57 @@ void contacts(char *contacts_path)
 {
     char * username;
     char * number;
-	f_con = fopen(contacts_path, "r");   
-	
-	if (f_con == NULL) 
-	{ 
-		printf("File contacts.txt not found\n");
-		return ;
-	}
-	else
-	{
-		while (fgets(tmp, 28, f_con)) 
-		{       
-                
-			/*if () //reads a line 
-			{ break; } 
-			
-			else 
-			{ */
-                    //const char s[2] = "-";
-                    //tmp[strlen(tmp)-1] = 0; //remove newline byte 
-                    //token = strtok(tmp, s); //just extract the contact name 
-                    username = strtok(tmp, "-");
-                    gtk_grid_insert_row(GTK_GRID(grid1), row);  
-                    button[row] = gtk_button_new_with_label(username);
-                    number = strtok(NULL, "-");
-                    gtk_widget_set_name(button[row], number);
-                    gtk_grid_attach (GTK_GRID(grid1), button[row], 1, row, 1, 1);
-                    g_signal_connect(button[row], "clicked", G_CALLBACK(select_contact), NULL); 
-                    row ++;
-                    //} 
-		} 
-	}
+    f_con = fopen(contacts_path, "r");   
+    
+    if (f_con == NULL) 
+    { 
+        printf("File contacts.txt not found\n");
+        return ;
+    }
+    else
+    {
+        while (fgets(tmp, 28, f_con)) 
+        {       
+        
+            /*if () //reads a line 
+            { break; } 
+            
+            else 
+            { */
+            //const char s[2] = "-";
+            //tmp[strlen(tmp)-1] = 0; //remove newline byte 
+            //token = strtok(tmp, s); //just extract the contact name 
+            username = strtok(tmp, "-");
+            gtk_grid_insert_row(GTK_GRID(grid1), row);  
+            button[row] = gtk_button_new_with_label(username);
+            number = strtok(NULL, "-");
+            gtk_widget_set_name(button[row], number);
+            gtk_grid_attach (GTK_GRID(grid1), button[row], 1, row, 1, 1);
+            g_signal_connect(button[row], "clicked", G_CALLBACK(select_contact), NULL); 
+            row ++;
+            //} 
+        } 
+    }
+    //gtk_widget_show_all(main_window);                
+}
+
+
+void clear_bubbles()
+{
+    while(row3 >= 0)
+    {
+        printf("Clearing row 3\n");
+        gtk_widget_hide(gtk_grid_get_child_at(GTK_GRID(grid3), 1, row3));
+        gtk_widget_destroy(gtk_grid_get_child_at(GTK_GRID(grid3), 1, row3));
+        row3 -= 2;
+    }
+    while(row2 >= 0)
+    {
+        printf("Clearing row 2\n");
+        gtk_widget_hide(gtk_grid_get_child_at(GTK_GRID(grid2), 1, row2));
+        gtk_widget_destroy(gtk_grid_get_child_at(GTK_GRID(grid2), 1, row2));
+        row2 -= 2;
+    }
 }
 
 void chat_bubbles(char path[]) //Display chat bubbles 
@@ -104,7 +124,7 @@ void chat_bubbles(char path[]) //Display chat bubbles
 	//Chat Bubbles -> row-=2 
 	//[USER1] --- 
 	//[USER2] --- 
-
+        clear_bubbles();
 	//f_chat = fopen("design/Main/chat.txt", "a+"); 
 	f_chat = fopen(path, "a+"); 
 
@@ -132,13 +152,14 @@ void chat_bubbles(char path[]) //Display chat bubbles
 
 			token = strtok(tmp_chat, s); //[Username]
 
-			if (strcmp(token + 1, user->username) == 0) //User - right grid (grid3)
+			if (strcmp(token + 1, user->username) != 0) //User - right grid (grid3)
 			{
 				token = strtok(NULL, s);
                                 printf("TEXT: %s\n", token);
 				gtk_grid_insert_row(GTK_GRID(grid3), row3);
 				button_chat[row3] = gtk_button_new_with_label(token); 
-				gtk_grid_attach (GTK_GRID(grid3), button_chat[row3], 1, row3, 1, 1);
+				gtk_widget_set_hexpand(button_chat[row3], TRUE);
+                                gtk_grid_attach (GTK_GRID(grid3), button_chat[row3], 1, row3, 1, 1);
 				row3+=2; 
 			}
 			else //contact - left grid (grid2)
@@ -146,11 +167,13 @@ void chat_bubbles(char path[]) //Display chat bubbles
 				token = strtok(NULL, s); 
 				gtk_grid_insert_row(GTK_GRID(grid2), row2);  
 				button_chat[row2] = gtk_button_new_with_label(token); 
+				gtk_widget_set_hexpand(button_chat[row2], TRUE);
 				gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 1, row2, 1, 1);
 				row2+=2; 
 			} 
 		} 
 	}
+        gtk_widget_show_all(grid2); 
 	fclose(f_chat); 
 }
 
@@ -175,32 +198,38 @@ void chat_bubbles(char path[]) //Display chat bubbles
 
 void addBubble(char* msg) 
 {
-	gtk_grid_insert_row(GTK_GRID(grid2), row2);  
-	bubble_chat[row2] = gtk_button_new_with_label(msg); 
-	gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);  
+    gtk_grid_insert_row(GTK_GRID(grid2), row2);  
+    bubble_chat[row2] = gtk_button_new_with_label(msg); 
+    gtk_widget_set_hexpand(bubble_chat[row2], TRUE);
+    gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);  
 
     row2+=2;
 
-	gtk_widget_show_all(grid2); 
+    //gtk_widget_show_all(bubble_chat[row2]); 
+    gtk_widget_show_all(grid2); 
 }   
 
 // Function to save message to chat log.
 void saveMessage(char *msg)
 {
-    char * path;
-    asprintf(&path, ".files/chats/%s", target_user->number);
-    f_chat = fopen(path, "a+"); 
-    free(path);
-    fprintf(f_chat, "[%s]%s\n", target_user->username, msg); 
-    //display bubble 
-    addBubble(msg); 
-    fclose(f_chat);
+    if(msg)
+    {
+        char * path = NULL;
+        asprintf(&path, ".files/chats/%s", target_user->number);
+        f_chat = fopen(path, "a+"); 
+        free(path);
+        fprintf(f_chat, "[%s]%s\n", target_user->username, msg); 
+        //display bubble 
+        addBubble(msg); 
+        fclose(f_chat);
+    }
 }
 
 
 // Function to send message.
 void sendMessage(char *buff)
 {
+    saveMessage(buff);
     // Step 1: Get receiver's public key (HARDCODED FOR NOW).
     message->receiver = user->number;   // To modify to target_user.   
     char *key = requestKey(message, sockfd);
@@ -275,12 +304,14 @@ void retrieveMessage()
         errx(1, "Error reading incoming messages");
 
     parseMessage(json, message);
-
+    
     printf("\nReceived a message from %s\n", message->sender);
     //sleep(2);
 
+    printf("");
+
     // free(cyphers);
-    struct cyphers *cyphers = malloc(sizeof(struct message)); // WARNING
+    struct cyphers *cyphers = malloc(sizeof(struct cyphers)); // WARNING
     cyphers->en_msg = message->content;
     cyphers->p = message->p;
     cyphers->size = message->size;
@@ -375,7 +406,7 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
     gtk_widget_set_sensitive(GTK_WIDGET(sendTextButton), TRUE);
 	// CONTACTS 
 	// add_contact();
-	contacts(contacts_path); 
+    contacts(contacts_path); 
 
 	// CHAT BUBBLES
 	//chat_bubbles(); 

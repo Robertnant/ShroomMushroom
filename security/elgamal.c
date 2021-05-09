@@ -153,11 +153,14 @@ char *decrypt_gamal(cyphers *en_data, privateKey *privkey)
     mpz_init(tmp_mpz);
     for (size_t i = 0; i < len; i++)
     {
-        mpz_tdiv_q(tmp_mpz, data[i], h);
+        // Added the != 0 verification: SERGIO
+        if (mpz_sgn(data[i]))
+        {
+            mpz_tdiv_q(tmp_mpz, data[i], h);
 
-        char tmp = (char) (mpz_get_ui(tmp_mpz));
-        res[i] = tmp;
-
+            char tmp = (char) (mpz_get_ui(tmp_mpz));
+            res[i] = tmp;
+        }
         // Clear data at current index.
         mpz_clear(data[i]);
     }
