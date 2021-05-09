@@ -131,59 +131,59 @@ void chat_bubbles(char path[]) //Display chat bubbles
     if (row2)
         clear_bubbles();
 
-	//f_chat = fopen("design/Main/chat.txt", "a+"); 
-	f_chat = fopen(path, "a+"); 
+    //f_chat = fopen("design/Main/chat.txt", "a+"); 
+    f_chat = fopen(path, "a+"); 
 
-	if (f_chat == NULL)
-	{ 
-		printf("File not found");
-		return; 
-	}
+    if (f_chat == NULL)
+    { 
+            printf("File not found");
+            return; 
+    }
 
-	while(1) 
-	{
-            printf("Got into the loop\n");
-		if ( fgets(tmp_chat, 1024, f_chat) == NULL) 
-		{
-            // Decrement row2 counter to remove extra row count.
-            // row2--;
+    while(1) 
+    {
+        printf("Got into the loop\n");
+            if ( fgets(tmp_chat, 1024, f_chat) == NULL) 
+            {
+        // Decrement row2 counter to remove extra row count.
+        // row2--;
 
-            break; 
-        } 
-		
-		else 
-		{
-                        // TODO Remove.
-                        printf("%s\n", tmp_chat);
+        break; 
+    } 
+            
+            else 
+            {
+                    // TODO Remove.
+                    printf("%s\n", tmp_chat);
 
-			tmp_chat[strlen(tmp_chat)-1] = 0; //remove newline byte 
-			const char s[2] = "]"; 
-			char *token; 
-			//char *user = "ROBERT";  
+                    tmp_chat[strlen(tmp_chat)-1] = 0; //remove newline byte 
+                    const char s[2] = "]"; 
+                    char *token; 
+                    //char *user = "ROBERT";  
 
-			token = strtok(tmp_chat, s); //[Username]
+                    token = strtok(tmp_chat, s); //[Username]
 
-			if (strcmp(token + 1, user->username) != 0) //User - right grid (grid3)
-			{
-				token = strtok(NULL, s);
-                                printf("TEXT: %s\n", token);
-				gtk_grid_insert_row(GTK_GRID(grid3), row3);
-				button_chat[row3] = gtk_button_new_with_label(token); 
-				gtk_widget_set_hexpand(button_chat[row3], TRUE);
-                                gtk_grid_attach (GTK_GRID(grid3), button_chat[row3], 1, row3, 1, 1);
-				row3+=1; 
-			}
-			else //contact - left grid (grid2)
-			{
-				token = strtok(NULL, s); 
-				gtk_grid_insert_row(GTK_GRID(grid2), row2);  
-				button_chat[row2] = gtk_button_new_with_label(token); 
-				gtk_widget_set_hexpand(button_chat[row2], TRUE);
-				gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 1, row2, 1, 1);
-				row2+=1; 
-			} 
-		} 
-	}
+                    if (strcmp(token + 1, user->username) != 0) //User - right grid (grid3)
+                    {
+                            token = strtok(NULL, s);
+                            printf("TEXT: %s\n", token);
+                            gtk_grid_insert_row(GTK_GRID(grid3), row3);
+                            button_chat[row3] = gtk_button_new_with_label(token); 
+                            gtk_widget_set_hexpand(button_chat[row3], TRUE);
+                            gtk_grid_attach (GTK_GRID(grid3), button_chat[row3], 1, row3, 1, 1);
+                            row3+=1; 
+                    }
+                    else //contact - left grid (grid2)
+                    {
+                            token = strtok(NULL, s); 
+                            gtk_grid_insert_row(GTK_GRID(grid2), row2);  
+                            button_chat[row2] = gtk_button_new_with_label(token); 
+                            gtk_widget_set_hexpand(button_chat[row2], TRUE);
+                            gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 1, row2, 1, 1);
+                            row2+=1; 
+                    } 
+            } 
+    }
 
     gtk_widget_show_all(grid2); 
     
@@ -211,8 +211,9 @@ void chat_bubbles(char path[]) //Display chat bubbles
 }
 */ 
 
-void addBubble(char* msg) 
+void addBubble(char * sender, char* msg) 
 {
+    UNUSED(sender);
     gtk_grid_insert_row(GTK_GRID(grid2), row2);  
     bubble_chat[row2] = gtk_button_new_with_label(msg); 
     gtk_widget_set_hexpand(bubble_chat[row2], TRUE);
@@ -225,7 +226,7 @@ void addBubble(char* msg)
 }   
 
 // Function to save message to chat log.
-void saveMessage(char *msg)
+void saveMessage(char * sender, char *msg)
 {
     if(msg)
     {
@@ -233,9 +234,8 @@ void saveMessage(char *msg)
         asprintf(&path, ".files/chats/%s", target_user->number);
         f_chat = fopen(path, "a+"); 
         free(path);
-        fprintf(f_chat, "[%s]%s\n", target_user->username, msg); 
+        fprintf(f_chat, "[%s]%s\n", sender, msg); 
         //display bubble 
-        addBubble(msg); 
         fclose(f_chat);
     }
 }
@@ -244,7 +244,8 @@ void saveMessage(char *msg)
 // Function to send message.
 void sendMessage(char *buff)
 {
-    saveMessage(buff);
+    saveMessage(user->username, buff);
+    addBubble(user->username, buff); 
     // Step 1: Get receiver's public key (HARDCODED FOR NOW).
     message->receiver = user->number;   // To modify to target_user.   
     char *key = requestKey(message, sockfd);
@@ -312,19 +313,37 @@ void retrieveMessage()
     // (For now just itself).
     // bzero(json, jsonSize);
 
-    int jsonSize = MAX_BUFFER;
+    //int jsonSize = MAX_BUFFER;
     char json[MAX_BUFFER];
+    GString *json_string = g_string_new(NULL);
+    bzero(json, MAX_BUFFER);
+    //if (read(sockfd, json, jsonSize) == -1)
+    //    errx(1, "Error reading incoming messages");
+    int found = 0;
+    int er;
+    while((er = read(sockfd, json, MAX_BUFFER - 1)) > 0)
+    {
+        json_string = g_string_append(json_string,  json);
 
-    if (read(sockfd, json, jsonSize) == -1)
-        errx(1, "Error reading incoming messages");
 
-    printf("BUFFER -> %s\n", json);
-    parseMessage(json, message);
+        if(g_str_has_suffix(json, "}"))
+        {
+            found = 1;
+            break;
+        }
+        bzero(json, MAX_BUFFER);
+    }
+    if (!found)
+        return;
+    gchar * final = g_string_free(json_string, FALSE);
+
+    //printf("BUFFER -> %s\n", json);
+    parseMessage(final, message);
     
     printf("\nReceived a message from %s\n", message->sender);
     //sleep(2);
 
-    printf("MESSAGE CONTENT: %s\n", message->content);
+    //printf("MESSAGE CONTENT: %s\n", message->content);
 
     // free(cyphers);
     struct cyphers *cyphers = malloc(sizeof(struct cyphers)); // WARNING
@@ -338,7 +357,8 @@ void retrieveMessage()
     printf("Decrypting received message\n");
     printf("Received message: %s\n", res);
 
-    saveMessage(res);
+    addBubble(target_user->username, res); 
+    saveMessage(target_user->username, res);
 
     // Free memory.
     free(res);

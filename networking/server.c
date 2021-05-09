@@ -15,6 +15,7 @@
 #include <signal.h>
 #include <arpa/inet.h>
 #include <err.h>
+#include <gmodule.h>
 
 #include "../saved_users/users.h"
 #include "../messages/messages.h"
@@ -22,7 +23,7 @@
 #include "../security/tools.h"
 #include "client_list.h"
 
-#define MAX 10000
+#define MAX_BUF_SIZE 100
 #define PORT 8080
 #define SA struct sockaddr
 #define MESSAGE_SIZE sizeof(struct message)
@@ -116,27 +117,36 @@ void * send_to(void* arg)
 void * listen_to_client( void * arg )
 {
     int * sockfd = (int *) arg;
-    char buff[MAX]; 
+    char buff[MAX_BUF_SIZE]; 
     int er;
 
     printf("Listening to client...\n");
-
     for (;;) 
     { 
-        bzero(buff, MAX); 
- 
-        // read the message from client and copy it in buffer 
-        while((er = read(*sockfd, buff, MAX)) > 0)
-        {
-            // If msg contains "Exit" then server exit and chat ended. 
-            if (strncmp("exit", buff, 4) == 0) 
-            { 
-                printf("Server Exit...\n"); 
-                return NULL; 
-            }
+        bzero(buff, MAX_BUF_SIZE);
 
-            // printf("From client: ");
-            parseMessage(buff, message);
+        GString *json_string = g_string_new(NULL);
+         
+        int found = 0;
+        while((er = read(*sockfd, buff, MAX_BUF_SIZE - 1)) > 0)
+        {
+            json_string = g_string_append(json_string,  buff);
+            
+            if(g_str_has_suffix(buff, "}"))
+            {
+                found = 1;
+                break;
+            }
+            bzero(buff, MAX_BUF_SIZE);
+        }
+        if (!found)
+            continue;
+        gchar * final = g_string_free(json_string, FALSE);
+        // read the message from client and copy it in buffer 
+        //while((er = read(*sockfd, buff, MAX_BUF_SIZE)) > 0)
+        //{
+
+            parseMessage(final, message);
             printf("Sender: %s\n", message->sender);
             printf("Receiver: %s\n", message->receiver);
             printf("Type: %d\n", message->type);
@@ -153,14 +163,14 @@ void * listen_to_client( void * arg )
             switch (message->type)
             {
                 case TEXT:
-                    l = strlen(buff) + 1;
+                    l = strlen(final) + 1;
                     
                     content = malloc(sizeof(struct pipe_content));
                     
                     tmp_buf = malloc(l * sizeof(char));
                     tmp_number = malloc(11 * sizeof(char));
                     
-                    strcpy(tmp_buf, buff);
+                    strcpy(tmp_buf, final);
                     strcpy(tmp_number, message->receiver);
                     
                     content->message = tmp_buf;
@@ -191,13 +201,14 @@ void * listen_to_client( void * arg )
             // (For now send back to client).
             
             //send_to(num, buff, err);
-            bzero(buff, MAX);
+            bzero(buff, MAX_BUF_SIZE);
             freeMessage(message);
-        }
 
         // Add newline.
         printf("\n");
 
+        g_free(final);
+        
         if(er < 1)
             return NULL;
   
@@ -213,7 +224,7 @@ void * listen_to_client( void * arg )
 
 void connect_client(char pipe[], int client)
 {
-    char buf[MAX];
+    char buf[MAX_BUF_SIZE];
     char * filename = get_filename(PIPES_FILE, pipe);
     //if (fd < 0)
     //    errx(1, "Couldn't open pipe for client redirection");
@@ -227,7 +238,7 @@ void connect_client(char pipe[], int client)
         fd = open(filename, O_RDONLY);
         if (fd > 0)
         {
-            while ((r = read(fd, buf, MAX)) > 0)
+            while ((r = read(fd, buf, MAX_BUF_SIZE)) > 0)
             {
                 rewrite(client, buf, r);
             }
