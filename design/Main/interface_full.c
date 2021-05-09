@@ -20,9 +20,6 @@ int row = 0;    //grid row counter (contact)
 int row2 = 0;   //grid row counter (contact, not really for now)  
 int row3 = 0;   //grid row counter (user)
 
-// TODO: "user->number" in "sendMessage" should be changed to "target_user->number" later.
-// TODO: Label for new contact should be username associated to that contact and not phone number.
-
 //struct *user user = get_user_path(".files/.user"); //name of the user 
 void on_row();
 void chat_bubbles(char path[]);
@@ -103,20 +100,25 @@ void contacts(char *contacts_path)
 
 void clear_bubbles()
 {
+    /*
     while(row3 >= 0)
     {
         printf("Clearing row 3\n");
         gtk_widget_hide(gtk_grid_get_child_at(GTK_GRID(grid3), 1, row3));
         gtk_widget_destroy(gtk_grid_get_child_at(GTK_GRID(grid3), 1, row3));
-        row3 -= 2;
+        row3 -= 1;
     }
-    while(row2 >= 0)
+    */
+    for (int i = 0; i < row2; i++)
     {
         printf("Clearing row 2\n");
-        gtk_widget_hide(gtk_grid_get_child_at(GTK_GRID(grid2), 1, row2));
-        gtk_widget_destroy(gtk_grid_get_child_at(GTK_GRID(grid2), 1, row2));
-        row2 -= 2;
+        gtk_widget_hide(gtk_grid_get_child_at(GTK_GRID(grid2), 1, i));
+        gtk_widget_destroy(gtk_grid_get_child_at(GTK_GRID(grid2), 1, i));
+        // row2 -= 1;
     }
+    
+    // Reset row2 counter.
+    row2 = 0;
 }
 
 void chat_bubbles(char path[]) //Display chat bubbles 
@@ -124,7 +126,11 @@ void chat_bubbles(char path[]) //Display chat bubbles
 	//Chat Bubbles -> row-=2 
 	//[USER1] --- 
 	//[USER2] --- 
+    
+    // Clear previous bubbles.
+    if (row2)
         clear_bubbles();
+
 	//f_chat = fopen("design/Main/chat.txt", "a+"); 
 	f_chat = fopen(path, "a+"); 
 
@@ -138,7 +144,12 @@ void chat_bubbles(char path[]) //Display chat bubbles
 	{
             printf("Got into the loop\n");
 		if ( fgets(tmp_chat, 1024, f_chat) == NULL) 
-		{ break; } 
+		{
+            // Decrement row2 counter to remove extra row count.
+            // row2--;
+
+            break; 
+        } 
 		
 		else 
 		{
@@ -160,7 +171,7 @@ void chat_bubbles(char path[]) //Display chat bubbles
 				button_chat[row3] = gtk_button_new_with_label(token); 
 				gtk_widget_set_hexpand(button_chat[row3], TRUE);
                                 gtk_grid_attach (GTK_GRID(grid3), button_chat[row3], 1, row3, 1, 1);
-				row3+=2; 
+				row3+=1; 
 			}
 			else //contact - left grid (grid2)
 			{
@@ -169,11 +180,15 @@ void chat_bubbles(char path[]) //Display chat bubbles
 				button_chat[row2] = gtk_button_new_with_label(token); 
 				gtk_widget_set_hexpand(button_chat[row2], TRUE);
 				gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 1, row2, 1, 1);
-				row2+=2; 
+				row2+=1; 
 			} 
 		} 
 	}
-        gtk_widget_show_all(grid2); 
+
+    gtk_widget_show_all(grid2); 
+    
+    printf("ROW 2 count: %d\n", row2);
+
 	fclose(f_chat); 
 }
 
@@ -203,7 +218,7 @@ void addBubble(char* msg)
     gtk_widget_set_hexpand(bubble_chat[row2], TRUE);
     gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);  
 
-    row2+=2;
+    row2+=1;
 
     //gtk_widget_show_all(bubble_chat[row2]); 
     gtk_widget_show_all(grid2); 
