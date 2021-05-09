@@ -203,7 +203,7 @@ char* user_to_string(struct user* user, size_t * l)
     char * res;
     size_t tmp;
     if (user)
-        tmp = asprintf(&res, "%s %s %s %s-%s-%s", user->username, user->number, user->UID,
+        tmp = asprintf(&res, "%s %s %s %s-%s-%s-", user->username, user->number, user->UID,
             user->pub.g, user->pub.q, user->pub.h);
     else
         tmp = asprintf(&res, "(null)");

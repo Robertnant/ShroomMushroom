@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow" id="reg_page">
@@ -7,7 +7,7 @@
     <property name="title" translatable="yes">reg_page</property>
     <property name="default_width">600</property>
     <property name="default_height">318</property>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child>
@@ -23,7 +23,7 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Shroom Shroom Mushroom</property>
+                <property name="label" translatable="yes">Shroom Shroom Mushroom 🥳🐨</property>
               </object>
               <packing>
                 <property name="expand">True</property>
