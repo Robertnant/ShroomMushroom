@@ -30,6 +30,8 @@ struct user
     struct user_pub pub;
 };
 
+void rewrite(int fd, char *buf, size_t count);
+
 char * get_filename(char directory[], char filename[]);
 
 struct user* get_user(char number[]);

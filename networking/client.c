@@ -81,7 +81,7 @@ struct user* init_procedure(int fd, char username[], char number[])
     int l;
     buf = genMessage(tmp_msg, &l);
 
-    write(fd, buf, l);
+    rewrite(fd, buf, l);
     free(buf);
     freeMessage(tmp_msg);
     free(tmp_msg);
@@ -103,7 +103,7 @@ int addContact(int fd, char number[])
     int l;    
     char * mess = genMessage(message, &l);
     
-    write(fd, mess, l);
+    rewrite(fd, mess, l);
     free(mess);
 
     // Waiting for a response
@@ -203,7 +203,7 @@ int main()
 
         int l;
         char *msg = genMessage(message, &l);
-        write(sockfd, msg, l);
+        rewrite(sockfd, msg, l);
         free(msg);
         printf("Identification done!\n");
         show_interface(INTERFACE_PATH, CONTACTS_PATH, CHAT_PATH);

@@ -281,9 +281,9 @@ void sendMessage(char *buff)
     printf("Sending JSON to server\n");
     //sleep(2);
 
-    int e = write(sockfd, json, jsonSize);
-    if (e == -1)
-        errx(1, "Write error");
+    rewrite(sockfd, json, jsonSize);
+    //if (e == -1)
+    //    errx(1, "Write error");
 
     // Free memory.
     free(cyphers);
@@ -303,12 +303,13 @@ void retrieveMessage()
     if (read(sockfd, json, jsonSize) == -1)
         errx(1, "Error reading incoming messages");
 
+    printf("BUFFER -> %s\n", json);
     parseMessage(json, message);
     
     printf("\nReceived a message from %s\n", message->sender);
     //sleep(2);
 
-    printf("");
+    printf("MESSAGE CONTENT: %s\n", message->content);
 
     // free(cyphers);
     struct cyphers *cyphers = malloc(sizeof(struct cyphers)); // WARNING

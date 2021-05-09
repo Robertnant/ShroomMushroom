@@ -13,6 +13,20 @@
 #include "../security/tools.h"
 
 
+void rewrite(int fd, char *buf, size_t count)
+{
+    int tmp;
+    while (count)
+    {
+        tmp = write(fd, buf, count);
+        if(tmp == -1)
+            errx(1, "Could not write to stream");
+
+        count -= tmp;
+        buf += tmp;
+    }
+}
+
 unsigned int hash(char *key)
 {
     unsigned int hash = 0;
@@ -168,13 +182,16 @@ struct user* parseUser(char string[])
     // Parsing the public key
     token = strtok(token, "-");
     strcpy(res->pub.g, token);
+    printf("PARSING G: %s \n", token);
 
-    token = strtok(token, "-");
+    token = strtok(NULL, "-");
     strcpy(res->pub.q, token);
+    printf("PARSING Q: %s \n", token);
     
 
-    token = strtok(token, "-");
+    token = strtok(NULL, "-");
     strcpy(res->pub.h, token);
+    printf("PARSING H: %s \n", token);
     
     // res->pub = stringtoPub(token);
 

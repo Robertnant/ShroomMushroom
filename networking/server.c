@@ -94,7 +94,7 @@ void * send_to(void* arg)
     free(tmp_target_user);
     free(filename);
 
-    write(fd, args->message, args->size);
+    rewrite(fd, args->message, args->size);
                     //printf("Attempting to open pipe\n");
                     //file_fd = open(receiver->UID, O_WRONLY);
                     //printf("Pipe opened!\n");
@@ -175,7 +175,7 @@ void * listen_to_client( void * arg )
                     // get pub key and user
                     // send the to "sender"
                     user_message = user_to_string(receiver, &l);
-                    write(*sockfd, user_message, l);
+                    rewrite(*sockfd, user_message, l);
                     break;
 
                 case IDENTIFICATION: case INIT:
@@ -229,7 +229,7 @@ void connect_client(char pipe[], int client)
         {
             while ((r = read(fd, buf, MAX)) > 0)
             {
-                write(client, buf, r);
+                rewrite(client, buf, r);
             }
         }
     }
