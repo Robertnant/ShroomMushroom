@@ -128,7 +128,9 @@ int addContact(int fd, char number[])
 
     // Save to specific file
     char *path;
-    asprintf(&path, ".files/contacts/%s", user->number);
+    asprintf(&path, ".files/contacts/%s", new_user->number);
+    printf("PATH FOR USER: %s\n", path);
+    printf("username -> %s ... pub.h -> %s\n", new_user->username, new_user->pub.h);
     save_user_path(new_user, path);
     free(path);
     free(new_user);

@@ -96,6 +96,7 @@ void save_user_path(struct user * user, char * path)
         errx(1, "Couldn't open file");
 
     fwrite(user, sizeof(struct user), 1, user_file);
+    printf("DONE WRITING TO FILE!\n");
     fclose(user_file);
 }
 
@@ -192,7 +193,6 @@ struct user* parseUser(char string[])
     token = strtok(NULL, "-");
     strcpy(res->pub.h, token);
     printf("PARSING H: %s \n", token);
-    
     // res->pub = stringtoPub(token);
 
     return res;
