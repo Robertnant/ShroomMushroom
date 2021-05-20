@@ -19,6 +19,12 @@ typedef struct
     GtkEntry *phonenumber;
     GtkLabel *error_label;
     struct registration_data * data;
+
+    GtkButton *lion_avatar_button;
+    GtkButton *elephant_avatar_button;
+    GtkButton *dog_avatar_button;
+    GtkButton *koala_avatar_button;
+    GtkButton *cat_avatar_button;
     
 } app_widgets;
 

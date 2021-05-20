@@ -9,6 +9,23 @@
 
 #define UNUSED(x) (void)(x)
 
+// Current selected character.
+GtkButton *selectedAvatar = NULL;
+
+void on_avatar_selected(GtkWidget *widget, gpointer data)
+{
+	GtkButton *avatar = data;
+
+	// Deactivate previously selected character.
+	if (selectedAvatar)
+	{
+		gtk_widget_set_sensitive(selectedAvatar, FALSE);
+	}
+
+	// Change currently selected character.
+	gtk_widget_set_sensitive(avatar, TRUE);
+	selectedAvatar = avatar;
+}
 
 void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
 {
@@ -87,12 +104,30 @@ void show_registration(struct registration_data* data)
     widgets_registration->username = GTK_ENTRY(gtk_builder_get_object(builder_registration, "username_textentry"));
     widgets_registration->error_label = GTK_LABEL(gtk_builder_get_object(builder_registration, "error_label"));
     widgets_registration->data = data;
+
+    widgets_registration->lion_avatar_button = GTK_BUTTON(gtk_builder_get_object(builder_registration, "lion_avatar_button")); 
+    widgets_registration->elephant_avatar_button = GTK_BUTTON(gtk_builder_get_object(builder_registration, "elephant_avatar_button"));
+    widgets_registration->dog_avatar_button = GTK_BUTTON(gtk_builder_get_object(builder_registration, "dog_avatar_button"));
+    widgets_registration->koala_avatar_button = GTK_BUTTON(gtk_builder_get_object(builder_registration, "koala_avatar_button"));
+    widgets_registration->cat_avatar_button = GTK_BUTTON(gtk_builder_get_object(builder_registration, "cat_avatar_button"));
     
     //widgets_registration->name_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder_registration, "name_textbuffer"));
     //widgets->error_label = GTK_LABEL(gtk_builder_get_object(builder, "textlabel"));
 
     g_signal_connect(widgets_registration->register_now_button, "clicked", G_CALLBACK(on_register_now_button_clicked), (gpointer) widgets_registration);
     g_signal_connect(window_registration, "destroy", G_CALLBACK(destroy), (gpointer) widgets_registration);
+
+    // Signals for avatar selection.
+    g_signal_connect(widgets_registration->lion_avatar_button, "clicked", G_CALLBACK(on_avatar_selected), (gpointer) widgets_registration, 
+		    GTK_WIDGET(widgets_registration->lion_avatar_button));
+    g_signal_connect(widgets_registration->elephant_avatar_button, "clicked", G_CALLBACK(on_avatar_selected), (gpointer) widgets_registration, 
+		    GTK_WIDGET(widgets_registration->elephant_avatar_button));
+    g_signal_connect(widgets_registration->dog_avatar_button, "clicked", G_CALLBACK(on_avatar_selected), (gpointer) widgets_registration, 
+		    GTK_WIDGET(widgets_registration->dog_avatar_button));
+    g_signal_connect(widgets_registration->koala_avatar_button, "clicked", G_CALLBACK(on_avatar_selected), (gpointer) widgets_registration, 
+		    GTK_WIDGET(widgets_registration->koala_avatar_button));
+    g_signal_connect(widgets_registration->cat_avatar_button, "clicked", G_CALLBACK(on_avatar_selected), (gpointer) widgets_registration, 
+		    GTK_WIDGET(widgets_registration->cat_avatar_button));
 
     //gtk_widget_set_sensitive(GTK_WIDGET(widgets->TextEntry), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(widgets_registration->register_now_button), TRUE);
