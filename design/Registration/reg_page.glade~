@@ -148,7 +148,7 @@
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="pixbuf">../Avatars/image0(2).ico</property>
+                                <property name="stock">gtk-missing-image</property>
                               </object>
                             </child>
                           </object>
@@ -167,7 +167,7 @@
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="pixbuf">../Avatars/elephant.ico</property>
+                                <property name="stock">gtk-missing-image</property>
                               </object>
                             </child>
                           </object>
@@ -186,7 +186,7 @@
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="pixbuf">../Avatars/dog.ico</property>
+                                <property name="stock">gtk-missing-image</property>
                               </object>
                             </child>
                           </object>
