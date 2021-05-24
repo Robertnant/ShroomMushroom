@@ -72,6 +72,12 @@ void on_register_now_button_clicked(GtkWidget *widget, gpointer data)
 		}
 	}
 
+	if (selectedAvatar == NULL)
+	{
+		gtk_label_set_text(arg->error_label, (const gchar*) "Please select an avatar");
+		return;
+	}
+
     arg->data->success = 1;
     user = init_procedure(sockfd, arg->data->username, arg->data->number);
     gtk_window_close(GTK_WINDOW(arg->window));
