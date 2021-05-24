@@ -148,7 +148,7 @@
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="pixbuf">../../../../../../../Downloads/lion.ico</property>
                               </object>
                             </child>
                           </object>
@@ -167,7 +167,7 @@
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="pixbuf">../../../../../../../Downloads/elephant.ico</property>
                               </object>
                             </child>
                           </object>
@@ -186,7 +186,7 @@
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="pixbuf">../../../../../../../Downloads/dog.ico</property>
                               </object>
                             </child>
                           </object>
@@ -205,7 +205,7 @@
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="pixbuf">../../../../../../../Downloads/koala.ico</property>
                               </object>
                             </child>
                           </object>
@@ -224,7 +224,7 @@
                               <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="stock">gtk-missing-image</property>
+                                <property name="pixbuf">../../../../../../../Downloads/cat.ico</property>
                               </object>
                             </child>
                           </object>
