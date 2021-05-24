@@ -5,7 +5,7 @@
 #define MAX_HT 100
 
 // Heap node structure.
-typedef struct
+struct heapNode
 {
     char data;
     size_t freq;
@@ -20,18 +20,18 @@ typedef struct
 {
     size_t size;
     size_t capacity;
-    heapNode **arr;
+    struct heapNode **arr;
 } heap;
 
 // Heap tools.
 heap *newHeap(size_t capacity);
-heapNode *newNode(char data, size_t freq);
-void swapNodes(heapNode **node1, heapNode **node2);
+struct heapNode *newNode(char data, size_t freq);
+void swapNodes(struct heapNode **node1, struct heapNode **node2);
 void heapify(heap *heap, size_t index);
 int isSizeOne(heap *heap);
-heapNode* getMin(heap *heap);
-void insertNode(heap *heap, heapNode *heapNode);
-int isLeaf(heapNode* root);
+struct heapNode* getMin(heap *heap);
+void insertNode(heap *heap, struct heapNode *heapNode);
+int isLeaf(struct heapNode* root);
 
 // Heap builder.
 void buildHeap(heap* heap);
@@ -39,11 +39,11 @@ heap *createAndBuildHeap(char *data, int *freq, int size);
 
 // COMPRESSION.
 ssize_t contains(char *chars, size_t len, char c);
-int occur(heapNode *root, char el, GString *res);
+int occur(struct heapNode *root, char el, GString *res);
 void buildFrequencyList(char *input, size_t *freq, char *chars);
-heapNode *buildHuffmanTree(char *data, int *freq, int size);
+struct heapNode *buildHuffmanTree(char *data, int *freq, int size);
 
 // Encoding.
-char *encodeData(heap *huffmanTree, char *input);
+char *encodeData(struct heapNode *huffmanTree, char *input);
 
 #endif

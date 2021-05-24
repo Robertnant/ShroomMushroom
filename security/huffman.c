@@ -2,9 +2,12 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <gmodule.h>
+#include <err.h>
 #include "huffman.h"
 
 #define _GNU_SOURCE
+
+/* README: Only use Huffman on base 62 compressed data! */
 
 // TODO: Use next pointers for freqList structs
 // to make code easier to implement.
@@ -22,15 +25,15 @@ heap *newHeap(size_t capacity)
 
     heap->size = 0;
     heap->capacity = capacity;
-    heap->arr = malloc(heap->capacity * sizeof(heapNode));
+    heap->arr = malloc(heap->capacity * sizeof(struct heapNode));
 
     return heap;
 }
 
 // Heap node.
-heapNode *newNode(char data, size_t freq)
+struct heapNode *newNode(char data, size_t freq)
 {
-    heapNode *node = malloc(sizeof(heapNode));
+    struct heapNode *node = malloc(sizeof(struct heapNode));
 
     node->l = NULL;
     node->r = NULL;
@@ -41,9 +44,9 @@ heapNode *newNode(char data, size_t freq)
 }
 
 // Swap nodes.
-void swapNodes(heapNode **node1, heapNode **node2)
+void swapNodes(struct heapNode **node1, struct heapNode **node2)
 {
-    heapNode *tmp = *node1;
+    struct heapNode *tmp = *node1;
     *node1 = *node2;
     *node2 = tmp;
 }
@@ -74,9 +77,9 @@ int isSizeOne(heap *heap)
 }
  
 // Get minimum node.
-heapNode* getMin(heap *heap)
+struct heapNode* getMin(heap *heap)
 {
-    heapNode *tmp = heap->arr[0];
+    struct heapNode *tmp = heap->arr[0];
 
     heap->arr[0] = heap->arr[heap->size-1];
  
@@ -90,7 +93,7 @@ heapNode* getMin(heap *heap)
 }
  
 // Insert new node to heap.
-void insertNode(heap *heap, heapNode *heapNode)
+void insertNode(heap *heap, struct heapNode *heapNode)
 {
     // Increase heap size.
     heap->size += 1;
@@ -116,7 +119,7 @@ void buildHeap(heap* heap)
 }
 
 // Check if node is leaf.
-int isLeaf(heapNode* root)
+int isLeaf(struct heapNode* root)
 {
     int a = !(root->l);
     int b = !(root->r);
@@ -174,23 +177,32 @@ void buildFrequencyList(char *input, size_t *freq, char *chars)
         // Case: new character.
         else
         {
-            g_string_append(s, input[i]);
-            g_array_append_val(f, 1);
+            g_string_append_c(s, input[i]);
+            
+            int val = 1;
+            g_array_append_vals(f, &val, 1);
         }
 
     }
 
     // Return freq and chars.
     freq = (size_t *) g_array_free(f, FALSE);
+
+    if (!freq)
+        err(1, "Failed to set freq list.");
+    
     chars = (char *) g_string_free(s, FALSE);
+
+    if (!chars)
+        err(1, "Failed to set chars list.");
 }
 
 // Build Huffman tree.
-heapNode *buildHuffmanTree(char *data, int *freq, int size)
+struct heapNode *buildHuffmanTree(char *data, int *freq, int size)
 {
-    heapNode *l;
-    heapNode *r;
-    heapNode *top;
+    struct heapNode *l;
+    struct heapNode *r;
+    struct heapNode *top;
  
     // Create new heap.
     heap* heap = createAndBuildHeap(data, freq, size);
@@ -203,7 +215,8 @@ heapNode *buildHuffmanTree(char *data, int *freq, int size)
  
         // Create new internal node with frequency equal to the
         // sum of the two nodes frequencies.
-        top = newNode(NULL, l->freq + r->freq);
+        // '$' represents empty node.
+        top = newNode('$', l->freq + r->freq);
  
         top->l = l;
         top->r = r;
@@ -213,26 +226,27 @@ heapNode *buildHuffmanTree(char *data, int *freq, int size)
  
     // Step 4: The remaining node is the
     // root node and the tree is complete.
-    return getMin(minHeap);
+    return getMin(heap);
 }
 
 // Encoding.
-int occur(heapNode *root, char el, GString *res)
+int occur(struct heapNode *root, char el, GString *res)
 {
     if (root->l)
     {
-        g_string_append(res, '0');
-        occur(root->l, res);
+        g_string_append_c(res, '0');
+        occur(root->l, el, res);
     }
 
     if (root->r)
     {
-        g_string_append(res, '1');
-        occur(root->r, res);
+        g_string_append_c(res, '1');
+        occur(root->r, el, res);
     }
 
     // Check if node contains el.
-    if (isLeaf(root) && root->data == el)
+    char tmp = root->data;
+    if (isLeaf(root) && tmp == el)
     {
         // Occurence found.
         return 1;
@@ -242,7 +256,7 @@ int occur(heapNode *root, char el, GString *res)
     return 0;
 }
 
-char *encodeData(heapNode *huffmanTree, char *input)
+char *encodeData(struct heapNode *huffmanTree, char *input)
 {
     GString *res = g_string_new(NULL);
     size_t len = strlen(input);
@@ -254,9 +268,8 @@ char *encodeData(heapNode *huffmanTree, char *input)
 
         // Append character occurence if found.
         if (occur(huffmanTree, input[i], tmp))
-            g_string_append(res, tmp);
-
-        g_string_free(tmp, TRUE);
+            g_string_append(res, g_string_free(tmp, TRUE));
+        
     }
 
     // Return final string.
@@ -281,6 +294,10 @@ int main()
     {
         printf("%c: %ld\n", chars[i], freq[i]);
     }
+
+    // Free memory.
+    free(freq);
+    free(chars);
 
     return 0;
 }
