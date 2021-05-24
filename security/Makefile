@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -std=c99 -Wall -Wextra -Werror -fsanitize=address -lm -g
-LIBS = `pkg-config --cflags glib-2.0` -lgmp
+CFLAGS = `pkg-config --cflags glib-2.0` -std=c99 -Wall -Wextra -Werror -fsanitize=address -lm -g
+LIBS = `pkg-config --libs glib-2.0` -lgmp
 
 all: elgamal, huffman
 

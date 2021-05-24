@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <gmodule.h>
 #include <err.h>
+#include <gmodule.h>
+#include <glib.h>
 #include "huffman.h"
 
 #define _GNU_SOURCE
