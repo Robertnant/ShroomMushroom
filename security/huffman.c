@@ -156,7 +156,7 @@ ssize_t contains(char *chars, size_t len, char c)
 
     return -1;
 }
-void buildFrequencyList(char *input, size_t *freq, char *chars)
+void buildFrequencyList(char *input, size_t **freq, char **chars)
 {
     // Use Glib data types to create list.
     GString *s = g_string_new(NULL);
@@ -186,14 +186,14 @@ void buildFrequencyList(char *input, size_t *freq, char *chars)
     }
 
     // Return freq and chars.
-    freq = (size_t *) g_array_free(f, FALSE);
+    *freq = (size_t *) g_array_free(f, FALSE);
 
-    if (!freq)
+    if (!(*freq))
         err(1, "Failed to set freq list.");
     
-    chars = (char *) g_string_free(s, FALSE);
+    *chars = (char *) g_string_free(s, FALSE);
 
-    if (!chars)
+    if (!*(chars))
         err(1, "Failed to set chars list.");
 }
 
@@ -287,7 +287,7 @@ int main()
     size_t *freq;
     char *chars;
 
-    buildFrequencyList(input, freq, chars);
+    buildFrequencyList(input, &freq, &chars);
 
     // Print char and frequency.
     for (size_t i = 0; i < strlen(chars); i++)
