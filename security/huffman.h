@@ -40,7 +40,7 @@ heap *createAndBuildHeap(char *data, int *freq, int size);
 // COMPRESSION.
 ssize_t contains(char *chars, size_t len, char c);
 int occur(struct heapNode *root, char el, GString *res);
-void buildFrequencyList(char *input, size_t **freq, char **chars);
+void buildFrequencyList(char *input, size_t *freq, char **chars);
 struct heapNode *buildHuffmanTree(char *data, int *freq, int size);
 
 // Encoding.

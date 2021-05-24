@@ -157,15 +157,16 @@ ssize_t contains(char *chars, size_t len, char c)
 
     return -1;
 }
-void buildFrequencyList(char *input, size_t **freq, char **chars)
+void buildFrequencyList(char *input, size_t *freq, char **chars)
 {
     // Use Glib data types to create list.
     GString *s = g_string_new(NULL);
-    GArray *f = g_array_new(FALSE, FALSE, sizeof(gsize));
+    // GArray *f = g_array_new(FALSE, FALSE, sizeof(gsize));
 
     // Build character list.
     ssize_t index;
     size_t len = strlen(input);
+    size_t nbFreq = 0;
 
     for (size_t i = 0; i < len; i++)
     {
@@ -173,25 +174,21 @@ void buildFrequencyList(char *input, size_t **freq, char **chars)
         if ((index = contains(s->str, s->len, input[i])) != -1)
         {
             // Increment frequency of character at index.
-            f->data[index] += 1;
+            freq[index] += 1;
         }
         // Case: new character.
         else
         {
             g_string_append_c(s, input[i]);
+            freq[nbFreq] = 1;
             
-            int val = 1;
-            g_array_append_vals(f, &val, 1);
+            // Increment freq counter.
+            nbFreq++;
         }
 
     }
 
-    // Return freq and chars.
-    *freq = (size_t *) g_array_free(f, FALSE);
-
-    if (!(*freq))
-        err(1, "Failed to set freq list.");
-    
+    // Return chars.
     *chars = (char *) g_string_free(s, FALSE);
 
     if (!*(chars))
@@ -279,16 +276,16 @@ char *encodeData(struct heapNode *huffmanTree, char *input)
 
 int main()
 {
-    // char simple[] = "Hello";
-    char input[] = "Sergio, Sergio, Sergio, tsk, tsk, tsk, man...";
+    char input[] = "Hello!";
+    // char input[] = "Sergio, Sergio, Sergio, tsk, tsk, tsk, man...";
 
     // TODO: Use Geeksforgeeks test to get their result.
 
     // Build frequency list.
-    size_t *freq;
+    size_t *freq = calloc(62, sizeof(size_t));
     char *chars;
 
-    buildFrequencyList(input, &freq, &chars);
+    buildFrequencyList(input, freq, &chars);
 
     // Print char and frequency.
     for (size_t i = 0; i < strlen(chars); i++)
