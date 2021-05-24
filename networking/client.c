@@ -236,6 +236,8 @@ int main()
         show_interface(INTERFACE_PATH, CONTACTS_PATH, CHAT_PATH);
         gtk_main();
     }
+    pthread_t thread_id;
+    pthread_create(&thread_id, NULL, start_message_receiver, NULL);
 
     // Free private key.
     freePriv(privkey);

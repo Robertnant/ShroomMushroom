@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <err.h>
+#include <pthread.h>
 
 #include "../../networking/client.h"
 #include "../../messages/messages.h"
@@ -23,6 +24,8 @@ int row3 = 0;   //grid row counter (user)
 //struct *user user = get_user_path(".files/.user"); //name of the user 
 void on_row();
 void chat_bubbles(char path[]);
+    
+pthread_t receiving_thread;
 
 void on_add_contact_button_selected() 
 {
@@ -275,7 +278,7 @@ void sendMessage(char *buff)
     strcpy(sender, user->number);
 
     char * receiver = malloc(sizeof(char) * 11);
-    strcpy(receiver, user->number);
+    strcpy(receiver, target_user->number);
 
     message->type = TEXT;
     message->content = cyphers->en_msg;
@@ -321,19 +324,33 @@ void retrieveMessage()
     //    errx(1, "Error reading incoming messages");
     int found = 0;
     int er;
+    printf("Waiting for message..\n");
     while((er = read(sockfd, json, MAX_BUFFER - 1)) > 0)
     {
-        json_string = g_string_append(json_string,  json);
+        printf("BUFFER: %s\n", json);
+        if (found)
+            json_string = g_string_append(json_string,  json);
 
 
+        if(g_str_has_prefix(json, "{"))
+        {
+            found++;
+            json_string = g_string_append(json_string,  json);
+        }
         if(g_str_has_suffix(json, "}"))
         {
-            found = 1;
+            found++;
+            printf("COMPLETED JSON!!!\n");
             break;
         }
         bzero(json, MAX_BUFFER);
     }
-    if (!found)
+    if (er <= 0)
+    {
+        pthread_cancel(receiving_thread);
+        return;
+    }
+    if (found != 2)
         return;
     gchar * final = g_string_free(json_string, FALSE);
 
@@ -357,7 +374,8 @@ void retrieveMessage()
     printf("Decrypting received message\n");
     printf("Received message: %s\n", res);
 
-    addBubble(target_user->username, res); 
+    if (strcmp(message->sender, target_user->number) == 0)
+        addBubble(target_user->username, res); 
     saveMessage(target_user->username, res);
 
     // Free memory.
@@ -367,13 +385,22 @@ void retrieveMessage()
     // free(json);
 }
 
+void * start_message_receiver(void * arg)
+{
+    while(1)
+    {
+        retrieveMessage();
+    }
+}
+
+
 void on_send_text_button_activate()
 {
     // int len = gtk_entry_get_text_length(TextEntry);
     char *tmp = (char*) gtk_entry_get_text(TextEntry);
     sendMessage(tmp);
     gtk_entry_set_text(TextEntry, "");
-    retrieveMessage();
+    //retrieveMessage();
     // chat_bubbles();
     // gtk_widget_show_all(main_window);                
 
@@ -451,6 +478,8 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 
     gtk_widget_show_all(main_window);                
 
+    
+    pthread_create(&receiving_thread, NULL, start_message_receiver, NULL);
     // Close.
     // fclose(f_con);
     // fclose(f_chat);
