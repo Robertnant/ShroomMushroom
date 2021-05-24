@@ -8,6 +8,7 @@
 #include <err.h>
 #include "elgamal.h"
 #include "tools.h"
+#include "huffman.h"
 
 #define MIN_GAMAL 511
 #define MAX_GAMAL 512
