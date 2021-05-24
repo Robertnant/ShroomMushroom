@@ -6,6 +6,12 @@
 // TODO: Use next pointers for freqList structs
 // to make code easier to implement.
 
+// TODO: If code fails: implement check for NULL in node char values.
+// of other functions. 
+// NONE is used to specify that no char is assigned.
+
+// TODO: gfree should be used by main to free freq and chars.
+
 // Heap node structure.
 typedef struct
 {
@@ -116,34 +122,131 @@ void insertNode(heap *heap, heapNode *heapNode)
     heap->arr[i] = heapNode;
 }
 
-// COMPRESSION.
-
-void buildFrequencyList(char *input, size_t *freq, char *chars)
+// Build heap.
+void buildHeap(heap* heap)
 {
-    unsigned size_t *tmp = calloc(256, sizeof(unsigned int));
+    int n = heap->size - 1;
+ 
+    for (int i = (n - 1) / 2; i >= 0; i--)
+        minHeapify(minHeap, i);
+}
 
-    for (size_t i = 0; *input != '\0'; i++)
-    {
-        int c = (int) input[i];
-        tmp[c] += 1;
-    }
+// Check if node is leaf.
+int isLeaf(heapNode* root)
+{
+    int a = !(root->left);
+    int b = !(root->right);
 
-    // Counter for elements in list.
-    size_t c = 0;
-    for (size_t j = 0; j < 256; j++)
-    {
-        if (tmp[j] > 0)
-        {
-            // Append frequency and char.
-            freq[c] = tmp[j];
-            chars[c] = (char) j;
+    return a && b;
+}
 
-            c++;
-        }
-    }
+// Creates a min heap of capacity from data and freq.
+heap *createAndBuildHeap(char *data, int *freq, int size)
+{
+    struct heap *heap = createHeap(size);
 
-    // Free temporary data.
-    free(tmp);
+    for (int i = 0; i < size; i++)
+        heap->arr[i] = newNode(data[i], freq[i]);
+
+    heap->size = size;
+    buildHeap(heap);
+
+    return heap;
 }
 
 
+// COMPRESSION.
+
+// Check for specific character in string.
+// Return index of character.
+ssize_t contains(char *chars, size_t len, char c)
+{
+    for (size_t i = 0; i < len; i++)
+    {
+        if (chars[i] == c)
+            return i;
+    }
+
+    return -1;
+}
+void buildFrequencyList(char *input, size_t *freq, char *chars)
+{
+    // Use Glib data types to create list.
+    GString *s = g_string_new(NULL);
+    GArray *f g_array_new(FALSE, FALSE, sizeof(gsize));
+
+    // Build character list.
+    ssize_t index;
+    size_t len = strlen(input);
+
+    for (size_t i = 0; i < len; i++)
+    {
+        // Case: character already found.
+        if ((index = contains(s->str, s->len, input[i])) != -1)
+        {
+            // Increment frequency of character at index.
+            f->data[index] += 1;
+        }
+        // Case: new character.
+        else
+        {
+            g_string_append(s, input[i]);
+            g_array_append_val(f, 1);
+        }
+
+    }
+
+    // Return freq and chars.
+    freq = (size_t *) g_array_free(f, FALSE);
+    chars = (char *) g_string_free(s, FALSE);
+}
+
+// Build Huffman tree.
+struct heapNode *buildHuffmanTree(char *data, int *freq, int size)
+{
+    struct heapNode *l;
+    struct heapNode *r;
+    struct heapNode *top;
+ 
+    // Create new heap.
+    heap* heap = createAndBuildMinHeap(data, freq, size);
+ 
+    while (!isSizeOne(heap)) 
+    {
+        // Extract the two minimum nodes.
+        l = getMin(heap);
+        r = getMin(heap);
+ 
+        // Create new internal node with frequency equal to the
+        // sum of the two nodes frequencies.
+        top = newNode(NULL, l->freq + r->freq);
+ 
+        top->l = l;
+        top->r = r;
+ 
+        insertNode(heap, top);
+    }
+ 
+    // Step 4: The remaining node is the
+    // root node and the tree is complete.
+    return getMin(minHeap);
+}
+
+// Encoding.
+char *encodeData(heap *huffmanTree, char *input)
+{
+    GString *res = g_string_new(NULL);
+    size_t len = strlen(input);
+
+    for (size_t i = 0; i < len; i++)
+    {
+        char *tmp = occur(huffmanTree, input[i], "");
+        g_string_append(res, tmp);
+
+        // Free memory. (TODO: Might want to use gfree).
+        free(tmp);
+    }
+
+    // Return final string.
+    return (char *) g_string_free(res, FALSE);
+}
