@@ -3,6 +3,9 @@
 
 #define MAX_HT 100
 
+// TODO: Use next pointers for freqList structs
+// to make code easier to implement.
+
 // Heap node structure.
 typedef struct
 {
@@ -55,20 +58,67 @@ void swapNodes(heapNode **node1, heapNode **node2)
     *node2 = tmp;
 }
 
+// Heapify.
+void heapify(heap *heap, int index) 
+{
+    int min = index;
+    int l = 2 * index + 1;
+    int r = 2 * index + 2;
+ 
+    if (l < heap->size && heap->arr[l]->freq < heap->arr[min]->freq)
+        min = l;
+ 
+    if (r < heap->size && heap->arr[r]->freq < heap->arr[min]->freq)
+        min = r;
+ 
+    if (min != index)
+    {
+        swapNodes(&heap->arr[min], &heap->arr[index]);
+        heapify(heap, min);
+    }
+}
+
+int isSizeOne(heap *heap)
+{
+    return (heap->size == 1);
+}
+ 
+// Get minimum node.
+heapNode* getMin(heap *heap)
+{
+    heapNode *tmp = heap->arr[0];
+
+    heap->arr[0] = heap->arr[heap->size-1];
+ 
+    // Decrease heap size.
+    heap->size -= 1;
+
+    // Heapify.
+    heapify(heap, 0);
+ 
+    return tmp;
+}
+ 
+// Insert new node to heap.
+void insertNode(heap *heap, heapNode *heapNode)
+{
+    // Increase heap size.
+    heap->size += 1;
+    
+    int i = heap->size - 1;
+    while (i && heapNode->freq < heap->arr[(i-1) / 2]->freq) 
+    {
+        heap->arr[i] = heap->arr[(i-1) / 2];
+        
+        i = (i-1) / 2;
+    }
+ 
+    heap->arr[i] = heapNode;
+}
+
 // COMPRESSION.
 
-// Tupple (as struct) for frequency list of characters.
-typedef struct
-{
-    // Characters (maximum 256).
-    char chars[256];
-
-    // Character frequencies.
-    size_t freq[256];
-
-} freqList;
-
-void buildFrequencyList(char *input, freqList *list)
+void buildFrequencyList(char *input, size_t *freq, char *chars)
 {
     unsigned size_t *tmp = calloc(256, sizeof(unsigned int));
 
@@ -84,8 +134,10 @@ void buildFrequencyList(char *input, freqList *list)
     {
         if (tmp[j] > 0)
         {
-            list->freq[c] = tmp[j];
-            list->chars[c] = (char) j;
+            // Append frequency and char.
+            freq[c] = tmp[j];
+            chars[c] = (char) j;
+
             c++;
         }
     }
@@ -93,4 +145,5 @@ void buildFrequencyList(char *input, freqList *list)
     // Free temporary data.
     free(tmp);
 }
+
 
