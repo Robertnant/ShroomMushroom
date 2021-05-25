@@ -122,10 +122,12 @@ void buildHeap(struct heap *heap)
 // Check if node is leaf.
 int isLeaf(struct heapNode* root)
 {
-    int a = !(root->l);
-    int b = !(root->r);
-
-    return a && b;
+    // TODO: Check children instead if fails.
+    // int a = !(root->l);
+    // int b = !(root->r);
+    // return a && b;
+    
+    return (root->data != '$');
 }
 
 // Creates a min heap of capacity from data and freq.
@@ -270,11 +272,45 @@ char *encodeData(struct heapNode *huffmanTree, char *input)
         
     }
 
+    // TODO: Call toChar directly here?
+    
     // Return final string.
     return (char *) g_string_free(res, FALSE);
 }
 
-// TODO/ Might need to use encodeData instead of this.
+// Convert encoded data from binary to characters.
+char *toChar(char *encData, unsigned char *offset)
+{
+    char tmp[9];
+    size_t len = strlen(encData);
+
+    // Get size of result string (floor division).
+    size_t resSize = (size_t) len / 8;
+
+    if (resSize % 8 != 0)
+        resSize++;
+
+    char res[resSize+1];
+    size_t resIndex = 0;
+
+    size_t i;
+    for (i = 0; i < len; i++)
+    {
+        tmp[i%8] = encData[i];
+
+        // Convert byte set to character.
+        if ((i+1) % 8 == 0)
+        {
+            res[resIndex] = (char) decBin(tmp);
+            // Increment result string index.
+            resIndex++;
+        }
+    }
+
+    // Save offset (number of 0s added).
+}
+
+// TODO: Might need to use encodeData instead of this.
 // to match Algo DM method.
 
 // A utility function to print an array of size n
@@ -330,6 +366,7 @@ void deleteHuffman(struct heapNode *huffmanTree)
 
         // Delete current node;
         free(huffmanTree);
+        huffmanTree = NULL;
     }
 }
 
