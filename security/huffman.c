@@ -20,9 +20,9 @@
 // TODO: gfree should be used by main to free freq and chars.
 
 // Heap creator.
-heap *newHeap(size_t capacity)
+struct heap *newHeap(size_t capacity)
 {
-    heap *heap = malloc(sizeof(heap));
+    struct heap *heap = malloc(sizeof(struct heap));
 
     heap->size = 0;
     heap->capacity = capacity;
@@ -53,7 +53,7 @@ void swapNodes(struct heapNode **node1, struct heapNode **node2)
 }
 
 // Heapify.
-void heapify(heap *heap, size_t index) 
+void heapify(struct heap *heap, size_t index) 
 {
     size_t min = index;
     size_t l = 2 * index + 1;
@@ -72,13 +72,13 @@ void heapify(heap *heap, size_t index)
     }
 }
 
-int isSizeOne(heap *heap)
+int isSizeOne(struct heap *heap)
 {
     return (heap->size == 1);
 }
  
 // Get minimum node.
-struct heapNode* getMin(heap *heap)
+struct heapNode* getMin(struct heap *heap)
 {
     struct heapNode *tmp = heap->arr[0];
 
@@ -94,7 +94,7 @@ struct heapNode* getMin(heap *heap)
 }
  
 // Insert new node to heap.
-void insertNode(heap *heap, struct heapNode *heapNode)
+void insertNode(struct heap *heap, struct heapNode *heapNode)
 {
     // Increase heap size.
     heap->size += 1;
@@ -111,7 +111,7 @@ void insertNode(heap *heap, struct heapNode *heapNode)
 }
 
 // Build heap.
-void buildHeap(heap* heap)
+void buildHeap(struct heap *heap)
 {
     int n = heap->size - 1;
  
@@ -129,11 +129,11 @@ int isLeaf(struct heapNode* root)
 }
 
 // Creates a min heap of capacity from data and freq.
-heap *createAndBuildHeap(char *data, int *freq, int size)
+struct heap *createAndBuildHeap(char *data, size_t *freq, size_t size)
 {
-    heap *heap = newHeap(size);
+    struct heap *heap = newHeap(size);
 
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
         heap->arr[i] = newNode(data[i], freq[i]);
 
     heap->size = size;
@@ -196,14 +196,14 @@ void buildFrequencyList(char *input, size_t *freq, char **chars)
 }
 
 // Build Huffman tree.
-struct heapNode *buildHuffmanTree(char *data, int *freq, int size)
+struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size)
 {
     struct heapNode *l;
     struct heapNode *r;
     struct heapNode *top;
  
     // Create new heap.
-    heap* heap = createAndBuildHeap(data, freq, size);
+    struct heap *heap = createAndBuildHeap(data, freq, size);
  
     while (!isSizeOne(heap)) 
     {
@@ -274,10 +274,85 @@ char *encodeData(struct heapNode *huffmanTree, char *input)
     return (char *) g_string_free(res, FALSE);
 }
 
+// TODO/ Might need to use encodeData instead of this.
+// to match Algo DM method.
+
+// A utility function to print an array of size n
+void printArr(int arr[], int n)
+{
+    int i;
+    for (i = 0; i < n; ++i)
+        printf("%d", arr[i]);
+ 
+    printf("\n");
+}
+
+// Prints huffman codes from the root of Huffman Tree.
+// It uses arr[] to store codes
+void printCodes(struct heapNode* root, int arr[], int top)
+{
+ 
+    // Assign 0 to left edge and recur
+    if (root->l) {
+ 
+        arr[top] = 0;
+        printCodes(root->l, arr, top + 1);
+    }
+ 
+    // Assign 1 to right edge and recur
+    if (root->r) {
+ 
+        arr[top] = 1;
+        printCodes(root->r, arr, top + 1);
+    }
+ 
+    // If this is a leaf node, then
+    // it contains one of the input
+    // characters, print the character
+    // and its code from arr[]
+    if (isLeaf(root)) {
+ 
+        printf("%c: ", root->data);
+        printArr(arr, top);
+    }
+}
+ 
+// The main function that builds a
+// Huffman Tree and print codes by traversing
+// the built Huffman Tree
+void HuffmanCodes(char data[], size_t freq[], size_t size) 
+{
+    // Construct Huffman Tree
+    struct heapNode* root = buildHuffmanTree(data, freq, size);
+ 
+    // Print Huffman codes using
+    // the Huffman tree built above
+    int arr[MAX_HT], top = 0;
+ 
+    printCodes(root, arr, top);
+}
+
 int main()
 {
-    char input[] = "Hello!";
+    // char input[] = "Hello!";
     // char input[] = "Sergio, Sergio, Sergio, tsk, tsk, tsk, man...";
+    char input[101];
+
+    for (int i = 0; i < 100; i++)
+    {
+        if (i < 5)
+            input[i] = 'a';
+        else if (i < 14)
+            input[i] = 'b';
+        else if (i < 26)
+            input[i] = 'c';
+        else if (i < 39)
+            input[i] = 'd';
+        else if (i < 55)
+            input[i] = 'e';
+        else
+            input[i] = 'f';
+    }
 
     // TODO: Use Geeksforgeeks test to get their result.
 
@@ -292,6 +367,10 @@ int main()
     {
         printf("%c: %ld\n", chars[i], freq[i]);
     }
+
+    printf("Test 2: \n");
+
+    HuffmanCodes(chars, freq, strlen(chars));
 
     // Free memory.
     free(freq);
