@@ -5,6 +5,7 @@
 #include <err.h>
 #include <gmodule.h>
 #include <glib.h>
+#include <math.h>
 #include "huffman.h"
 
 #define _GNU_SOURCE
@@ -270,9 +271,23 @@ char *encodeData(struct heapNode *huffmanTree, char *input)
     return (char *) g_string_free(res, FALSE);
 }
 
+int binDec(char *binStr)
+{
+    int dec = 0;
+    int bin = atoi(binStr);
+ 
+    for (int i = 0; bin; i++, bin /= 10)
+        if (bin % 10)
+            dec += pow(2, i);
+ 
+    printf("%d\n", dec);
+
+    return dec;
+}
+
 // TODO: TEST WITH SIMPLE STRING.
 // Convert encoded data from binary to characters.
-char *toChar(char *encData, unsigned char *offset)
+char *toChar(char *encData)
 {
     char tmp[9];
     bzero(tmp, 9);
@@ -288,6 +303,7 @@ char *toChar(char *encData, unsigned char *offset)
     size_t resIndex = 0;
 
     size_t i;
+    printf("Enc size: %ld\n", len);
     for (i = 0; i < len; i++)
     {
         tmp[i%8] = encData[i];
@@ -295,7 +311,7 @@ char *toChar(char *encData, unsigned char *offset)
         // Convert byte set to character.
         if ((i+1) % 8 == 0)
         {
-            res[resIndex] = (char) decBin(tmp);
+            res[resIndex] = (char) binDec(tmp);
 
             // Reset tmp string.
             bzero(tmp, 8);
@@ -306,7 +322,9 @@ char *toChar(char *encData, unsigned char *offset)
     }
 
     // Pad last set of bits to 8 bits.
-    *offset = 0;
+    // *offset = 0;
+    res[resIndex] = (char) binDec(tmp);
+    /*
     if ((i+1) % 8 != 0)
     {
         // Create new padded string.
@@ -314,14 +332,16 @@ char *toChar(char *encData, unsigned char *offset)
         bzero(padded, 9);
 
         // Save offset (number of NULL bytes added).
-        *offset = 8 - strlen(tmp);
+        // *offset = 8 - strlen(tmp);
+        printf("Offset: %d\n", *offset);
 
         for (int c = *offset; c < 8; c++)
             padded[c] = tmp[c - *offset];
 
-        res[resIndex] = (char) decBin(padded);
+        res[resIndex] = (char) binDec(padded);
     }
-
+    */
+    
     return res;
 }
 
@@ -358,8 +378,8 @@ void printCodes(struct heapNode* root, int arr[], int top)
     // it contains one of the input
     // characters, print the character
     // and its code from arr[]
-    if (isLeaf(root)) {
- 
+    if (isLeaf(root)) 
+    {
         printf("%c: ", root->data);
         printArr(arr, top);
     }
@@ -400,9 +420,20 @@ void HuffmanCodes(char data[], size_t freq[], size_t size)
     deleteHuffman(root);
 }
 
-/*
 int main()
 {
+    char binStr[] = "00101110101001011101001011010101010101011110011010011101010";
+    // char binStr[] = "00101110 10100101 11010010 11010101 01010101 11100110 10011101 010";
+    // char binStr[] = "46         165     210         213     85      230       157   2"
+    // char binStr[] = "   .           ¥       Ò         Õ         U       æ             "   
+
+    char *encoding = toChar(binStr);
+    printf("Encoding is:\n %s\n", encoding);
+
+    // Free memory.
+    free(encoding);
+
+    /*
     // char input[] = "Hello!";
     // char input[] = "Sergio, Sergio, Sergio, tsk, tsk, tsk, man...";
     char input[101];
@@ -442,7 +473,7 @@ int main()
     // Free memory.
     free(freq);
     free(chars);
+    */
 
     return 0;
 }
-*/

@@ -55,6 +55,6 @@ void printCodes(struct heapNode* root, int arr[], int top);
 void HuffmanCodes(char data[], size_t freq[], size_t size);
 
 // Tools.
-char *toChar(char *encData, unsigned char *offset);
+char *toChar(char *encData);
 
 #endif
