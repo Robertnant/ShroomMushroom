@@ -297,7 +297,29 @@ publicKey* stringtoPub(char *string)
     return key;
 }
 
-/*
+void compress(char *input)
+{
+    // Build frequency list.
+    size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
+    char *chars;
+
+    buildFrequencyList(input, freq, &chars);
+
+    // Print char and frequency.
+    for (size_t i = 0; i < strlen(chars); i++)
+    {
+        printf("%c: %ld\n", chars[i], freq[i]);
+    }
+
+    printf("\nHuffman compression: \n");
+
+    HuffmanCodes(chars, freq, strlen(chars));
+
+    // Free memory.
+    free(freq);
+    free(chars);
+}
+
 int main()
 {
     char *msg = "Black leather gloves, no sequins\n\
@@ -322,7 +344,10 @@ int main()
 
     // Encrypt message and print.
     encrypt_gamal(msg, receiver_pubkey, dataCyphers);
-    // printf("\nEncryption: %s\n", dataCyphers -> en_msg);
+    printf("\nEncryption: %s\n", dataCyphers -> en_msg);
+
+    // Compress encryption with Huffman.
+    compress(dataCyphers->en_msg);
 
     // Decrypt data and print.
     char *dr_msg = decrypt_gamal(dataCyphers, receiver_privkey);
@@ -348,4 +373,3 @@ int main()
     return 0;
 
 }
-*/

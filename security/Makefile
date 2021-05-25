@@ -5,7 +5,7 @@ LIBS = `pkg-config --libs glib-2.0` -lgmp
 all: elgamal, huffman
 
 elgamal: elgamal.c
-	$(CC) $(CFLAGS) -o elgamal elgamal.c tools.c $(LIBS)
+	$(CC) $(CFLAGS) -o elgamal elgamal.c tools.c huffman.c $(LIBS)
 
 huffman: huffman.c
 	$(CC) $(CFLAGS) -o huffman huffman.c $(LIBS)

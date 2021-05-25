@@ -316,22 +316,42 @@ void printCodes(struct heapNode* root, int arr[], int top)
         printArr(arr, top);
     }
 }
- 
+
+// Delete Huffman tree.
+void deleteHuffman(struct heapNode *huffmanTree)
+{
+    if (huffmanTree)
+    {
+        // Delete left child.
+        deleteHuffman(huffmanTree->l);
+
+        // Delete right child.
+        deleteHuffman(huffmanTree->r);
+
+        // Delete current node;
+        free(huffmanTree);
+    }
+}
+
 // The main function that builds a
 // Huffman Tree and print codes by traversing
 // the built Huffman Tree
 void HuffmanCodes(char data[], size_t freq[], size_t size) 
 {
     // Construct Huffman Tree
-    struct heapNode* root = buildHuffmanTree(data, freq, size);
+    struct heapNode *root = buildHuffmanTree(data, freq, size);
  
     // Print Huffman codes using
     // the Huffman tree built above
     int arr[MAX_HT], top = 0;
  
     printCodes(root, arr, top);
+
+    // Delete Huffman tree.
+    deleteHuffman(root);
 }
 
+/*
 int main()
 {
     // char input[] = "Hello!";
@@ -354,10 +374,8 @@ int main()
             input[i] = 'f';
     }
 
-    // TODO: Use Geeksforgeeks test to get their result.
-
     // Build frequency list.
-    size_t *freq = calloc(62, sizeof(size_t));
+    size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
     char *chars;
 
     buildFrequencyList(input, freq, &chars);
@@ -378,3 +396,4 @@ int main()
 
     return 0;
 }
+*/
