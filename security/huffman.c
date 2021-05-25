@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 #include <sys/types.h>
 #include <err.h>
 #include <gmodule.h>
@@ -9,15 +10,6 @@
 #define _GNU_SOURCE
 
 /* README: Only use Huffman on base 62 compressed data! */
-
-// TODO: Use next pointers for freqList structs
-// to make code easier to implement.
-
-// TODO: If code fails: implement check for NULL in node char values.
-// of other functions. 
-// NONE is used to specify that no char is assigned.
-
-// TODO: gfree should be used by main to free freq and chars.
 
 // Heap creator.
 struct heap *newHeap(size_t capacity)
@@ -278,19 +270,21 @@ char *encodeData(struct heapNode *huffmanTree, char *input)
     return (char *) g_string_free(res, FALSE);
 }
 
+// TODO: TEST WITH SIMPLE STRING.
 // Convert encoded data from binary to characters.
 char *toChar(char *encData, unsigned char *offset)
 {
     char tmp[9];
-    size_t len = strlen(encData);
+    bzero(tmp, 9);
 
     // Get size of result string (floor division).
+    size_t len = strlen(encData);
     size_t resSize = (size_t) len / 8;
 
     if (resSize % 8 != 0)
         resSize++;
 
-    char res[resSize+1];
+    char *res = calloc(resSize+1, sizeof(char));
     size_t resIndex = 0;
 
     size_t i;
@@ -302,16 +296,34 @@ char *toChar(char *encData, unsigned char *offset)
         if ((i+1) % 8 == 0)
         {
             res[resIndex] = (char) decBin(tmp);
+
+            // Reset tmp string.
+            bzero(tmp, 8);
+
             // Increment result string index.
             resIndex++;
         }
     }
 
-    // Save offset (number of 0s added).
-}
+    // Pad last set of bits to 8 bits.
+    *offset = 0;
+    if ((i+1) % 8 != 0)
+    {
+        // Create new padded string.
+        char padded[9];
+        bzero(padded, 9);
 
-// TODO: Might need to use encodeData instead of this.
-// to match Algo DM method.
+        // Save offset (number of NULL bytes added).
+        *offset = 8 - strlen(tmp);
+
+        for (int c = *offset; c < 8; c++)
+            padded[c] = tmp[c - *offset];
+
+        res[resIndex] = (char) decBin(padded);
+    }
+
+    return res;
+}
 
 // A utility function to print an array of size n
 void printArr(int arr[], int n)
