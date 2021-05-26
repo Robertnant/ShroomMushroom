@@ -31,9 +31,9 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Shroom Shroom Mushroom 🥳🐨</property>
+                <property name="label" translatable="yes">Shroom Shroom Mushroom 🐨</property>
                 <attributes>
-                  <attribute name="font-desc" value="Nimbus Mono L Bold 15"/>
+                  <attribute name="font-desc" value="Nimbus Mono PS Bold 20"/>
                 </attributes>
               </object>
               <packing>
