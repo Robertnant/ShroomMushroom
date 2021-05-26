@@ -325,6 +325,40 @@ void compress(char *data, char **resTree, char **resData)
     free(chars);
 }
 
+// Decode binary encoded string using corresponding huffman tree.
+char *decodeData(struct heapNode *huffmanTree, char *data)
+{
+    // Check for empty tree.
+    if (huffmanTree == NULL)
+        err(1, "Empty Huffman Tree.");
+
+    GString *res = g_string_new(NULL);
+
+    struct heapNode *tmp = huffmanTree;
+
+    size_t len = strlen(data);
+    for (size_t i = 0; i < len; i++)
+    {
+        char c = data[i];
+        
+        if (c == '0')
+            tmp = tmp->l;
+        else if (tmp->r != NULL)
+            tmp = tmp->r;
+
+        // Check if character reached.
+        if (isLeaf(tmp))
+        {
+            g_string_append_c(res, tmp->data);
+
+            // Reset temporary tree.
+            tmp = huffmanTree;
+        }
+    }
+
+    return g_string_free(res, FALSE);
+}
+
 // Prints huffman codes from the root of Huffman Tree.
 // It uses arr[] to store codes
 void printCodes(struct heapNode* root, int arr[], int top)
