@@ -1,23 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 #include <sys/types.h>
 #include <err.h>
 #include <gmodule.h>
 #include <glib.h>
+#include <math.h>
 #include "huffman.h"
 
 #define _GNU_SOURCE
 
 /* README: Only use Huffman on base 62 compressed data! */
-
-// TODO: Use next pointers for freqList structs
-// to make code easier to implement.
-
-// TODO: If code fails: implement check for NULL in node char values.
-// of other functions. 
-// NONE is used to specify that no char is assigned.
-
-// TODO: gfree should be used by main to free freq and chars.
 
 // Heap creator.
 struct heap *newHeap(size_t capacity)
@@ -122,10 +115,12 @@ void buildHeap(struct heap *heap)
 // Check if node is leaf.
 int isLeaf(struct heapNode* root)
 {
-    int a = !(root->l);
-    int b = !(root->r);
-
-    return a && b;
+    // TODO: Check children instead if fails.
+    // int a = !(root->l);
+    // int b = !(root->r);
+    // return a && b;
+    
+    return (root->data != '$');
 }
 
 // Creates a min heap of capacity from data and freq.
@@ -270,12 +265,85 @@ char *encodeData(struct heapNode *huffmanTree, char *input)
         
     }
 
+    // TODO: Call toChar directly here?
+    
     // Return final string.
     return (char *) g_string_free(res, FALSE);
 }
 
-// TODO/ Might need to use encodeData instead of this.
-// to match Algo DM method.
+int binDec(char *binStr)
+{
+    int dec = 0;
+    int bin = atoi(binStr);
+ 
+    for (int i = 0; bin; i++, bin /= 10)
+        if (bin % 10)
+            dec += pow(2, i);
+ 
+    printf("%d\n", dec);
+
+    return dec;
+}
+
+// TODO: TEST WITH SIMPLE STRING.
+// Convert encoded data from binary to characters.
+char *toChar(char *encData)
+{
+    char tmp[9];
+    bzero(tmp, 9);
+
+    // Get size of result string (floor division).
+    size_t len = strlen(encData);
+    size_t resSize = (size_t) len / 8;
+
+    if (resSize % 8 != 0)
+        resSize++;
+
+    char *res = calloc(resSize+1, sizeof(char));
+    size_t resIndex = 0;
+
+    size_t i;
+    printf("Enc size: %ld\n", len);
+    for (i = 0; i < len; i++)
+    {
+        tmp[i%8] = encData[i];
+
+        // Convert byte set to character.
+        if ((i+1) % 8 == 0)
+        {
+            res[resIndex] = (char) binDec(tmp);
+
+            // Reset tmp string.
+            bzero(tmp, 8);
+
+            // Increment result string index.
+            resIndex++;
+        }
+    }
+
+    // Pad last set of bits to 8 bits.
+    // *offset = 0;
+    res[resIndex] = (char) binDec(tmp);
+    /*
+    if ((i+1) % 8 != 0)
+    {
+        // Create new padded string.
+        char padded[9];
+        bzero(padded, 9);
+
+        // Save offset (number of NULL bytes added).
+        // *offset = 8 - strlen(tmp);
+        printf("Offset: %d\n", *offset);
+
+        for (int c = *offset; c < 8; c++)
+            padded[c] = tmp[c - *offset];
+
+        res[resIndex] = (char) binDec(padded);
+    }
+    */
+    
+    return res;
+}
 
 // A utility function to print an array of size n
 void printArr(int arr[], int n)
@@ -310,30 +378,62 @@ void printCodes(struct heapNode* root, int arr[], int top)
     // it contains one of the input
     // characters, print the character
     // and its code from arr[]
-    if (isLeaf(root)) {
- 
+    if (isLeaf(root)) 
+    {
         printf("%c: ", root->data);
         printArr(arr, top);
     }
 }
- 
+
+// Delete Huffman tree.
+void deleteHuffman(struct heapNode *huffmanTree)
+{
+    if (huffmanTree)
+    {
+        // Delete left child.
+        deleteHuffman(huffmanTree->l);
+
+        // Delete right child.
+        deleteHuffman(huffmanTree->r);
+
+        // Delete current node;
+        free(huffmanTree);
+        huffmanTree = NULL;
+    }
+}
+
 // The main function that builds a
 // Huffman Tree and print codes by traversing
 // the built Huffman Tree
 void HuffmanCodes(char data[], size_t freq[], size_t size) 
 {
     // Construct Huffman Tree
-    struct heapNode* root = buildHuffmanTree(data, freq, size);
+    struct heapNode *root = buildHuffmanTree(data, freq, size);
  
     // Print Huffman codes using
     // the Huffman tree built above
     int arr[MAX_HT], top = 0;
  
     printCodes(root, arr, top);
+
+    // Delete Huffman tree.
+    deleteHuffman(root);
 }
 
 int main()
 {
+    char binStr[] = "00101110101001011101001011010101010101011110011010011101010";
+    // char binStr[] = "00101110 10100101 11010010 11010101 01010101 11100110 10011101 010";
+    // char binStr[] = "46         165     210         213     85      230       157   2"
+    // char binStr[] = "   .           ¥       Ò         Õ         U       æ             "   
+
+    char *encoding = toChar(binStr);
+    printf("Encoding is:\n %s\n", encoding);
+
+    // Free memory.
+    free(encoding);
+
+    /*
     // char input[] = "Hello!";
     // char input[] = "Sergio, Sergio, Sergio, tsk, tsk, tsk, man...";
     char input[101];
@@ -354,10 +454,8 @@ int main()
             input[i] = 'f';
     }
 
-    // TODO: Use Geeksforgeeks test to get their result.
-
     // Build frequency list.
-    size_t *freq = calloc(62, sizeof(size_t));
+    size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
     char *chars;
 
     buildFrequencyList(input, freq, &chars);
@@ -375,6 +473,7 @@ int main()
     // Free memory.
     free(freq);
     free(chars);
+    */
 
     return 0;
 }

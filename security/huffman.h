@@ -1,8 +1,13 @@
 #ifndef HUFFMAN_H
 #define HUFFMAN_H
 
+#include <gmodule.h>
+#include <glib.h>
+
 // TODO Increase this if error occurs.
 #define MAX_HT 100
+// 63 total chars in encryption including hyphen.
+#define TOTAL_CHARS 63
 
 // Heap node structure.
 struct heapNode
@@ -45,5 +50,11 @@ struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size);
 
 // Encoding.
 char *encodeData(struct heapNode *huffmanTree, char *input);
+void printArr(int arr[], int n);
+void printCodes(struct heapNode* root, int arr[], int top);
+void HuffmanCodes(char data[], size_t freq[], size_t size);
+
+// Tools.
+char *toChar(char *encData);
 
 #endif
