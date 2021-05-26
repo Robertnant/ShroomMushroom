@@ -11,6 +11,8 @@
 
 #define _GNU_SOURCE
 
+// TODO: Test encodeTree function.
+
 /* README: Only use Huffman on base 62 compressed data! */
 
 // Heap creator.
@@ -298,6 +300,31 @@ void encodeTree(struct heapNode *huffmanTree, GString *res)
     }
 }
 
+// TODO: Add offset if necessary.
+void compress(char *data, char **resTree, char **resData)
+{
+    // Step 1: Build frequency list.
+    size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
+    char *chars;
+
+    buildFrequencyList(data, freq, &chars);
+
+    // Step 2: Build Huffman tree.
+    struct heapNode *ht = buildHuffmanTree(chars, freq, strlen(chars));
+
+    // Step 3: Compress Huffman tree.
+    GString *tmp = g_string_new(NULL);
+    encodeTree(ht, tmp);
+    *resTree = toChar(g_string_free(tmp, FALSE));
+
+    // Step 4: Compress input string.
+    *resData = toChar(encodeData(ht, data));
+
+    // Free memory.
+    free(freq);
+    free(chars);
+}
+
 // Prints huffman codes from the root of Huffman Tree.
 // It uses arr[] to store codes
 void printCodes(struct heapNode* root, int arr[], int top)
@@ -368,8 +395,8 @@ int main()
     // ------------------ TEST 1------------------
     char binStr[] = "00101110101001011101001011010101010101011110011010011101010";
     // char binStr[] = "00101110 10100101 11010010 11010101 01010101 11100110 10011101 010";
-    // char binStr[] = "46         165     210         213     85      230       157   2"
-    // char binStr[] = "   .           ¥       Ò         Õ         U       æ             "   
+    // char binStr[] = "46         165     210         213     85      230       157   2";
+    // char binStr[] = "   .           ¥       Ò         Õ         U       æ             ";
 
     char *encoding = toChar(binStr);
     printf("Encoding is:\n %s\n", encoding);
@@ -381,6 +408,7 @@ int main()
     // char input[] = "Hello!";
     // char input[] = "Sergio, Sergio, Sergio, tsk, tsk, tsk, man...";
     char input[101];
+    input[100] = '\0';
 
     for (int i = 0; i < 100; i++)
     {
