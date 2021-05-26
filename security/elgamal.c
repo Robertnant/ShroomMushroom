@@ -297,6 +297,7 @@ publicKey* stringtoPub(char *string)
     return key;
 }
 
+/*
 void compress(char *input)
 {
     // Build frequency list.
@@ -319,6 +320,7 @@ void compress(char *input)
     free(freq);
     free(chars);
 }
+*/
 
 /*
 int main()

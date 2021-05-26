@@ -11,8 +11,6 @@
 
 #define _GNU_SOURCE
 
-// TODO: Test encodeTree function.
-
 /* README: Only use Huffman on base 62 compressed data! */
 
 // Heap creator.
@@ -268,8 +266,6 @@ char *encodeData(struct heapNode *huffmanTree, char *input)
         
     }
 
-    // TODO: Call toChar directly here?
-    
     // Return final string.
     return (char *) g_string_free(res, FALSE);
 }
@@ -359,6 +355,12 @@ char *decodeData(struct heapNode *huffmanTree, char *data)
     return g_string_free(res, FALSE);
 }
 
+// Decode binary encoded huffman tree.
+struct heapNode *decodeTree(char *data)
+{
+
+}
+
 // Prints huffman codes from the root of Huffman Tree.
 // It uses arr[] to store codes
 void printCodes(struct heapNode* root, int arr[], int top)
@@ -424,6 +426,7 @@ void HuffmanCodes(char data[], size_t freq[], size_t size)
     deleteHuffman(root);
 }
 
+/*
 int main()
 {
     // ------------------ TEST 1------------------
@@ -482,3 +485,4 @@ int main()
 
     return 0;
 }
+*/
