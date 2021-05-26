@@ -84,6 +84,7 @@ struct pipe_content
 
 void * send_to(void* arg)
 {
+    signal(SIGPIPE, SIG_IGN);
     struct pipe_content* args = arg;
     
     int fd;
@@ -91,11 +92,12 @@ void * send_to(void* arg)
     struct user* tmp_target_user = get_user(args->number);
     char* filename = get_filename(PIPES_FILE, tmp_target_user->UID);
 
-    fd = open(filename, O_WRONLY);
-    free(tmp_target_user);
-    free(filename);
-
-    rewrite(fd, args->message, args->size);
+    int sent = 0;
+    while (!sent)
+    {
+        fd = open(filename, O_WRONLY);
+        sent = rewrite(fd, args->message, args->size);
+    }
                     //printf("Attempting to open pipe\n");
                     //file_fd = open(receiver->UID, O_WRONLY);
                     //printf("Pipe opened!\n");
@@ -103,6 +105,8 @@ void * send_to(void* arg)
                     //printf("Write successfull!\n");
                     //close(file_fd);
                     //printf("Pipe closed!\n");
+    free(tmp_target_user);
+    free(filename);
 
     free(args->message);
     free(args->number);

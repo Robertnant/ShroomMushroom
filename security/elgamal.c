@@ -324,6 +324,7 @@ void compress(char *input)
     free(chars);
 }
 
+/*
 int main()
 {
     char *msg = "Black leather gloves, no sequins\n\
@@ -377,3 +378,4 @@ int main()
     return 0;
 
 }
+*/

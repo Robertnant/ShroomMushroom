@@ -420,6 +420,8 @@ void HuffmanCodes(char data[], size_t freq[], size_t size)
     deleteHuffman(root);
 }
 
+
+/*
 int main()
 {
     char binStr[] = "00101110101001011101001011010101010101011110011010011101010";
@@ -433,7 +435,7 @@ int main()
     // Free memory.
     free(encoding);
 
-    /*
+    //////////////////////////////////
     // char input[] = "Hello!";
     // char input[] = "Sergio, Sergio, Sergio, tsk, tsk, tsk, man...";
     char input[101];
@@ -473,7 +475,7 @@ int main()
     // Free memory.
     free(freq);
     free(chars);
-    */
+    ///////////////////////////////
 
     return 0;
-}
+}*/

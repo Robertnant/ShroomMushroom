@@ -1,13 +1,15 @@
 CC=gcc
-CFLAGS= `pkg-config --cflags gtk+-3.0` -Wall -Wextra -g -lm -pthread -std=c99 -fsanitize=address
-LDLIBS= `pkg-config --libs gtk+-3.0` -ljson-c -lgmp
+CFLAGS= `pkg-config --cflags gtk+-3.0` `pkg-config --cflags glib-2.0` -Wall -Wextra -lm -g -pthread -std=c99 -fsanitize=address
+LDLIBS= `pkg-config --libs gtk+-3.0`  -ljson-c -lgmp -lm
 VPATH=networking:saved_users:messages:security:design/Registration:design/Main:design/addcontact
+LIBS= `pkg-config --libs glib-2.0` -lgmp -lm
+
 
 all: server client
 
-server: server.c users.c messages.c tools.c elgamal.c client_list.c
+server: server.c users.c messages.c tools.c elgamal.c huffman.c client_list.c
 
-client: client.c users.c messages.c tools.c elgamal.c reg_page.c interface_full.c add_contact.c
+client: client.c users.c messages.c tools.c elgamal.c huffman.c reg_page.c interface_full.c add_contact.c
 
 
 clean:

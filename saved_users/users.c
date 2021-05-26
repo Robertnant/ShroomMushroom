@@ -13,18 +13,24 @@
 #include "../security/tools.h"
 
 
-void rewrite(int fd, char *buf, size_t count)
+int rewrite(int fd, char *buf, size_t count)
 {
     int tmp;
     while (count)
     {
         tmp = write(fd, buf, count);
         if(tmp == -1)
-            errx(1, "Could not write to stream");
+        {
+            printf("Could not rewrite to stream!\n");
+            return 0;
+        }
+            
+            //errx(1, "Could not write to stream");
 
         count -= tmp;
         buf += tmp;
     }
+    return 1;
 }
 
 unsigned int hash(char *key)

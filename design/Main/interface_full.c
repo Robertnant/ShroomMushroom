@@ -318,7 +318,7 @@ void retrieveMessage()
 
     //int jsonSize = MAX_BUFFER;
     char json[MAX_BUFFER];
-    GString *json_string = g_string_new(NULL);
+     GString *json_string = g_string_new(NULL);
     bzero(json, MAX_BUFFER);
     //if (read(sockfd, json, jsonSize) == -1)
     //    errx(1, "Error reading incoming messages");
@@ -353,7 +353,11 @@ void retrieveMessage()
     if (found != 2)
         return;
     gchar * final = g_string_free(json_string, FALSE);
-
+    
+    if (!message)
+    {
+        printf("MESSAGE ADDRESS: %p\n", message);
+    }
     //printf("BUFFER -> %s\n", json);
     parseMessage(final, message);
     
@@ -374,7 +378,7 @@ void retrieveMessage()
     printf("Decrypting received message\n");
     printf("Received message: %s\n", res);
 
-    if (strcmp(message->sender, target_user->number) == 0)
+    if (target_user && strcmp(message->sender, target_user->number) == 0)
         addBubble(target_user->username, res); 
     saveMessage(target_user->username, res);
 
@@ -387,6 +391,7 @@ void retrieveMessage()
 
 void * start_message_receiver(void * arg)
 {
+    UNUSED(arg);
     while(1)
     {
         retrieveMessage();
