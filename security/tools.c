@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <gmp.h>
 #include "tools.h"
 
 #define BASE 62
@@ -102,3 +98,102 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
 
 }
 
+// Convert binary string to decimal.
+int binDec(char *binStr)
+{
+    int dec = 0;
+    int bin = atoi(binStr);
+ 
+    for (int i = 0; bin; i++, bin /= 10)
+        if (bin % 10)
+            dec += pow(2, i);
+ 
+    printf("%d\n", dec);
+
+    return dec;
+}
+
+// Convert decimal to binary string.
+// Result will have 8 digits.
+void decBin(int dec, char res[])
+{
+    int i = 7;
+    while (i >= 0)
+    {
+        res[i] = (dec%2) + '0';
+        dec /= 2;
+        i--;
+    }
+
+    // Null terminate string.
+    res[8] = '\0';
+}
+
+// Convert encoded data from binary to characters.
+char *toChar(char *encData)
+{
+    char tmp[9];
+    bzero(tmp, 9);
+
+    // Get size of result string (floor division).
+    size_t len = strlen(encData);
+    size_t resSize = (size_t) len / 8;
+
+    if (resSize % 8 != 0)
+        resSize++;
+
+    char *res = calloc(resSize+1, sizeof(char));
+    size_t resIndex = 0;
+
+    size_t i;
+    printf("Enc size: %ld\n", len);
+    for (i = 0; i < len; i++)
+    {
+        tmp[i%8] = encData[i];
+
+        // Convert byte set to character.
+        if ((i+1) % 8 == 0)
+        {
+            res[resIndex] = (char) binDec(tmp);
+
+            // Reset tmp string.
+            bzero(tmp, 8);
+
+            // Increment result string index.
+            resIndex++;
+        }
+    }
+
+    // Pad last set of bits to 8 bits.
+    // *offset = 0;
+    res[resIndex] = (char) binDec(tmp);
+    /*
+    if ((i+1) % 8 != 0)
+    {
+        // Create new padded string.
+        char padded[9];
+        bzero(padded, 9);
+
+        // Save offset (number of NULL bytes added).
+        // *offset = 8 - strlen(tmp);
+        printf("Offset: %d\n", *offset);
+
+        for (int c = *offset; c < 8; c++)
+            padded[c] = tmp[c - *offset];
+
+        res[resIndex] = (char) binDec(padded);
+    }
+    */
+    
+    return res;
+}
+
+// A utility function to print an array of size n
+void printArr(int arr[], int n)
+{
+    int i;
+    for (i = 0; i < n; ++i)
+        printf("%d", arr[i]);
+ 
+    printf("\n");
+}

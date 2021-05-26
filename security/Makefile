@@ -8,7 +8,7 @@ elgamal: elgamal.c
 	$(CC) $(CFLAGS) -o elgamal elgamal.c tools.c huffman.c $(LIBS)
 
 huffman: huffman.c
-	$(CC) $(CFLAGS) -o huffman huffman.c $(LIBS)
+	$(CC) $(CFLAGS) -o huffman huffman.c tools.c $(LIBS)
 
 clean:
 	${RM} *.o
