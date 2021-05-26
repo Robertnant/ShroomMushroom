@@ -25,4 +25,7 @@ bigclean:
 	${RM} saved_users/Pipes/*[0-9]* saved_users/Users/*[0-9]*
 	${RM} .files/.user .files/contacts/*[0-9]* .files/contacts.txt .files/chats/*[0-9]*
 
+clear_chat:
+	${RM} .files/chats/*[0-9]*
+
 .PHONY: all clean remove bigclean

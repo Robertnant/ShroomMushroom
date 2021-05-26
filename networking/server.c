@@ -143,6 +143,8 @@ void * listen_to_client( void * arg )
             }
             bzero(buff, MAX_BUF_SIZE);
         }
+        if (er < 0)
+            return NULL;
         if (!found)
             continue;
         gchar * final = g_string_free(json_string, FALSE);
