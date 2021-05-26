@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow" id="reg_page">
@@ -8,7 +8,15 @@
     <property name="default_width">1021</property>
     <property name="default_height">600</property>
     <child type="titlebar">
-      <placeholder/>
+      <object class="GtkLabel">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Registration Page 🍓</property>
+        <attributes>
+          <attribute name="font-desc" value="Nimbus Mono PS Bold 15"/>
+          <attribute name="foreground" value="#72729f9fcfcf"/>
+        </attributes>
+      </object>
     </child>
     <child>
       <object class="GtkViewport">
