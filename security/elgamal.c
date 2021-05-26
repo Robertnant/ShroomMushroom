@@ -41,10 +41,12 @@ void large_keygen(mpz_t lower, mpz_t upper, mpz_t res)
 void coprime_key(mpz_t q, mpz_t res)
 {
     // Initialize and set GMP numbers.
-    mpz_t low, tmp;
+    mpz_t low, tmp, one;
     mpz_init(low);
     mpz_init(tmp);
     mpz_ui_pow_ui(low, 2, MIN_GAMAL);
+
+    mpz_init_set_str(one, "1", 10);
 
     large_keygen(low, q, res);
     // mpz_set(res, large_keygen(low, q));
@@ -53,13 +55,15 @@ void coprime_key(mpz_t q, mpz_t res)
     // Check if values are coprime.
     while (mpz_cmp_ui(tmp, 1) != 0)
     {
-        large_keygen(low, q, res);
+        //large_keygen(low, q, res); // old method
+        mpz_sub(res, res, one);
         mpz_gcd(tmp, res, q);
     }
 
     // Free memory.
     mpz_clear(low);
     mpz_clear(tmp);
+    mpz_clear(one);
 
 }
 
