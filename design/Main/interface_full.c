@@ -27,6 +27,11 @@ void column(char path[]);
 
 pthread_t receiving_thread;
 
+void on_window_main_destroy()
+{
+    gtk_main_quit();
+}
+
 void on_add_contact_button_selected()
 {
     // Display New Contact page.
@@ -463,6 +468,8 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
     builder = gtk_builder_new_from_file(interface_path);
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
 
+    close_window_button = GTK_BUTTON(gtk_builder_get_object(builder, "close_window_button"));
+
     addContactButton = GTK_BUTTON(gtk_builder_get_object(builder, "addContactButton"));
 
     sendTextButton = GTK_BUTTON(gtk_builder_get_object(builder, "sendTextButton"));
@@ -478,7 +485,7 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
     // Connect signals.
     g_signal_connect(sendTextButton, "clicked", G_CALLBACK(on_send_text_button_activate), NULL);
     g_signal_connect(addContactButton, "clicked", G_CALLBACK(on_add_contact_button_selected), NULL);
-
+    g_signal_connect(close_window_button, "clicked", G_CALLBACK(on_window_main_destroy), NULL);
     // Set Widget sensitivity.
     gtk_widget_set_sensitive(GTK_WIDGET(TextEntry), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(sendTextButton), TRUE);
@@ -499,6 +506,7 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
     // fclose(f_con);
     // fclose(f_chat);
 }
+
 
 /*
 int main()
