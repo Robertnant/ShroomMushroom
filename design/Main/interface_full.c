@@ -174,13 +174,13 @@ void chat_bubbles(char path[]) //Display chat bubbles
                     button_chat[row3] = gtk_button_new_with_label(token);
                     gtk_widget_set_hexpand(button_chat[row2], TRUE);
 
-                    if (is_user != 0) //User - right grid (grid3)
-                    {
-                            gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 2, row2, 1, 1);
-                    }
-                    else //contact - left grid (grid2)
+                    if (is_user != 0) //User - column2
                     {
                             gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 1, row2, 1, 1);
+                    }
+                    else // Contact - column1
+                    {
+                            gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 2, row2, 1, 1);
                     }
                     row2+=1;
             }
@@ -228,7 +228,7 @@ void addBubble(char * sender, char* msg)
     else //not user
       gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 2, row2, 1, 1);
 
-    row2+=1; 
+    row2+=1;
 
     //gtk_widget_show_all(bubble_chat[row2]);
     gtk_widget_show_all(grid2);
@@ -474,7 +474,6 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
     grid1 = GTK_WIDGET(gtk_builder_get_object(builder, "grid1"));
     fixed2 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed2"));
     grid2 = GTK_WIDGET(gtk_builder_get_object(builder, "grid2"));
-    grid3 = GTK_WIDGET(gtk_builder_get_object(builder, "grid3"));
 
     // Connect signals.
     g_signal_connect(sendTextButton, "clicked", G_CALLBACK(on_send_text_button_activate), NULL);
