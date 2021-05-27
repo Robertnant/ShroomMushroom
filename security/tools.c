@@ -108,7 +108,7 @@ int binDec(char *binStr)
         if (bin % 10)
             dec += pow(2, i);
  
-    printf("%d\n", dec);
+    // printf("%d\n", dec);
 
     return dec;
 }
@@ -146,7 +146,7 @@ char *toChar(char *encData, int *offset)
     size_t resIndex = 0;
 
     size_t i;
-    printf("Enc size: %ld\n", len);
+    // printf("Enc size: %ld\n", len);
     for (i = 0; i < len; i++)
     {
         tmp[i%8] = encData[i];
@@ -155,6 +155,8 @@ char *toChar(char *encData, int *offset)
         if ((i+1) % 8 == 0)
         {
             res[resIndex] = (char) binDec(tmp);
+            // TODO Delete.
+            // printf("Char: %c\n", res[resIndex]);
 
             // Reset tmp string.
             bzero(tmp, 8);
@@ -164,15 +166,19 @@ char *toChar(char *encData, int *offset)
         }
     }
 
-    // Pad last set of bits to 8 bits.
+
     *offset = 0;
-    res[resIndex] = (char) binDec(tmp);
-    
-    if ((i+1) % 8 != 0)
+    if ((i) % 8 != 0)
     {
+        // Pad last set of bits to 8 bits.
+        res[resIndex] = (char) binDec(tmp);
+        
+        // TODO Delete.
+        // printf("Char: %c\n", res[resIndex]);
+
         // Save offset (number of NULL bytes added).
         *offset = 8 - strlen(tmp);
-        printf("Offset: %d\n", *offset);
+        // printf("Offset: %d\n", *offset);
     }
     
     return res;
@@ -199,8 +205,12 @@ char *fromChar(char *data, int align)
     */
 
     size_t len = strlen(data);
+    printf("Original Len: %ld\n", len);
+    printf("Align: %d\n", align);
+
     size_t resSize = len * 8 - align;
     
+    printf("Len wanted: %ld\n", resSize);
     char *res = calloc(resSize + 1, sizeof(char));
     size_t c = 0;
 

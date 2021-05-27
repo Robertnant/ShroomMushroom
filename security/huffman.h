@@ -4,7 +4,6 @@
 #include <gmodule.h>
 #include <glib.h>
 
-// TODO Increase this if error occurs.
 #define MAX_HT 100
 // 63 total chars in encryption including hyphen.
 #define TOTAL_CHARS 63
@@ -47,12 +46,23 @@ ssize_t contains(char *chars, size_t len, char c);
 int occur(struct heapNode *root, char el, GString *res);
 void buildFrequencyList(char *input, size_t *freq, char **chars);
 struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size);
+void compress(char *data, char **resTree, char **resData,
+        int *treeOffset, int *dataOffset);
 
 // Encoding.
 char *encodeData(struct heapNode *huffmanTree, char *input);
+void encodeTree(struct heapNode *huffmanTree, GString *res);
 void printCodes(struct heapNode* root, int arr[], int top);
 void HuffmanCodes(char data[], size_t freq[], size_t size);
 
-// Tools.
+// Decoding.
+char *decodeData(struct heapNode *huffmanTree, char *data);
+struct heapNode *decodeTree(char *data);
+
+// DECOMPRESSION.
+char *decompress(char *data, int dataAlign, char *tree, int treeAlign);
+
+// Deletion.
+void deleteHuffman(struct heapNode *huffmanTree);
 
 #endif

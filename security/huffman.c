@@ -313,6 +313,7 @@ void compress(char *data, char **resTree, char **resData,
     encodeTree(ht, tmp);
 
     char *freedStr = g_string_free(tmp, FALSE);
+    printf("Freed Str: %s\n", freedStr);
     *resTree = toChar(freedStr, treeOffset);
 
     // Free memory.
@@ -324,6 +325,7 @@ void compress(char *data, char **resTree, char **resData,
     // Free memory.
     free(freq);
     free(chars);
+    deleteHuffman(ht);
 }
 
 // Decode binary encoded string using corresponding huffman tree.
@@ -428,6 +430,7 @@ struct heapNode *decodeTree(char *data)
 char *decompress(char *data, int dataAlign, char *tree, int treeAlign)
 {
     // Step 1: Get binary representation of tree.
+    printf("Tree: %s\n", tree);
     char *treeBin = fromChar(tree, treeAlign);
 
     // Step 2: Decode Huffman Tree.
@@ -441,7 +444,7 @@ char *decompress(char *data, int dataAlign, char *tree, int treeAlign)
 
     // Free memory.
     free(treeBin);
-    free(ht);
+    deleteHuffman(ht);
     free(dataBin);
 
     return res;
@@ -512,63 +515,26 @@ void HuffmanCodes(char data[], size_t freq[], size_t size)
     deleteHuffman(root);
 }
 
-/*
 int main()
 {
-    // ------------------ TEST 1------------------
-    char binStr[] = "00101110101001011101001011010101010101011110011010011101010";
-    // char binStr[] = "00101110 10100101 11010010 11010101 01010101 11100110 10011101 010";
-    // char binStr[] = "46         165     210         213     85      230       157   2";
-    // char binStr[] = "   .           ¥       Ò         Õ         U       æ             ";
+    char input[] = "My name is Robert and I really love eating food bro";
 
-    char *encoding = toChar(binStr);
-    printf("Encoding is:\n %s\n", encoding);
+    // Compression.
+    char *encTree, *encData;
+    int treeOffset, dataOffset;
 
-    // Free memory.
-    free(encoding);
+    printf("To compress: %s\n", input);
+    compress(input, &encTree, &encData, &treeOffset, &dataOffset);
 
-    // ------------------ TEST 2------------------
-    // char input[] = "Hello!";
-    // char input[] = "Sergio, Sergio, Sergio, tsk, tsk, tsk, man...";
-    char input[101];
-    input[100] = '\0';
+    printf("Tree offset: %d\n", treeOffset);
+    printf("Data offset: %d\n", dataOffset);
+    
+    printf("\nFinished compression\n");
 
-    for (int i = 0; i < 100; i++)
-    {
-        if (i < 5)
-            input[i] = 'a';
-        else if (i < 14)
-            input[i] = 'b';
-        else if (i < 26)
-            input[i] = 'c';
-        else if (i < 39)
-            input[i] = 'd';
-        else if (i < 55)
-            input[i] = 'e';
-        else
-            input[i] = 'f';
-    }
+    // Decompression.
+    char *res = decompress(encData, dataOffset, encTree, treeOffset);
 
-    // Build frequency list.
-    size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
-    char *chars;
-
-    buildFrequencyList(input, freq, &chars);
-
-    // Print char and frequency.
-    for (size_t i = 0; i < strlen(chars); i++)
-    {
-        printf("%c: %ld\n", chars[i], freq[i]);
-    }
-
-    printf("Test 2: \n");
-
-    HuffmanCodes(chars, freq, strlen(chars));
-
-    // Free memory.
-    free(freq);
-    free(chars);
+    printf("\nRetrieved: %s\n", res);
 
     return 0;
 }
-*/
