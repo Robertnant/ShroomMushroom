@@ -424,7 +424,28 @@ struct heapNode *decodeTree(char *data)
 
 }
 
+// Decompression process.
+char *decompress(char *data, int dataAlign, char *tree, int treeAlign)
+{
+    // Step 1: Get binary representation of tree.
+    char *treeBin = fromChar(tree, treeAlign);
 
+    // Step 2: Decode Huffman Tree.
+    struct heapNode *ht = decodeTree(treeBin);
+
+    // Step 3: Get binary representation of data.
+    char *dataBin = fromChar(data, dataAlign);
+
+    // Step 4: Decode encoded data.
+    char *res = decodeData(ht, dataBin);
+
+    // Free memory.
+    free(treeBin);
+    free(ht);
+    free(dataBin);
+
+    return res;
+}
 
 // Prints huffman codes from the root of Huffman Tree.
 // It uses arr[] to store codes
