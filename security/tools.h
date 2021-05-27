@@ -20,6 +20,7 @@ void fromString(char *enc, size_t finalLen, mpz_t *res);
 int binDec(char *binStr);
 void decBin(int dec, char res[]);
 void printArr(int arr[], int n);
-char *toChar(char *encData);
+char *toChar(char *encData, int *offset);
+char *fromChar(char *data, int align);
 
 #endif

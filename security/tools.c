@@ -130,7 +130,7 @@ void decBin(int dec, char res[])
 }
 
 // Convert encoded data from binary to characters.
-char *toChar(char *encData)
+char *toChar(char *encData, int *offset)
 {
     char tmp[9];
     bzero(tmp, 9);
@@ -165,26 +165,72 @@ char *toChar(char *encData)
     }
 
     // Pad last set of bits to 8 bits.
-    // *offset = 0;
+    *offset = 0;
     res[resIndex] = (char) binDec(tmp);
-    /*
+    
     if ((i+1) % 8 != 0)
     {
-        // Create new padded string.
-        char padded[9];
-        bzero(padded, 9);
-
         // Save offset (number of NULL bytes added).
-        // *offset = 8 - strlen(tmp);
+        *offset = 8 - strlen(tmp);
         printf("Offset: %d\n", *offset);
-
-        for (int c = *offset; c < 8; c++)
-            padded[c] = tmp[c - *offset];
-
-        res[resIndex] = (char) binDec(padded);
     }
-    */
     
+    return res;
+}
+
+// Convert each string character to binary representation.
+char *fromChar(char *data, int align)
+{
+    /*
+    size_t len = strlen(data) - 1;
+
+    // Result string.
+    GString *res = g_string_new(NULL);
+
+    for (size_t i = 0; i < len)
+        g_string_append(res, decBin((int) data[i]));
+
+    // Convert final character.
+    // Exclude extra 0s added for padding.
+    char *tmp = decBin((int) data[len]);
+    g_string_append_len(res, tmp+align, 8-align);
+
+    return g_string_free(res, FALSE);
+    */
+
+    size_t len = strlen(data);
+    size_t resSize = len * 8 - align;
+    
+    char *res = calloc(resSize + 1, sizeof(char));
+    size_t c = 0;
+
+    char tmp[9];
+    bzero(tmp, 9);
+
+    for (size_t i = 0; i < len - 1; i++)
+    {
+
+        // Convert character.
+        decBin(data[i], tmp);
+
+        // Append converted character.
+        for (int j = 0; j < 8; j++)
+        {
+            res[c] = tmp[j];
+            c++;
+        }
+    }
+
+    // Convert final character.
+    decBin(data[len-1], tmp);
+
+    // Append conversion (exclude extra padding 0s).
+    for (int j = align; j < 8; j++)
+    {
+        res[c] = tmp[j];
+        c++;
+    }
+
     return res;
 }
 

@@ -296,8 +296,8 @@ void encodeTree(struct heapNode *huffmanTree, GString *res)
     }
 }
 
-// TODO: Add offset if necessary.
-void compress(char *data, char **resTree, char **resData)
+void compress(char *data, char **resTree, char **resData,
+        int *treeOffset, int *dataOffset)
 {
     // Step 1: Build frequency list.
     size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
@@ -311,10 +311,15 @@ void compress(char *data, char **resTree, char **resData)
     // Step 3: Compress Huffman tree.
     GString *tmp = g_string_new(NULL);
     encodeTree(ht, tmp);
-    *resTree = toChar(g_string_free(tmp, FALSE));
+
+    char *freedStr = g_string_free(tmp, FALSE);
+    *resTree = toChar(freedStr, treeOffset);
+
+    // Free memory.
+    free(freedStr);
 
     // Step 4: Compress input string.
-    *resData = toChar(encodeData(ht, data));
+    *resData = toChar(encodeData(ht, data), dataOffset);
 
     // Free memory.
     free(freq);
@@ -356,10 +361,70 @@ char *decodeData(struct heapNode *huffmanTree, char *data)
 }
 
 // Decode binary encoded huffman tree.
+// New nodes will have frequency of -1.
 struct heapNode *decodeTree(char *data)
 {
+    size_t len = strlen(data);
+
+    // Empty tree case.
+    if (len == 0)
+        return NULL;
+
+    // Stack simulator.
+    // Max height of tree should be TOTAL_CHARS - 1.
+    struct heapNode **arr = malloc((TOTAL_CHARS-1) * sizeof(struct heapNode *));
+    int c = 0;
+
+    struct heapNode *ht = newNode('$', -1);
+    struct heapNode *tmp = ht;
+
+    size_t i = 0;
+    while (i < len)
+    {
+        if (data[i] == '0')
+        {
+            // Insert right node.
+            tmp->r = newNode('$', -1);
+            arr[c] = tmp->r;
+
+            // Insert left node.
+            tmp->l = newNode('$', -1);
+            tmp = tmp->l;
+
+            i++;
+            
+            // Increment nodes array counter.
+            c++;
+        }
+        else
+        {
+            char sub[9];
+            sub[8] = '\0';
+
+            // Create substring to convert to character.
+            for (int j = 1; j < 9; j++)
+                sub[j-1] = data[i+j];
+
+            // Save character to current tree.
+            tmp->data = (char) binDec(sub);
+
+            i += 9;
+
+            if (c > 0)
+            {
+                // Pop and decrement array counters.
+                tmp = arr[c-1];
+                arr[c-1] = '\0';
+                c--;
+            }
+        }
+    }
+
+    return ht;
 
 }
+
+
 
 // Prints huffman codes from the root of Huffman Tree.
 // It uses arr[] to store codes
