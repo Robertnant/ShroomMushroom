@@ -136,17 +136,29 @@ void * listen_to_client( void * arg )
         {
             json_string = g_string_append(json_string,  buff);
             
-            if(g_str_has_suffix(buff, "}"))
+            if(g_str_has_prefix(buff, "{"))
             {
                 found = 1;
+            }
+            if(g_str_has_suffix(buff, "}"))
+            {
+                found++;
                 break;
+            }
+            else if (!found)
+            {
+                free(g_string_free(json_string, FALSE));
+                json_string = g_string_new(NULL);
             }
             bzero(buff, MAX_BUF_SIZE);
         }
         if (er < 0)
             return NULL;
         if (!found)
+        {
+            free(g_string_free(json_string, FALSE));
             continue;
+        }
         gchar * final = g_string_free(json_string, FALSE);
         // read the message from client and copy it in buffer 
         //while((er = read(*sockfd, buff, MAX_BUF_SIZE)) > 0)
@@ -214,11 +226,6 @@ void * listen_to_client( void * arg )
         printf("\n");
 
         g_free(final);
-        
-        if(er < 1)
-            return NULL;
-  
-         
     }
 
     // Free memory.
