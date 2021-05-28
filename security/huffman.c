@@ -375,36 +375,27 @@ void compress(char *data, unsigned char **resTree,
     struct codes *codes = calloc(1, sizeof(struct codes));
     initCodes(codes, ht);
 
-    printf("Occurence struct generated.\n");
-    for (int i = 0; i < codes->size; i++)
-        printf("Occ char %c: %s\n", codes->chars[i], codes->occur[i]);
-
-    printf("Actual occurence.\n");
-    int arr[MAX_HT];
-    printCodes(ht, arr, 0);
-
-    // Step 3: Compress Huffman tree.
+    // Step 4: Compress Huffman tree.
     printf("\nEncoding Huffman tree.\n");
 
     GString *tmp = g_string_new(NULL);
     encodeTree(ht, tmp);
 
     char *freedStr = g_string_free(tmp, FALSE);
-    printf("Tree Before toChar: %s\n", freedStr);
+    // printf("Tree Before toChar: %s\n", freedStr);
     *resTree = toChar(freedStr, treeOffset);
     // printf("Res Str: %s\n", *resTree);
 
     // Free memory.
     free(freedStr);
 
-    // Step 4: Compress input string.
-    printf("\nEncoding input string.\n");
+    // Step 5: Compress input string.
+    // printf("\nEncoding input string.\n");
     char *preEncData = encodeData(codes, data);
-    printf("Data Before toChar: %s\n", preEncData);
+    // printf("Data Before toChar: %s\n", preEncData);
     *resData = toChar(preEncData, dataOffset);
 
     // Free memory.
-    // TODO: Stop freeing occurence list if needed after compression.
     freeCodes(codes);
     free(freq);
     free(chars);
@@ -514,33 +505,17 @@ char *decompress(unsigned char *data, int dataAlign,
 {
     // Step 1: Get binary representation of tree.
     char *treeBin = fromChar(tree, treeAlign);
-    printf("Tree decoded: %s\n", treeBin);
-    // printf("Received tree binary representation: %s\n", treeBin);
 
     // Step 2: Decode Huffman Tree.
     struct heapNode *ht = decodeTree(treeBin);
-    printf("\nRecreating Huffman Tree\n");
-
-    struct codes *codes = calloc(1, sizeof(struct codes));
-    initCodes(codes, ht);
-
-    printf("Occurence struct generated.\n");
-    for (int i = 0; i < codes->size; i++)
-        printf("Occ char %c: %s\n", codes->chars[i], codes->occur[i]);
-
-    printf("Actual occurence.\n");
-    int arr[MAX_HT];
-    printCodes(ht, arr, 0);
 
     // Step 3: Get binary representation of data.
     char *dataBin = fromChar(data, dataAlign);
-    printf("Data decoded: %s\n", dataBin);
 
     // Step 4: Decode encoded data.
     char *res = decodeData(ht, dataBin);
 
     // Free memory.
-    freeCodes(codes);
     free(treeBin);
     deleteHuffman(ht);
     free(dataBin);
@@ -596,24 +571,37 @@ void printCodes(struct heapNode* root, int arr[], int top)
 
 int main()
 {
-    char input[] = "My name is Robert and I really love eating food bro";
+    char input[] = "Black leather gloves, no sequins Buckles on the jacket, it's Alyx **** Nike crossbody, got a piece in it Got a dance, but it's really on some street **** I'ma show you how to get it It go, right foot up, left foot slide Left foot up, right foot slide.";
 
     // Compression.
     unsigned char *encTree, *encData;
     int treeOffset, dataOffset;
+    size_t len = strlen(input);
 
     printf("To compress: %s\n", input);
+    printf("Len: %ld\n", len);
     compress(input, &encTree, &encData, &treeOffset, &dataOffset);
 
-    printf("Tree + Offset encoded: %d - %s\n", treeOffset, encTree);
-    printf("Data + Offset encoded: %d - %s\n", dataOffset, encData);
+    size_t compressedLen = 0;
+    while (encTree[compressedLen] != '\0')
+        compressedLen++;
+    for (size_t i = 0; encData[i] != '\0'; i++)
+        compressedLen++;
+
+    printf("Compressed Tree: %sEND\n", encTree);
+    printf("Compressed Data: %sEND\n", encData);
+    printf("Compressed len: %ld\n", compressedLen);
     
     printf("\nFinished compression\n");
 
     // Decompression.
     char *res = decompress(encData, dataOffset, encTree, treeOffset);
 
-    printf("\nRetrieved: %s\n", res);
+    printf("\nDecompressed: %s\n", res);
+
+    // Ratio.
+    double ratio = (float) len / (float) compressedLen;
+    printf("\nConversion ratio: %f\n", ratio);
 
     return 0;
 }
