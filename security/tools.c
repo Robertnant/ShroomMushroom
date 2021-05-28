@@ -5,7 +5,6 @@
 
 int largenum_len(mpz_t x)
 {
-    // printf("Size in base 10: %d\n", mpz_sizeinbase(x,10));
     return (int) mpz_sizeinbase(x, BASE);
 }
 
@@ -219,7 +218,7 @@ char *fromChar(char *data, int align)
 
     size_t resSize = len * 8 - align;
     
-    printf("Len wanted: %ld\n", resSize);
+    // printf("Len wanted: %ld\n", resSize);
     // Add 10 extra slots just in case.
     char *res = calloc(resSize + 10, sizeof(char));
     size_t c = 0;

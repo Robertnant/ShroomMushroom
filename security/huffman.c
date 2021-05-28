@@ -258,7 +258,10 @@ void freeCodes(struct codes *codes)
 void addCode(struct codes *codes, char el, char *occur)
 {
     codes->chars[codes->size] = el;
-    codes->occur[codes->size] = occur;
+    // codes->occur[codes->size] = occur;
+
+    // Copy passed occurence to codes struct.
+    strcpy(codes->occur[codes->size], occur);
 
     codes->size++;
 }
@@ -283,7 +286,7 @@ void occurList(struct heapNode *root, struct codes *codes,
     // Add code from arr[] to codes structure.
     if (isLeaf(root)) 
     {
-        printf("Occur %c: %s\n", root->data, arr);
+        // printf("Occur %c: %s\n", root->data, arr);
         addCode(codes, root->data, arr);
     }
 }
@@ -293,7 +296,8 @@ char *occur(struct codes *codes, char el)
 {
     char *res;
 
-    for (int i = 0; i < codes->size; i++)
+    int i;
+    for (i = 0; i < codes->size; i++)
     {
         if (codes->chars[i] == el)
         {
@@ -302,10 +306,12 @@ char *occur(struct codes *codes, char el)
         }
     }
 
+    if (i == codes->size)
+        printf("\nDid not find wanted occurence\n");
+
     return res;
 }
 
-// TODO: Fix broken function (problem comes from occur).
 char *encodeData(struct codes *codes, char *input)
 {
     GString *res = g_string_new(NULL);
@@ -317,13 +323,8 @@ char *encodeData(struct codes *codes, char *input)
         // tmp = g_string_sized_new(MAX_HT);
 
         char *tmpStr = occur(codes, input[i]);
+        // printf("\nReceived occur: %s\n", tmpStr);
         g_string_append(res, tmpStr);
-
-        // Free memory.
-        // free(tmpStr);
-
-        // printf("Found an occurence\n");
-        // g_string_append(res, g_string_free(tmp, TRUE));
     }
 
     // Return final string.
@@ -373,17 +374,21 @@ void compress(char *data, char **resTree, char **resData,
     initCodes(codes, ht);
 
     // Step 3: Compress Huffman tree.
+    printf("\nEncoding Huffman tree.\n");
+
     GString *tmp = g_string_new(NULL);
     encodeTree(ht, tmp);
 
     char *freedStr = g_string_free(tmp, FALSE);
     // printf("Freed Str: %s\n", freedStr);
     *resTree = toChar(freedStr, treeOffset);
+    // printf("Res Str: %s\n", *resTree);
 
     // Free memory.
     free(freedStr);
 
     // Step 4: Compress input string.
+    printf("\nEncoding input string.\n");
     *resData = toChar(encodeData(codes, data), dataOffset);
 
     // Free memory.
@@ -496,8 +501,8 @@ struct heapNode *decodeTree(char *data)
 char *decompress(char *data, int dataAlign, char *tree, int treeAlign)
 {
     // Step 1: Get binary representation of tree.
-    printf("Tree: %s\n", tree);
     char *treeBin = fromChar(tree, treeAlign);
+    // printf("Received tree binary representation: %s\n", treeBin);
 
     // Step 2: Decode Huffman Tree.
     struct heapNode *ht = decodeTree(treeBin);
@@ -544,10 +549,8 @@ int main()
     printf("To compress: %s\n", input);
     compress(input, &encTree, &encData, &treeOffset, &dataOffset);
 
-    printf("Tree offset: %d\n", treeOffset);
-    printf("Tree encoded: %s\n", encTree);
-    printf("Data offset: %d\n", dataOffset);
-    printf("Data encoded: %s\n", encData);
+    printf("Tree + Offset encoded: %d - %s\n", treeOffset, encTree);
+    printf("Data + Offset encoded: %d - %s\n", dataOffset, encData);
     
     printf("\nFinished compression\n");
 
