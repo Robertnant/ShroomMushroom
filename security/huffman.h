@@ -27,6 +27,14 @@ struct heap
     struct heapNode **arr;
 } heap;
 
+// Character occurence structure.
+struct codes
+{
+    char chars[TOTAL_CHARS];
+    char **occur;
+    int size;
+} codes;
+
 // Heap tools.
 struct heap *newHeap(size_t capacity);
 struct heapNode *newNode(char data, size_t freq);
@@ -43,14 +51,19 @@ struct heap *createAndBuildHeap(char *data, size_t *freq, size_t size);
 
 // COMPRESSION.
 ssize_t contains(char *chars, size_t len, char c);
-int occur(struct heapNode *root, char el, GString *res);
+void initCodes(struct codes *codes, struct heapNode *root);
+void addCode(struct codes *codes, char el, char *occur);
+char *occur(struct codes *codes, char el);
+void occurList(struct heapNode *root, struct codes *codes, 
+        char *arr, int index);
+
 void buildFrequencyList(char *input, size_t *freq, char **chars);
 struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size);
 void compress(char *data, char **resTree, char **resData,
         int *treeOffset, int *dataOffset);
 
 // Encoding.
-char *encodeData(struct heapNode *huffmanTree, char *input);
+char *encodeData(struct codes *codes, char *input);
 void encodeTree(struct heapNode *huffmanTree, GString *res);
 void printCodes(struct heapNode* root, int arr[], int top);
 void HuffmanCodes(char data[], size_t freq[], size_t size);
@@ -64,5 +77,6 @@ char *decompress(char *data, int dataAlign, char *tree, int treeAlign);
 
 // Deletion.
 void deleteHuffman(struct heapNode *huffmanTree);
+void freeCodes(struct codes *codes);
 
 #endif

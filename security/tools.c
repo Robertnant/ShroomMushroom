@@ -142,7 +142,8 @@ char *toChar(char *encData, int *offset)
     if (resSize % 8 != 0)
         resSize++;
 
-    char *res = calloc(resSize+1, sizeof(char));
+    // Allocate 10 extra slots just in case.
+    char *res = calloc(resSize+10, sizeof(char));
     size_t resIndex = 0;
 
     size_t i;
@@ -178,9 +179,17 @@ char *toChar(char *encData, int *offset)
 
         // Save offset (number of NULL bytes added).
         *offset = 8 - strlen(tmp);
-        // printf("Offset: %d\n", *offset);
+        // printf("Offset yo: %d\n", *offset);
+
+        resIndex++;
     }
+
+    // printf("Current res index: %ld\n", resIndex);
+    // printf("But res size is: %ld\n", resSize);
+    res[resIndex] = '\0';
     
+    // printf("Current res: %s\n", res);
+
     return res;
 }
 
@@ -205,13 +214,14 @@ char *fromChar(char *data, int align)
     */
 
     size_t len = strlen(data);
-    printf("Original Len: %ld\n", len);
-    printf("Align: %d\n", align);
+    // printf("Original Len: %ld\n", len);
+    // printf("Align: %d\n", align);
 
     size_t resSize = len * 8 - align;
     
     printf("Len wanted: %ld\n", resSize);
-    char *res = calloc(resSize + 1, sizeof(char));
+    // Add 10 extra slots just in case.
+    char *res = calloc(resSize + 10, sizeof(char));
     size_t c = 0;
 
     char tmp[9];

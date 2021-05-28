@@ -224,46 +224,98 @@ struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size)
 }
 
 // Encoding.
-int occur(struct heapNode *root, char el, GString *res)
+
+// TODO: If fails, create occurence list of characters in Huffman Tree.
+// chars and occur will be of size MAX_HT.
+
+void initCodes(struct codes *codes, struct heapNode *root)
 {
-    if (root->l)
-    {
-        g_string_append_c(res, '0');
-        occur(root->l, el, res);
-    }
+    codes->occur = calloc(TOTAL_CHARS, sizeof(char *));
 
-    if (root->r)
-    {
-        g_string_append_c(res, '1');
-        occur(root->r, el, res);
-    }
+    // Initialize all chars slots.
+    for (int i = 0; i < TOTAL_CHARS; i++)
+        codes->occur[i] = calloc(MAX_HT, sizeof(char));
 
-    // Check if node contains el.
-    char tmp = root->data;
-    if (isLeaf(root) && tmp == el)
-    {
-        // Occurence found.
-        return 1;
-    }
+    // Initialize size.
+    codes->size = 0;
 
-    // Occurence not found.
-    return 0;
+    char arr[MAX_HT];
+    bzero(arr, MAX_HT);
+
+    occurList(root, codes, arr, 0);
 }
 
-char *encodeData(struct heapNode *huffmanTree, char *input)
+void freeCodes(struct codes *codes)
+{
+    // Free all occurences.
+    for (int i = 0; i < TOTAL_CHARS; i++)
+        free(codes->occur[i]);
+    free(codes->occur);
+
+    free(codes);
+}
+
+void addCode(struct codes *codes, char el, char *occur)
+{
+    codes->chars[codes->size] = el;
+    codes->occur[codes->size] = occur;
+
+    codes->size++;
+}
+
+void occurList(struct heapNode *root, struct codes *codes, 
+        char *arr, int index)
+{
+    // Assign 0 to left edge and recur
+    if (root->l) 
+    {
+        arr[index] = '0';
+        occurList(root->l, codes, arr, index + 1);
+    }
+ 
+    // Assign 1 to right edge and recur
+    if (root->r) 
+    {
+        arr[index] = '1';
+        occurList(root->r, codes, arr, index + 1);
+    }
+ 
+    // Add code from arr[] to codes structure.
+    if (isLeaf(root)) 
+    {
+        addCode(codes, root->data, arr);
+    }
+}
+
+// Find occurence of character and return it.
+char *occur(struct codes *codes, char el)
+{
+    for (int i = 0; i < codes->size; i++)
+    {
+        if (codes->chars[i] == el)
+            return codes->occur[i];
+    }
+}
+
+// TODO: Fix broken function (problem comes from occur).
+char *encodeData(struct codes *codes, char *input)
 {
     GString *res = g_string_new(NULL);
     size_t len = strlen(input);
 
-    GString *tmp;
+    // GString *tmp;
     for (size_t i = 0; i < len; i++)
     {
-        tmp = g_string_new(NULL);
+        // tmp = g_string_sized_new(MAX_HT);
 
-        // Append character occurence if found.
-        if (occur(huffmanTree, input[i], tmp))
-            g_string_append(res, g_string_free(tmp, TRUE));
-        
+        char *tmpStr = occur(codes, input[i]);
+        g_string_append(res, tmpStr);
+
+        // Free memory.
+        // free(tmpStr);
+
+        // printf("Found an occurence\n");
+        // g_string_append(res, g_string_free(tmp, TRUE));
     }
 
     // Return final string.
@@ -299,9 +351,12 @@ void encodeTree(struct heapNode *huffmanTree, GString *res)
 void compress(char *data, char **resTree, char **resData,
         int *treeOffset, int *dataOffset)
 {
-    // Step 1: Build frequency list.
+    // Step 1: Build frequency list and occurence struct.
     size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
     char *chars;
+
+    struct codes *codes = calloc(1, sizeof(struct codes));
+    initCodes(codes);
 
     buildFrequencyList(data, freq, &chars);
 
@@ -313,16 +368,18 @@ void compress(char *data, char **resTree, char **resData,
     encodeTree(ht, tmp);
 
     char *freedStr = g_string_free(tmp, FALSE);
-    printf("Freed Str: %s\n", freedStr);
+    // printf("Freed Str: %s\n", freedStr);
     *resTree = toChar(freedStr, treeOffset);
 
     // Free memory.
     free(freedStr);
 
     // Step 4: Compress input string.
-    *resData = toChar(encodeData(ht, data), dataOffset);
+    *resData = toChar(encodeData(ht, codes, data), dataOffset);
 
     // Free memory.
+    // TODO: Stop freeing occurence list if needed after compression.
+    freeCodes(codes);
     free(freq);
     free(chars);
     deleteHuffman(ht);
@@ -450,36 +507,6 @@ char *decompress(char *data, int dataAlign, char *tree, int treeAlign)
     return res;
 }
 
-// Prints huffman codes from the root of Huffman Tree.
-// It uses arr[] to store codes
-void printCodes(struct heapNode* root, int arr[], int top)
-{
- 
-    // Assign 0 to left edge and recur
-    if (root->l) {
- 
-        arr[top] = 0;
-        printCodes(root->l, arr, top + 1);
-    }
- 
-    // Assign 1 to right edge and recur
-    if (root->r) {
- 
-        arr[top] = 1;
-        printCodes(root->r, arr, top + 1);
-    }
- 
-    // If this is a leaf node, then
-    // it contains one of the input
-    // characters, print the character
-    // and its code from arr[]
-    if (isLeaf(root)) 
-    {
-        printf("%c: ", root->data);
-        printArr(arr, top);
-    }
-}
-
 // Delete Huffman tree.
 void deleteHuffman(struct heapNode *huffmanTree)
 {
@@ -497,24 +524,6 @@ void deleteHuffman(struct heapNode *huffmanTree)
     }
 }
 
-// The main function that builds a
-// Huffman Tree and print codes by traversing
-// the built Huffman Tree
-void HuffmanCodes(char data[], size_t freq[], size_t size) 
-{
-    // Construct Huffman Tree
-    struct heapNode *root = buildHuffmanTree(data, freq, size);
- 
-    // Print Huffman codes using
-    // the Huffman tree built above
-    int arr[MAX_HT], top = 0;
- 
-    printCodes(root, arr, top);
-
-    // Delete Huffman tree.
-    deleteHuffman(root);
-}
-
 int main()
 {
     char input[] = "My name is Robert and I really love eating food bro";
@@ -527,7 +536,9 @@ int main()
     compress(input, &encTree, &encData, &treeOffset, &dataOffset);
 
     printf("Tree offset: %d\n", treeOffset);
+    printf("Tree encoded: %s\n", encTree);
     printf("Data offset: %d\n", dataOffset);
+    printf("Data encoded: %s\n", encData);
     
     printf("\nFinished compression\n");
 
