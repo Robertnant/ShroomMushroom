@@ -133,7 +133,7 @@ void * listen_to_client( void * arg )
         GString *json_string = g_string_new(NULL);
          
         int found = 0;
-        while((er = read(*sockfd, buff, MAX_BUF_SIZE - 1)) > 0)
+        while((er = read(sockfd, buff, MAX_BUF_SIZE - 1)) > 0)
         {
             json_string = g_string_append(json_string,  buff);
             
@@ -207,7 +207,7 @@ void * listen_to_client( void * arg )
                     // get pub key and user
                     // send the to "sender"
                     user_message = user_to_string(receiver, &l);
-                    rewrite(*sockfd, user_message, l);
+                    rewrite(sockfd, user_message, l);
                     break;
 
                 case IDENTIFICATION: case INIT:
