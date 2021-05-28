@@ -283,6 +283,7 @@ void occurList(struct heapNode *root, struct codes *codes,
     // Add code from arr[] to codes structure.
     if (isLeaf(root)) 
     {
+        printf("Occur %c: %s\n", root->data, arr);
         addCode(codes, root->data, arr);
     }
 }
@@ -290,11 +291,18 @@ void occurList(struct heapNode *root, struct codes *codes,
 // Find occurence of character and return it.
 char *occur(struct codes *codes, char el)
 {
+    char *res;
+
     for (int i = 0; i < codes->size; i++)
     {
         if (codes->chars[i] == el)
-            return codes->occur[i];
+        {
+            res = codes->occur[i];
+            break;
+        }
     }
+
+    return res;
 }
 
 // TODO: Fix broken function (problem comes from occur).
@@ -351,17 +359,18 @@ void encodeTree(struct heapNode *huffmanTree, GString *res)
 void compress(char *data, char **resTree, char **resData,
         int *treeOffset, int *dataOffset)
 {
-    // Step 1: Build frequency list and occurence struct.
+    // Step 1: Build frequency list.
     size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
     char *chars;
-
-    struct codes *codes = calloc(1, sizeof(struct codes));
-    initCodes(codes);
 
     buildFrequencyList(data, freq, &chars);
 
     // Step 2: Build Huffman tree.
     struct heapNode *ht = buildHuffmanTree(chars, freq, strlen(chars));
+
+    // Step 3: Build occurence struct.
+    struct codes *codes = calloc(1, sizeof(struct codes));
+    initCodes(codes, ht);
 
     // Step 3: Compress Huffman tree.
     GString *tmp = g_string_new(NULL);
@@ -375,11 +384,11 @@ void compress(char *data, char **resTree, char **resData,
     free(freedStr);
 
     // Step 4: Compress input string.
-    *resData = toChar(encodeData(ht, codes, data), dataOffset);
+    *resData = toChar(encodeData(codes, data), dataOffset);
 
     // Free memory.
     // TODO: Stop freeing occurence list if needed after compression.
-    freeCodes(codes);
+    // freeCodes(codes);
     free(freq);
     free(chars);
     deleteHuffman(ht);
