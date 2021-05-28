@@ -380,7 +380,7 @@ void compress(char *data, char **resTree, char **resData,
     encodeTree(ht, tmp);
 
     char *freedStr = g_string_free(tmp, FALSE);
-    // printf("Freed Str: %s\n", freedStr);
+    printf("Tree Before toChar: %s\n", freedStr);
     *resTree = toChar(freedStr, treeOffset);
     // printf("Res Str: %s\n", *resTree);
 
@@ -389,7 +389,9 @@ void compress(char *data, char **resTree, char **resData,
 
     // Step 4: Compress input string.
     printf("\nEncoding input string.\n");
-    *resData = toChar(encodeData(codes, data), dataOffset);
+    char *preEncData = encodeData(codes, data);
+    printf("Data Before toChar: %s\n", preEncData);
+    *resData = toChar(preEncData, dataOffset);
 
     // Free memory.
     // TODO: Stop freeing occurence list if needed after compression.
@@ -502,6 +504,7 @@ char *decompress(char *data, int dataAlign, char *tree, int treeAlign)
 {
     // Step 1: Get binary representation of tree.
     char *treeBin = fromChar(tree, treeAlign);
+    printf("Tree decoded: %s\n", treeBin);
     // printf("Received tree binary representation: %s\n", treeBin);
 
     // Step 2: Decode Huffman Tree.
@@ -509,6 +512,7 @@ char *decompress(char *data, int dataAlign, char *tree, int treeAlign)
 
     // Step 3: Get binary representation of data.
     char *dataBin = fromChar(data, dataAlign);
+    printf("Data decoded: %s\n", dataBin);
 
     // Step 4: Decode encoded data.
     char *res = decodeData(ht, dataBin);

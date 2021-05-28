@@ -154,7 +154,9 @@ char *toChar(char *encData, int *offset)
         // Convert byte set to character.
         if ((i+1) % 8 == 0)
         {
-            res[resIndex] = (char) binDec(tmp);
+            int dec = binDec(tmp);
+            printf("BinDec values: %d\n", dec);
+            res[resIndex] = (char) dec;
             // TODO Delete.
             // printf("Char: %c\n", res[resIndex]);
 
@@ -171,7 +173,9 @@ char *toChar(char *encData, int *offset)
     if ((i) % 8 != 0)
     {
         // Pad last set of bits to 8 bits.
-        res[resIndex] = (char) binDec(tmp);
+        int dec = binDec(tmp);
+        printf("BinDec values: %d\n", dec);
+        res[resIndex] = (char) dec;
         
         // TODO Delete.
         // printf("Char: %c\n", res[resIndex]);
@@ -193,6 +197,8 @@ char *toChar(char *encData, int *offset)
 }
 
 // Convert each string character to binary representation.
+// TODO: Fix cause not working. Some function (not this one
+// is overflowing values).
 char *fromChar(char *data, int align)
 {
     /*
@@ -201,7 +207,7 @@ char *fromChar(char *data, int align)
     // Result string.
     GString *res = g_string_new(NULL);
 
-    for (size_t i = 0; i < len)
+    for (size_t i = 0; i < len; i++)
         g_string_append(res, decBin((int) data[i]));
 
     // Convert final character.
@@ -218,7 +224,7 @@ char *fromChar(char *data, int align)
 
     size_t resSize = len * 8 - align;
     
-    // printf("Len wanted: %ld\n", resSize);
+    printf("Len wanted: %ld\n", resSize);
     // Add 10 extra slots just in case.
     char *res = calloc(resSize + 10, sizeof(char));
     size_t c = 0;
@@ -228,9 +234,11 @@ char *fromChar(char *data, int align)
 
     for (size_t i = 0; i < len - 1; i++)
     {
-
         // Convert character.
-        decBin(data[i], tmp);
+        size_t dec = data[i];
+        printf("Dec is: %ld\n", dec);
+        decBin(dec, tmp);
+        // printf("Binary: %s\n", tmp);
 
         // Append converted character.
         for (int j = 0; j < 8; j++)
@@ -250,6 +258,7 @@ char *fromChar(char *data, int align)
         c++;
     }
 
+    printf("Retrieved string: %s\n", res);
     return res;
 }
 
