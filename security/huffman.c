@@ -255,39 +255,40 @@ void freeCodes(struct codes *codes)
     free(codes);
 }
 
-void addCode(struct codes *codes, char el, char *occur)
+void addCode(struct codes *codes, char el, int n, char *occur)
 {
     codes->chars[codes->size] = el;
     // codes->occur[codes->size] = occur;
 
     // Copy passed occurence to codes struct.
-    strcpy(codes->occur[codes->size], occur);
+    strncpy(codes->occur[codes->size], occur, n);
 
     codes->size++;
 }
 
 void occurList(struct heapNode *root, struct codes *codes, 
-        char *arr, int index)
+        char *arr, int top)
 {
     // Assign 0 to left edge and recur
     if (root->l) 
     {
-        arr[index] = '0';
-        occurList(root->l, codes, arr, index + 1);
+        arr[top] = '0';
+        occurList(root->l, codes, arr, top + 1);
     }
  
     // Assign 1 to right edge and recur
     if (root->r) 
     {
-        arr[index] = '1';
-        occurList(root->r, codes, arr, index + 1);
+        arr[top] = '1';
+        occurList(root->r, codes, arr, top + 1);
     }
  
     // Add code from arr[] to codes structure.
     if (isLeaf(root)) 
     {
         // printf("Occur %c: %s\n", root->data, arr);
-        addCode(codes, root->data, arr);
+        addCode(codes, root->data, top, arr);
+        //bzero(arr, strlen(arr));
     }
 }
 
@@ -312,6 +313,7 @@ char *occur(struct codes *codes, char el)
     return res;
 }
 
+// TODO: Fix.
 char *encodeData(struct codes *codes, char *input)
 {
     GString *res = g_string_new(NULL);
@@ -373,6 +375,14 @@ void compress(char *data, unsigned char **resTree,
     struct codes *codes = calloc(1, sizeof(struct codes));
     initCodes(codes, ht);
 
+    printf("Occurence struct generated.\n");
+    for (int i = 0; i < codes->size; i++)
+        printf("Occ char %c: %s\n", codes->chars[i], codes->occur[i]);
+
+    printf("Actual occurence.\n");
+    int arr[MAX_HT];
+    printCodes(ht, arr, 0);
+
     // Step 3: Compress Huffman tree.
     printf("\nEncoding Huffman tree.\n");
 
@@ -395,7 +405,7 @@ void compress(char *data, unsigned char **resTree,
 
     // Free memory.
     // TODO: Stop freeing occurence list if needed after compression.
-    // freeCodes(codes);
+    freeCodes(codes);
     free(freq);
     free(chars);
     deleteHuffman(ht);
@@ -422,7 +432,6 @@ char *decodeData(struct heapNode *huffmanTree, char *data)
         else if (tmp->r != NULL)
             tmp = tmp->r;
 
-        // Check if character reached.
         if (isLeaf(tmp))
         {
             g_string_append_c(res, tmp->data);
@@ -510,6 +519,18 @@ char *decompress(unsigned char *data, int dataAlign,
 
     // Step 2: Decode Huffman Tree.
     struct heapNode *ht = decodeTree(treeBin);
+    printf("\nRecreating Huffman Tree\n");
+
+    struct codes *codes = calloc(1, sizeof(struct codes));
+    initCodes(codes, ht);
+
+    printf("Occurence struct generated.\n");
+    for (int i = 0; i < codes->size; i++)
+        printf("Occ char %c: %s\n", codes->chars[i], codes->occur[i]);
+
+    printf("Actual occurence.\n");
+    int arr[MAX_HT];
+    printCodes(ht, arr, 0);
 
     // Step 3: Get binary representation of data.
     char *dataBin = fromChar(data, dataAlign);
@@ -519,6 +540,7 @@ char *decompress(unsigned char *data, int dataAlign,
     char *res = decodeData(ht, dataBin);
 
     // Free memory.
+    freeCodes(codes);
     free(treeBin);
     deleteHuffman(ht);
     free(dataBin);
@@ -540,6 +562,35 @@ void deleteHuffman(struct heapNode *huffmanTree)
         // Delete current node;
         free(huffmanTree);
         huffmanTree = NULL;
+    }
+}
+
+// Prints huffman codes from the root of Huffman Tree.
+// It uses arr[] to store codes
+void printCodes(struct heapNode* root, int arr[], int top)
+{
+    // Assign 0 to left edge and recur
+    if (root->l)
+    {
+        arr[top] = 0;
+        printCodes(root->l, arr, top + 1);
+    }
+ 
+    // Assign 1 to right edge and recur
+    if (root->r)
+    {
+        arr[top] = 1;
+        printCodes(root->r, arr, top + 1);
+    }
+ 
+    // If this is a leaf node, then
+    // it contains one of the input
+    // characters, print the character
+    // and its code from arr[]
+    if (isLeaf(root))
+    {
+        printf("%c: ", root->data);
+        printArr(arr, top);
     }
 }
 

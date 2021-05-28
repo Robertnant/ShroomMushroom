@@ -156,8 +156,7 @@ unsigned char *toChar(char *encData, int *offset)
         if ((i+1) % 8 == 0)
         {
             int dec = binDec(tmp);
-            printf("BinDec values: %d\n", dec);
-            printf("BinDec unchar value: %d\n", (unsigned char) dec);
+            // printf("BinDec values: %d\n", (unsigned char) dec);
             res[resIndex] = (unsigned char) dec;
             // TODO Delete.
             // printf("Char: %c\n", res[resIndex]);
@@ -176,7 +175,7 @@ unsigned char *toChar(char *encData, int *offset)
     {
         // Pad last set of bits to 8 bits.
         int dec = binDec(tmp);
-        printf("BinDec values: %d\n", (unsigned char) dec);
+        // printf("BinDec values: %d\n", (unsigned char) dec);
         res[resIndex] = (unsigned char) dec;
         
         // TODO Delete.
@@ -206,12 +205,12 @@ char *fromChar(unsigned char *data, int align)
     for (len = 0; data[len] != '\0'; len++)
         ;
 
-    printf("Original Len: %ld\n", len);
+    // printf("Original Len: %ld\n", len);
     // printf("Align: %d\n", align);
 
     size_t resSize = len * 8 - align;
     
-    printf("Len wanted: %ld\n", resSize);
+    // printf("Len wanted: %ld\n", resSize);
     // Add 10 extra slots just in case.
     char *res = calloc(resSize + 10, sizeof(char));
     size_t c = 0;
@@ -223,7 +222,7 @@ char *fromChar(unsigned char *data, int align)
     {
         // Convert character.
         size_t dec = data[i];
-        printf("Dec is: %ld\n", dec);
+        // printf("Dec is: %ld\n", dec);
         decBin(dec, tmp);
         // printf("Binary: %s\n", tmp);
 
@@ -236,7 +235,9 @@ char *fromChar(unsigned char *data, int align)
     }
 
     // Convert final character.
-    decBin(data[len-1], tmp);
+    size_t dec = data[len-1];
+    // printf("Dec is: %ld\n", dec);
+    decBin(dec, tmp);
 
     // Append conversion (exclude extra padding 0s).
     for (int j = align; j < 8; j++)
@@ -245,7 +246,6 @@ char *fromChar(unsigned char *data, int align)
         c++;
     }
 
-    printf("Retrieved string: %s\n", res);
     return res;
 }
 

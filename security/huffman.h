@@ -52,10 +52,10 @@ struct heap *createAndBuildHeap(char *data, size_t *freq, size_t size);
 // COMPRESSION.
 ssize_t contains(char *chars, size_t len, char c);
 void initCodes(struct codes *codes, struct heapNode *root);
-void addCode(struct codes *codes, char el, char *occur);
+void addCode(struct codes *codes, char el, int n, char *occur);
 char *occur(struct codes *codes, char el);
 void occurList(struct heapNode *root, struct codes *codes, 
-        char *arr, int index);
+        char *arr, int top);
 
 void buildFrequencyList(char *input, size_t *freq, char **chars);
 struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size);
