@@ -357,8 +357,8 @@ void encodeTree(struct heapNode *huffmanTree, GString *res)
     }
 }
 
-void compress(char *data, char **resTree, char **resData,
-        int *treeOffset, int *dataOffset)
+void compress(char *data, unsigned char **resTree, 
+        unsigned char **resData, int *treeOffset, int *dataOffset)
 {
     // Step 1: Build frequency list.
     size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
@@ -500,7 +500,8 @@ struct heapNode *decodeTree(char *data)
 }
 
 // Decompression process.
-char *decompress(char *data, int dataAlign, char *tree, int treeAlign)
+char *decompress(unsigned char *data, int dataAlign, 
+        unsigned char *tree, int treeAlign)
 {
     // Step 1: Get binary representation of tree.
     char *treeBin = fromChar(tree, treeAlign);
@@ -547,7 +548,7 @@ int main()
     char input[] = "My name is Robert and I really love eating food bro";
 
     // Compression.
-    char *encTree, *encData;
+    unsigned char *encTree, *encData;
     int treeOffset, dataOffset;
 
     printf("To compress: %s\n", input);

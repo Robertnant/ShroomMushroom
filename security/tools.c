@@ -129,7 +129,8 @@ void decBin(int dec, char res[])
 }
 
 // Convert encoded data from binary to characters.
-char *toChar(char *encData, int *offset)
+// TODO: Fix overflow by using unsigned chars instead.
+unsigned char *toChar(char *encData, int *offset)
 {
     char tmp[9];
     bzero(tmp, 9);
@@ -142,7 +143,7 @@ char *toChar(char *encData, int *offset)
         resSize++;
 
     // Allocate 10 extra slots just in case.
-    char *res = calloc(resSize+10, sizeof(char));
+    unsigned char *res = calloc(resSize+10, sizeof(unsigned char));
     size_t resIndex = 0;
 
     size_t i;
@@ -156,7 +157,8 @@ char *toChar(char *encData, int *offset)
         {
             int dec = binDec(tmp);
             printf("BinDec values: %d\n", dec);
-            res[resIndex] = (char) dec;
+            printf("BinDec unchar value: %d\n", (unsigned char) dec);
+            res[resIndex] = (unsigned char) dec;
             // TODO Delete.
             // printf("Char: %c\n", res[resIndex]);
 
@@ -174,8 +176,8 @@ char *toChar(char *encData, int *offset)
     {
         // Pad last set of bits to 8 bits.
         int dec = binDec(tmp);
-        printf("BinDec values: %d\n", dec);
-        res[resIndex] = (char) dec;
+        printf("BinDec values: %d\n", (unsigned char) dec);
+        res[resIndex] = (unsigned char) dec;
         
         // TODO Delete.
         // printf("Char: %c\n", res[resIndex]);
@@ -197,29 +199,14 @@ char *toChar(char *encData, int *offset)
 }
 
 // Convert each string character to binary representation.
-// TODO: Fix cause not working. Some function (not this one
-// is overflowing values).
-char *fromChar(char *data, int align)
+char *fromChar(unsigned char *data, int align)
 {
-    /*
-    size_t len = strlen(data) - 1;
+    // Get data length.
+    size_t len;
+    for (len = 0; data[len] != '\0'; len++)
+        ;
 
-    // Result string.
-    GString *res = g_string_new(NULL);
-
-    for (size_t i = 0; i < len; i++)
-        g_string_append(res, decBin((int) data[i]));
-
-    // Convert final character.
-    // Exclude extra 0s added for padding.
-    char *tmp = decBin((int) data[len]);
-    g_string_append_len(res, tmp+align, 8-align);
-
-    return g_string_free(res, FALSE);
-    */
-
-    size_t len = strlen(data);
-    // printf("Original Len: %ld\n", len);
+    printf("Original Len: %ld\n", len);
     // printf("Align: %d\n", align);
 
     size_t resSize = len * 8 - align;
