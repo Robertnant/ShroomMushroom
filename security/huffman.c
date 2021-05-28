@@ -588,8 +588,8 @@ int main()
     for (size_t i = 0; encData[i] != '\0'; i++)
         compressedLen++;
 
-    printf("Compressed Tree: %sEND\n", encTree);
-    printf("Compressed Data: %sEND\n", encData);
+    printf("Compressed Tree:\n %s END\n", encTree);
+    printf("Compressed Data:\n %s END\n", encData);
     printf("Compressed len: %ld\n", compressedLen);
     
     printf("\nFinished compression\n");
