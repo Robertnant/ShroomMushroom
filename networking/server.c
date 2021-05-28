@@ -120,7 +120,8 @@ void * send_to(void* arg)
 
 void * listen_to_client( void * arg )
 {
-    int * sockfd = (int *) arg;
+    struct client * self = (struct client *) arg;
+    int sockfd =  self->fd;
     char buff[MAX_BUF_SIZE]; 
     int er;
 
@@ -412,7 +413,7 @@ int main()
         curr->user = tmp_user;
         
 
-        pthread_create(&curr->listening, NULL, listen_to_client, (void *) &(user->fd));
+        pthread_create(&curr->listening, NULL, listen_to_client, (void *) user);
         pthread_create(&curr->sending, NULL, sending_from_pipe, (void *) user);
         
         printf("New user connected!\n");
