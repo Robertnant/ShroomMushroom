@@ -21,12 +21,10 @@ int rewrite(int fd, char *buf, size_t count)
         tmp = write(fd, buf, count);
         if(tmp == -1)
         {
-            printf("Could not rewrite to stream!\n");
+            //printf("Could not rewrite to stream!\n");
             return 0;
         }
             
-            //errx(1, "Could not write to stream");
-
         count -= tmp;
         buf += tmp;
     }

@@ -68,7 +68,7 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
     size_t subIndex = 0;
 
     // Get each substring.
-    char *tmp = calloc(MAX_LENGTH, sizeof(char));
+    char *tmp = calloc(len + 1, sizeof(char));
 
     size_t count = 0;
 

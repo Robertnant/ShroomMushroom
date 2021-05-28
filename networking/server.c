@@ -126,7 +126,7 @@ void * listen_to_client( void * arg )
 
     printf("Listening to client...\n");
     for (;;) 
-    { 
+    {
         bzero(buff, MAX_BUF_SIZE);
 
         GString *json_string = g_string_new(NULL);
@@ -152,8 +152,11 @@ void * listen_to_client( void * arg )
             }
             bzero(buff, MAX_BUF_SIZE);
         }
-        if (er < 0)
+        if (er <= 0)
+        {
+            printf("Closed connection with client\n");
             return NULL;
+        }
         if (!found)
         {
             free(g_string_free(json_string, FALSE));
@@ -231,7 +234,7 @@ void * listen_to_client( void * arg )
     // Free memory.
     //freeMessage(message);
     free(message);
-
+    printf("Closed connection with client\n");
     return NULL;
 }
 
@@ -253,14 +256,15 @@ void connect_client(char pipe[], int client)
         {
             while ((r = read(fd, buf, MAX_BUF_SIZE)) > 0)
             {
-                rewrite(client, buf, r);
+                while (!rewrite(client, buf, r))
+                    fd = open(filename, O_RDONLY);
             }
         }
     }
     free(filename);
 }
 
-void * sending_from_pipe(void * arg)
+void * sending_from_pipe (void * arg)
 {
     struct client* user = arg;
     connect_client(user->user->UID, user->fd);
