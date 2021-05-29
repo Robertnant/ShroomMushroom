@@ -301,27 +301,42 @@ publicKey* stringtoPub(char *string)
     return key;
 }
 
-void compress(char *input)
+char *compressElgamal(char *input)
 {
-    // Build frequency list.
-    size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
-    char *chars;
+    unsigned char *encTree, *encData;
+    size_t encTreeSize, encDataSize;
 
-    buildFrequencyList(input, freq, &chars);
+    int treeOffset, dataOffset;
+    size_t len = strlen(input);
 
-    // Print char and frequency.
-    for (size_t i = 0; i < strlen(chars); i++)
-    {
-        printf("%c: %ld\n", chars[i], freq[i]);
-    }
+    //printf("To compress: %s\n", input);
+    // printf("Len: %ld\n", len);
+    compress(input, &encTree, &encData, &treeOffset, &dataOffset,
+            &encTreeSize, &encDataSize);
 
-    printf("\nHuffman compression: \n");
+    size_t compressedLen = encTreeSize + encDataSize;
 
-    HuffmanCodes(chars, freq, strlen(chars));
+    // printf("Compressed Tree:\n %s END\n", encTree);
+    // printf("Compressed Data:\n %s END\n", encData);
+    // printf("Compressed len: %ld\n", compressedLen);
+    // printf("\nFinished compression\n");
+
+    // Decompression.
+    char *res = decompress(encData, dataOffset, encTree, treeOffset,
+            encDataSize, encTreeSize);
+
+    // printf("\nDecompressed: %s\n", res);
+
+    // Ratio.
+    double ratio = (float) len / (float) compressedLen;
+    printf("\nConversion ratio: %f\n", ratio);
 
     // Free memory.
-    free(freq);
-    free(chars);
+    free(encData);
+    free(encTree);
+    //free(res);
+    
+    return res;
 }
 
 /*
@@ -337,6 +352,7 @@ int main()
                  Basically, I'm saying either way, we 'bout to slide, ayy\n\
                  Can't let this one slide, ayy";
 
+    // char *msg = "Bought a spaceship now I'm a space cadet.";
     printf("Original message: %s\n", msg);
 
     // Receiver and data structures.
@@ -349,10 +365,13 @@ int main()
 
     // Encrypt message and print.
     encrypt_gamal(msg, receiver_pubkey, dataCyphers);
-    printf("\nEncryption: %s\n", dataCyphers -> en_msg);
+    // printf("\nEncryption: %s\n", dataCyphers -> en_msg);
 
     // Compress encryption with Huffman.
-    compress(dataCyphers->en_msg);
+    printf("\nCompressing data.\n");
+    char *res = compressElgamal(dataCyphers->en_msg);
+    free(dataCyphers->en_msg);
+    dataCyphers->en_msg = res;
 
     // Decrypt data and print.
     char *dr_msg = decrypt_gamal(dataCyphers, receiver_privkey);

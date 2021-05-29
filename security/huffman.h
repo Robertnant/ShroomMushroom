@@ -4,8 +4,7 @@
 #include <gmodule.h>
 #include <glib.h>
 
-// TODO Increase this if error occurs.
-#define MAX_HT 100
+#define MAX_HT 65
 // 63 total chars in encryption including hyphen.
 #define TOTAL_CHARS 63
 
@@ -28,6 +27,14 @@ struct heap
     struct heapNode **arr;
 } heap;
 
+// Character occurence structure.
+struct codes
+{
+    char chars[TOTAL_CHARS];
+    char **occur;
+    int size;
+} codes;
+
 // Heap tools.
 struct heap *newHeap(size_t capacity);
 struct heapNode *newNode(char data, size_t freq);
@@ -44,17 +51,33 @@ struct heap *createAndBuildHeap(char *data, size_t *freq, size_t size);
 
 // COMPRESSION.
 ssize_t contains(char *chars, size_t len, char c);
-int occur(struct heapNode *root, char el, GString *res);
+void initCodes(struct codes *codes, struct heapNode *root);
+void addCode(struct codes *codes, char el, int n, char *occur);
+char *occur(struct codes *codes, char el);
+void occurList(struct heapNode *root, struct codes *codes, 
+        char *arr, int top);
+
 void buildFrequencyList(char *input, size_t *freq, char **chars);
 struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size);
-
+void compress(char *data, unsigned char **resTree, unsigned char **resData,
+        int *treeOffset, int *dataOffset, size_t *resTreeSize, 
+        size_t *resDataSize);
 // Encoding.
-char *encodeData(struct heapNode *huffmanTree, char *input);
-void printArr(int arr[], int n);
+char *encodeData(struct codes *codes, char *input);
+void encodeTree(struct heapNode *huffmanTree, GString *res);
 void printCodes(struct heapNode* root, int arr[], int top);
 void HuffmanCodes(char data[], size_t freq[], size_t size);
 
-// Tools.
-char *toChar(char *encData);
+// Decoding.
+char *decodeData(struct heapNode *huffmanTree, char *data);
+struct heapNode *decodeTree(char *data);
+
+// DECOMPRESSION.
+char *decompress(unsigned char *data, int dataAlign, 
+        unsigned char *tree, int treeAlign, size_t dataSize, size_t treeSize);
+
+// Deletion.
+void deleteHuffman(struct heapNode *huffmanTree);
+void freeCodes(struct codes *codes);
 
 #endif
