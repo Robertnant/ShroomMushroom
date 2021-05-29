@@ -297,7 +297,7 @@ publicKey* stringtoPub(char *string)
     return key;
 }
 
-void compressElgamal(char *input)
+char *compressElgamal(char *input)
 {
     unsigned char *encTree, *encData;
     int treeOffset, dataOffset;
@@ -331,7 +331,9 @@ void compressElgamal(char *input)
     // Free memory.
     free(encData);
     free(encTree);
-    free(res);
+    //free(res);
+    
+    return res;
 }
 
 int main()
@@ -363,7 +365,8 @@ int main()
 
     // Compress encryption with Huffman.
     printf("\nCompressing data.\n");
-    compressElgamal(dataCyphers->en_msg);
+    char *res = compressElgamal(dataCyphers->en_msg);
+    dataCyphers->en_msg = res;
 
     // Decrypt data and print.
     char *dr_msg = decrypt_gamal(dataCyphers, receiver_privkey);
