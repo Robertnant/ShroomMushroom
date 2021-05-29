@@ -59,8 +59,9 @@ void occurList(struct heapNode *root, struct codes *codes,
 
 void buildFrequencyList(char *input, size_t *freq, char **chars);
 struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size);
-void compress(char *data, unsigned char **resTree, 
-        unsigned char **resData, int *treeOffset, int *dataOffset);
+void compress(char *data, unsigned char **resTree, unsigned char **resData,
+        int *treeOffset, int *dataOffset, size_t *resTreeSize, 
+        size_t *resDataSize);
 // Encoding.
 char *encodeData(struct codes *codes, char *input);
 void encodeTree(struct heapNode *huffmanTree, GString *res);
@@ -73,7 +74,7 @@ struct heapNode *decodeTree(char *data);
 
 // DECOMPRESSION.
 char *decompress(unsigned char *data, int dataAlign, 
-        unsigned char *tree, int treeAlign);
+        unsigned char *tree, int treeAlign, size_t dataSize, size_t treeSize);
 
 // Deletion.
 void deleteHuffman(struct heapNode *huffmanTree);

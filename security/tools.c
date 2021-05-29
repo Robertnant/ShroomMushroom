@@ -129,25 +129,24 @@ void decBin(int dec, char res[])
 }
 
 // Convert encoded data from binary to characters.
-// TODO: Fix overflow by using unsigned chars instead.
-unsigned char *toChar(char *encData, int *offset)
+unsigned char *toChar(char *encData, int *offset, size_t *resSize)
 {
     char tmp[9];
     bzero(tmp, 9);
 
     // Get size of result string (floor division).
     size_t len = strlen(encData);
-    size_t resSize = (size_t) len / 8;
+    *resSize = (size_t) len / 8;
 
-    if (resSize % 8 != 0)
-        resSize++;
+    if (*resSize % 8 != 0)
+        *resSize += 1;
 
     // Allocate 10 extra slots just in case.
-    unsigned char *res = calloc(resSize+10, sizeof(unsigned char));
+    unsigned char *res = calloc((*resSize) + 10, sizeof(unsigned char));
     size_t resIndex = 0;
 
     size_t i;
-    // printf("Enc size: %ld\n", len);
+    printf("Enc size: %ld\nAnd Wanted Size: %ld\n", len, *resSize);
     for (i = 0; i < len; i++)
     {
         tmp[i%8] = encData[i];
@@ -158,6 +157,9 @@ unsigned char *toChar(char *encData, int *offset)
             int dec = binDec(tmp);
             // printf("BinDec values: %d\n", (unsigned char) dec);
             res[resIndex] = (unsigned char) dec;
+
+            // if (res[resIndex] == '\0')
+            //    printf("\nWhy tf did I encode a NULL byte %ld?\n", resIndex);
             // TODO Delete.
             // printf("Char: %c\n", res[resIndex]);
 
@@ -198,19 +200,14 @@ unsigned char *toChar(char *encData, int *offset)
 }
 
 // Convert each string character to binary representation.
-char *fromChar(unsigned char *data, int align)
+char *fromChar(unsigned char *data, size_t len, int align)
 {
-    // Get data length.
-    size_t len;
-    for (len = 0; data[len] != '\0'; len++)
-        ;
-
     // printf("Original Len: %ld\n", len);
     // printf("Align: %d\n", align);
 
     size_t resSize = len * 8 - align;
     
-    // printf("Len wanted: %ld\n", resSize);
+    printf("Len wanted for fromChar: %ld\n", resSize);
     // Add 10 extra slots just in case.
     char *res = calloc(resSize + 10, sizeof(char));
     size_t c = 0;

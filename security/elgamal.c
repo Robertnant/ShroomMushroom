@@ -300,12 +300,15 @@ publicKey* stringtoPub(char *string)
 char *compressElgamal(char *input)
 {
     unsigned char *encTree, *encData;
+    size_t encTreeSize, encDataSize;
+
     int treeOffset, dataOffset;
     size_t len = strlen(input);
 
     printf("To compress: %s\n", input);
     printf("Len: %ld\n", len);
-    compress(input, &encTree, &encData, &treeOffset, &dataOffset);
+    compress(input, &encTree, &encData, &treeOffset, &dataOffset,
+            &encTreeSize, &encDataSize);
 
     size_t compressedLen = 0;
     while (encTree[compressedLen] != '\0')
@@ -320,7 +323,8 @@ char *compressElgamal(char *input)
     printf("\nFinished compression\n");
 
     // Decompression.
-    char *res = decompress(encData, dataOffset, encTree, treeOffset);
+    char *res = decompress(encData, dataOffset, encTree, treeOffset,
+            encDataSize, encTreeSize);
 
     printf("\nDecompressed: %s\n", res);
 

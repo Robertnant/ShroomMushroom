@@ -317,7 +317,12 @@ char *occur(struct codes *codes, char el)
     return res;
 }
 
-// TODO: Fix.
+// Note: this function works. But toChar len should be
+// res->len / 8 maximum.
+// Hence problem might come from not allocating enough space in
+// toChar.
+// TODO: Fix toChar.
+// Maybe there's a resSize length overflow.
 char *encodeData(struct codes *codes, char *input)
 {
     GString *res = g_string_new(NULL);
@@ -329,7 +334,7 @@ char *encodeData(struct codes *codes, char *input)
         // tmp = g_string_sized_new(MAX_HT);
 
         char *tmpStr = occur(codes, input[i]);
-        // printf("\nReceived occur: %s\n", tmpStr);
+        //printf("\nReceived occur %ld: %s\n", i, tmpStr);
         g_string_append(res, tmpStr);
     }
 
@@ -363,8 +368,9 @@ void encodeTree(struct heapNode *huffmanTree, GString *res)
     }
 }
 
-void compress(char *data, unsigned char **resTree, 
-        unsigned char **resData, int *treeOffset, int *dataOffset)
+void compress(char *data, unsigned char **resTree, unsigned char **resData,
+        int *treeOffset, int *dataOffset, size_t *resTreeSize, 
+        size_t *resDataSize)
 {
     // Step 1: Build frequency list.
     size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
@@ -389,7 +395,7 @@ void compress(char *data, unsigned char **resTree,
 
     char *freedStr = g_string_free(tmp, FALSE);
     // printf("Tree Before toChar: %s\n", freedStr);
-    *resTree = toChar(freedStr, treeOffset);
+    *resTree = toChar(freedStr, treeOffset, resTreeSize);
     // printf("Res Str: %s\n", *resTree);
 
     // Free memory.
@@ -398,8 +404,9 @@ void compress(char *data, unsigned char **resTree,
     // Step 5: Compress input string.
     // printf("\nEncoding input string.\n");
     char *preEncData = encodeData(codes, data);
-    // printf("Data Before toChar: %s\n", preEncData);
-    *resData = toChar(preEncData, dataOffset);
+    // printf("Data Before toChar - Size %ld: %s\n", 
+    //        strlen(preEncData), preEncData);
+    *resData = toChar(preEncData, dataOffset, resDataSize);
 
     // Free memory.
     freeCodes(codes);
@@ -512,16 +519,16 @@ struct heapNode *decodeTree(char *data)
 
 // Decompression process.
 char *decompress(unsigned char *data, int dataAlign, 
-        unsigned char *tree, int treeAlign)
+        unsigned char *tree, int treeAlign, size_t dataSize, size_t treeSize)
 {
     // Step 1: Get binary representation of tree.
-    char *treeBin = fromChar(tree, treeAlign);
+    char *treeBin = fromChar(tree, treeSize, treeAlign);
 
     // Step 2: Decode Huffman Tree.
     struct heapNode *ht = decodeTree(treeBin);
 
     // Step 3: Get binary representation of data.
-    char *dataBin = fromChar(data, dataAlign);
+    char *dataBin = fromChar(data, dataSize, dataAlign);
 
     // Step 4: Decode encoded data.
     char *res = decodeData(ht, dataBin);
