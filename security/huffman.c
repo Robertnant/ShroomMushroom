@@ -219,7 +219,11 @@ struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size)
     // Step 4: The remaining node is the
     // root node and the tree is complete.
     struct heapNode *res = getMin(heap);
+
+    // Free heap memory.
+    free(heap->arr);
     free(heap);
+
     return res;
 }
 
