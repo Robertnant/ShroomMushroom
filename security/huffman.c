@@ -116,11 +116,6 @@ void buildHeap(struct heap *heap)
 // Check if node is leaf.
 int isLeaf(struct heapNode* root)
 {
-    // TODO: Check children instead if fails.
-    // int a = !(root->l);
-    // int b = !(root->r);
-    // return a && b;
-    
     return (root->data != '$');
 }
 
@@ -153,6 +148,7 @@ ssize_t contains(char *chars, size_t len, char c)
 
     return -1;
 }
+
 void buildFrequencyList(char *input, size_t *freq, char **chars)
 {
     // Use Glib data types to create list.
@@ -222,7 +218,9 @@ struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size)
  
     // Step 4: The remaining node is the
     // root node and the tree is complete.
-    return getMin(heap);
+    struct heapNode *res = getMin(heap);
+    free(heap);
+    return res;
 }
 
 // Encoding.
@@ -502,7 +500,6 @@ struct heapNode *decodeTree(char *data)
 
     // Free stack simulator.
     tmp = NULL;
-    printf("Stack simulator still has %d elements\n", c);
     free(arr);
 
     return ht;
@@ -612,6 +609,11 @@ int main()
     // Ratio.
     double ratio = (float) len / (float) compressedLen;
     printf("\nConversion ratio: %f\n", ratio);
+
+    // Free memory.
+    free(encData);
+    free(encTree);
+    free(res);
 
     return 0;
 }
