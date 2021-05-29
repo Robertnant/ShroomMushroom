@@ -192,7 +192,9 @@ void buildFrequencyList(char *input, size_t *freq, char **chars)
 }
 
 // Build Huffman tree.
-struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size)
+// Heap created in the process is saved to parameter heap in order to
+// free it after creation.
+struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size) 
 {
     struct heapNode *l;
     struct heapNode *r;
@@ -249,7 +251,7 @@ void freeCodes(struct codes *codes)
 {
     // Free all occurences.
     for (int i = 0; i < TOTAL_CHARS; i++)
-        free(codes->occur[i]);
+        g_free(codes->occur[i]);
     free(codes->occur);
 
     free(codes);
@@ -369,6 +371,8 @@ void compress(char *data, unsigned char **resTree,
     buildFrequencyList(data, freq, &chars);
 
     // Step 2: Build Huffman tree.
+
+    // Heap that will be used in the process.
     struct heapNode *ht = buildHuffmanTree(chars, freq, strlen(chars));
 
     // Step 3: Build occurence struct.
@@ -397,6 +401,7 @@ void compress(char *data, unsigned char **resTree,
 
     // Free memory.
     freeCodes(codes);
+    g_free(preEncData);
     free(freq);
     free(chars);
     deleteHuffman(ht);
@@ -495,6 +500,11 @@ struct heapNode *decodeTree(char *data)
         }
     }
 
+    // Free stack simulator.
+    tmp = NULL;
+    printf("Stack simulator still has %d elements\n", c);
+    free(arr);
+
     return ht;
 
 }
@@ -571,7 +581,7 @@ void printCodes(struct heapNode* root, int arr[], int top)
 
 int main()
 {
-    char input[] = "Black leather gloves, no sequins Buckles on the jacket, it's Alyx **** Nike crossbody, got a piece in it Got a dance, but it's really on some street **** I'ma show you how to get it It go, right foot up, left foot slide Left foot up, right foot slide.";
+    char input[] = "Black leather gloves, no sequins Buckles on the jacket, it's Alyx **** Nike crossbody, got a piece in it Got a dance, but it's really on some street **** I'ma show you how to get it It go, right foot up, left foot slide Left foot up, right foot slide money";
 
     // Compression.
     unsigned char *encTree, *encData;
