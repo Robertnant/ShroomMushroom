@@ -305,28 +305,23 @@ char *compressElgamal(char *input)
     int treeOffset, dataOffset;
     size_t len = strlen(input);
 
-    printf("To compress: %s\n", input);
-    printf("Len: %ld\n", len);
+    //printf("To compress: %s\n", input);
+    // printf("Len: %ld\n", len);
     compress(input, &encTree, &encData, &treeOffset, &dataOffset,
             &encTreeSize, &encDataSize);
 
-    size_t compressedLen = 0;
-    while (encTree[compressedLen] != '\0')
-        compressedLen++;
-    for (size_t i = 0; encData[i] != '\0'; i++)
-        compressedLen++;
+    size_t compressedLen = encTreeSize + encDataSize;
 
-    printf("Compressed Tree:\n %s END\n", encTree);
-    printf("Compressed Data:\n %s END\n", encData);
-    printf("Compressed len: %ld\n", compressedLen);
-    
-    printf("\nFinished compression\n");
+    // printf("Compressed Tree:\n %s END\n", encTree);
+    // printf("Compressed Data:\n %s END\n", encData);
+    // printf("Compressed len: %ld\n", compressedLen);
+    // printf("\nFinished compression\n");
 
     // Decompression.
     char *res = decompress(encData, dataOffset, encTree, treeOffset,
             encDataSize, encTreeSize);
 
-    printf("\nDecompressed: %s\n", res);
+    // printf("\nDecompressed: %s\n", res);
 
     // Ratio.
     double ratio = (float) len / (float) compressedLen;

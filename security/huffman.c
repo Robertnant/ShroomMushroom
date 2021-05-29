@@ -388,7 +388,7 @@ void compress(char *data, unsigned char **resTree, unsigned char **resData,
     initCodes(codes, ht);
 
     // Step 4: Compress Huffman tree.
-    printf("\nEncoding Huffman tree.\n");
+    // printf("\nEncoding Huffman tree.\n");
 
     GString *tmp = g_string_new(NULL);
     encodeTree(ht, tmp);

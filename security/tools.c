@@ -138,7 +138,7 @@ unsigned char *toChar(char *encData, int *offset, size_t *resSize)
     size_t len = strlen(encData);
     *resSize = (size_t) len / 8;
 
-    if (*resSize % 8 != 0)
+    if (len % 8 != 0)
         *resSize += 1;
 
     // Allocate 10 extra slots just in case.
@@ -146,7 +146,7 @@ unsigned char *toChar(char *encData, int *offset, size_t *resSize)
     size_t resIndex = 0;
 
     size_t i;
-    printf("Enc size: %ld\nAnd Wanted Size: %ld\n", len, *resSize);
+    // printf("Enc size: %ld\nAnd Wanted Size: %ld\n", len, *resSize);
     for (i = 0; i < len; i++)
     {
         tmp[i%8] = encData[i];
@@ -207,7 +207,7 @@ char *fromChar(unsigned char *data, size_t len, int align)
 
     size_t resSize = len * 8 - align;
     
-    printf("Len wanted for fromChar: %ld\n", resSize);
+    // printf("Len wanted for fromChar: %ld\n", resSize);
     // Add 10 extra slots just in case.
     char *res = calloc(resSize + 10, sizeof(char));
     size_t c = 0;
