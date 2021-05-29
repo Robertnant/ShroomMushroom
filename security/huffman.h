@@ -4,9 +4,9 @@
 #include <gmodule.h>
 #include <glib.h>
 
-#define MAX_HT 300
+#define MAX_HT 65
 // 63 total chars in encryption including hyphen.
-#define TOTAL_CHARS 300
+#define TOTAL_CHARS 63
 
 // Heap node structure.
 struct heapNode
