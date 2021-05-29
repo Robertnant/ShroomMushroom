@@ -580,6 +580,7 @@ void printCodes(struct heapNode* root, int arr[], int top)
     }
 }
 
+/*
 int main()
 {
     char input[] = "Black leather gloves, no sequins Buckles on the jacket, it's Alyx **** Nike crossbody, got a piece in it Got a dance, but it's really on some street **** I'ma show you how to get it It go, right foot up, left foot slide Left foot up, right foot slide money";
@@ -621,3 +622,4 @@ int main()
 
     return 0;
 }
+*/

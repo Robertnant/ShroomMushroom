@@ -327,9 +327,13 @@ void compressElgamal(char *input)
     // Ratio.
     double ratio = (float) len / (float) compressedLen;
     printf("\nConversion ratio: %f\n", ratio);
+
+    // Free memory.
+    free(encData);
+    free(encTree);
+    free(res);
 }
 
-/*
 int main()
 {
     char *msg = "Black leather gloves, no sequins\n\
@@ -385,4 +389,3 @@ int main()
     return 0;
 
 }
-*/
