@@ -370,6 +370,7 @@ int main()
     // Compress encryption with Huffman.
     printf("\nCompressing data.\n");
     char *res = compressElgamal(dataCyphers->en_msg);
+    free(dataCyphers->en_msg);
     dataCyphers->en_msg = res;
 
     // Decrypt data and print.
