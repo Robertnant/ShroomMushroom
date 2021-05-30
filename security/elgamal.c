@@ -328,6 +328,9 @@ char *compressElgamal(char *input)
     double ratio = (float) len / (float) compressedLen;
     printf("\nCompression ratio: %f\n", ratio);
 
+    // Free memory.
+    free(compData);
+
     return res;
 }
 

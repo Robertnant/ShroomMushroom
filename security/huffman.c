@@ -626,6 +626,7 @@ char *decompress(unsigned char *compData)
     free(dataBin);
 
     // Free memory.
+    free(comp);
     deleteHuffman(ht);
 
     return res;
