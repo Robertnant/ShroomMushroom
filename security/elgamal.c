@@ -315,29 +315,19 @@ publicKey* stringtoPub(char *string)
 
 char *compressElgamal(char *input)
 {
-    unsigned char *encTree, *encData;
-    size_t encTreeSize, encDataSize;
-
-    int treeOffset, dataOffset;
     size_t len = strlen(input);
 
-    compress(input, &encTree, &encData, &treeOffset, &dataOffset,
-            &encTreeSize, &encDataSize);
-
-    size_t compressedLen = encTreeSize + encDataSize;
+    // Compression.
+    size_t compressedLen;
+    unsigned char *compData = compress(input, &compressedLen);
 
     // Decompression.
-    char *res = decompress(encData, dataOffset, encTree, treeOffset,
-            encDataSize, encTreeSize);
+    char *res = decompress(compData);
 
     // Ratio.
     double ratio = (float) len / (float) compressedLen;
     printf("\nCompression ratio: %f\n", ratio);
 
-    // Free memory.
-    free(encData);
-    free(encTree);
-    
     return res;
 }
 

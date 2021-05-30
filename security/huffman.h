@@ -42,6 +42,8 @@ struct comp
     unsigned char *encData;
     size_t treeSize;
     size_t dataSize;
+    int treeOffset;
+    int dataOffset;
 } comp;
 
 // Heap tools.
@@ -68,9 +70,8 @@ void occurList(struct heapNode *root, struct codes *codes,
 
 void buildFrequencyList(char *input, size_t *freq, char **chars);
 struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size);
-void compress(char *data, unsigned char **resTree, unsigned char **resData,
-        int *treeOffset, int *dataOffset, size_t *resTreeSize, 
-        size_t *resDataSize);
+unsigned char *compress(char *data, size_t *len);
+
 // Encoding.
 char *encodeData(struct codes *codes, char *input);
 void encodeTree(struct heapNode *huffmanTree, GString *res);
@@ -82,11 +83,13 @@ char *decodeData(struct heapNode *huffmanTree, char *data);
 struct heapNode *decodeTree(char *data);
 
 // DECOMPRESSION.
-char *decompress(unsigned char *data, int dataAlign, 
-        unsigned char *tree, int treeAlign, size_t dataSize, size_t treeSize);
+char *decompress(unsigned char *data);
 
 // Deletion.
 void deleteHuffman(struct heapNode *huffmanTree);
 void freeCodes(struct codes *codes);
 
+// Merge compression.
+unsigned char *mergeComp(struct comp *comp, size_t *size);
+void unmergeComp(unsigned char *data, struct comp *res);
 #endif

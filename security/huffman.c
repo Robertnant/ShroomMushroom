@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -9,7 +11,6 @@
 #include "tools.h"
 #include "huffman.h"
 
-#define _GNU_SOURCE
 
 /* README: Only use Huffman on base 62 compressed data. */
 
@@ -347,10 +348,11 @@ void encodeTree(struct heapNode *huffmanTree, GString *res)
     }
 }
 
-void compress(char *data, unsigned char **resTree, unsigned char **resData,
-        int *treeOffset, int *dataOffset, size_t *resTreeSize, 
-        size_t *resDataSize)
+// Lenght pointer can be NULL.
+unsigned char *compress(char *data, size_t *len)
 {
+    struct comp *comp = malloc(sizeof(struct comp));
+    
     // Step 1: Build frequency list.
     size_t *freq = calloc(TOTAL_CHARS, sizeof(size_t));
     char *chars;
@@ -371,46 +373,52 @@ void compress(char *data, unsigned char **resTree, unsigned char **resData,
     encodeTree(ht, tmp);
 
     char *freedStr = g_string_free(tmp, FALSE);
-    *resTree = toChar(freedStr, treeOffset, resTreeSize);
+    comp->encTree = toChar(freedStr, &(comp->treeOffset), &(comp->treeSize));
 
     // Free memory.
     free(freedStr);
 
     // Step 5: Compress input string.
     char *preEncData = encodeData(codes, data);
-    *resData = toChar(preEncData, dataOffset, resDataSize);
+    comp->encData = toChar(preEncData, &(comp->dataOffset), &(comp->dataSize));
+
+    // Step 6: Merge compression.
+    unsigned char *res = mergeComp(comp, len);
 
     // Free memory.
-    freeCodes(codes);
-    g_free(preEncData);
     free(freq);
     free(chars);
+    free(comp);
+    freeCodes(codes);
+    g_free(preEncData);
     deleteHuffman(ht);
+
+    return res;
 }
 
 // Merge compression into one string.
 // (Frees previous unmerged tree and data).
-// Format "TreeSize-DataSize-Tree END Data" (no spaces).
+// Format "TreeSize-DataSize-TreeOffset-DataOffset-EncTreeEncData" (no spaces).
 // TODO: Use memmove instead if somehow memory areas overlap.
-unsigned char *mergeComp(struct comp *comp)
+// Len is used for compression ratio purposes only.
+unsigned char *mergeComp(struct comp *comp, size_t *size)
 {
     // Get struct fields.
     unsigned char *encTree = comp->encTree;
     unsigned char *encData = comp->encData;
     size_t treeSize = comp->treeSize;
     size_t dataSize = comp->dataSize;
+    int treeOffset = comp->treeOffset;
+    int dataOffset = comp->dataOffset;
 
-    // Size of format seperator.
-    char token[] = "END";
-    int tokSize = strlen(token);
-    
     // Create string for sizes.
     char *sizes;
-    asprintf(sizes, "%ld-%ld-", treeSize, dataSize);
+    asprintf(&sizes, "%ld-%ld-%d-%d-", treeSize, dataSize, 
+            treeOffset, dataOffset);
 
     // Create final result.
     size_t sizesLen = strlen(sizes);
-    size_t len = sizesLen + treeSize + tokSize + dataSize;
+    size_t len = sizesLen + treeSize + dataSize;
     unsigned char *res = malloc(len * sizeof(unsigned char));
 
     memcpy(res, sizes, sizesLen);
@@ -419,44 +427,70 @@ unsigned char *mergeComp(struct comp *comp)
     unsigned char *tmp = memcpy(res+sizesLen, encTree, treeSize);
     free(encTree);
 
-    tmp = memcpy(tmp+treeSize, token, tokSize);
-    tmp = memcpy(tmp+tokSize, encData, dataSize);
+    tmp = memcpy(tmp+treeSize, encData, dataSize);
     free(encData);
+
+    // Return size for ratio calculation.
+    if (size != NULL)
+        *size = len;
 
     return res;
 }
 
-// Unmerge compressed data.
-// HINT: Use treeSize and dataSize to know when to stop.
-void unmergeComp(char *data, struct comp *res)
+// Copy bytes till delimiter reached.
+unsigned char *delimcpy(unsigned char *data, char *res)
 {
     int c = 0;
+    unsigned char *tmp;
+    for (tmp = data; *tmp != '-'; tmp++)
+    {
+        res[c] = *tmp;
+        c++;
+    }
+
+    tmp++;
+
+    // Return current position of data.
+    return tmp;
+}
+
+// Unmerge compressed data.
+// HINT: Use treeSize and dataSize to know when to stop.
+void unmergeComp(unsigned char *data, struct comp *res)
+{
     char strSize[8];
     bzero(strSize, 8);
 
     // Get encTree size.
-    char *tmp;
-    for (tmp = data; *tmp != '-'; tmp++)
-    {
-        strSize[c] = *tmp;
-        c++;
-    }
-
+    unsigned char *tmp = data;
+    tmp = delimcpy(tmp, strSize);
     res->treeSize = atoi(strSize);
 
     // Get encData size.
-    bzero(strSize, c);
-    c = 0;
-    for (tmp++; *tmp != '-'; tmp++)
-    {
-        strSize[c] = *tmp;
-        c++;
-    }
-
+    bzero(strSize, 8);
+    tmp = delimcpy(tmp, strSize);
     res->dataSize = atoi(strSize);
 
-    // Get encTree.
-    tmp++;
+    // Get tree offset.
+    bzero(strSize, 8);
+    tmp = delimcpy(tmp, strSize);
+    res->treeOffset = atoi(strSize);
+
+    // Get data offset.
+    bzero(strSize, 8);
+    tmp = delimcpy(tmp, strSize);
+    res->dataOffset = atoi(strSize);
+
+    // Get encTree and encData.
+    res->encTree = malloc((res->treeSize) * sizeof(unsigned char));
+    res->encData = malloc((res->dataSize) * sizeof(unsigned char));
+
+    // Step 1: Copy encoded tree bytes to encTree.
+    memcpy(res->encTree, tmp, res->treeSize);
+    tmp += res->treeSize;
+
+    // Step 2: Copy encoded data bytes to encData.
+    memcpy(res->encData, tmp, res->dataSize);
 }
 
 // Decode binary encoded string using corresponding huffman tree.
@@ -561,25 +595,38 @@ struct heapNode *decodeTree(char *data)
 }
 
 // Decompression process.
-char *decompress(unsigned char *data, int dataAlign, 
-        unsigned char *tree, int treeAlign, size_t dataSize, size_t treeSize)
+char *decompress(unsigned char *compData)
 {
-    // Step 1: Get binary representation of tree.
+    // Step 1: Unmerge compressed data.
+    struct comp *comp = malloc(sizeof(struct comp));
+    unmergeComp(compData, comp);
+
+    // Step 2: Get structure fields.
+    unsigned char *tree = comp->encTree;
+    unsigned char *data = comp->encData;
+    size_t treeSize = comp->treeSize;
+    size_t dataSize = comp->dataSize;
+    int treeAlign = comp->treeOffset;
+    int dataAlign = comp->dataOffset;
+
+    // Step 3: Get binary representation of tree.
     char *treeBin = fromChar(tree, treeSize, treeAlign);
+    free(tree);
 
-    // Step 2: Decode Huffman Tree.
+    // Step 4: Decode Huffman Tree.
     struct heapNode *ht = decodeTree(treeBin);
+    free(treeBin);
 
-    // Step 3: Get binary representation of data.
+    // Step 5: Get binary representation of data.
     char *dataBin = fromChar(data, dataSize, dataAlign);
+    free(data);
 
-    // Step 4: Decode encoded data.
+    // Step 6: Decode encoded data.
     char *res = decodeData(ht, dataBin);
+    free(dataBin);
 
     // Free memory.
-    free(treeBin);
     deleteHuffman(ht);
-    free(dataBin);
 
     return res;
 }
