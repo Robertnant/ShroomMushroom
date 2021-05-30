@@ -35,6 +35,15 @@ struct codes
     int size;
 } codes;
 
+// Compressed data structure.
+struct comp
+{
+    unsigned char *encTree;
+    unsigned char *encData;
+    size_t treeSize;
+    size_t dataSize;
+} comp;
+
 // Heap tools.
 struct heap *newHeap(size_t capacity);
 struct heapNode *newNode(char data, size_t freq);

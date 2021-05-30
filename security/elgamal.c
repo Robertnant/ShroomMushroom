@@ -28,7 +28,6 @@ void large_keygen(mpz_t lower, mpz_t upper, mpz_t res)
 
     // Ensure that result is between lower and upper bounds.
     mpz_sub(tmp, upper, lower);
-    // gmp_printf("Upper - lower: %Zd\n", tmp);
     mpz_urandomm(res, state, tmp);
     mpz_add(res, res, lower);
 
@@ -49,13 +48,11 @@ void coprime_key(mpz_t q, mpz_t res)
     mpz_init_set_str(one, "1", 10);
 
     large_keygen(low, q, res);
-    // mpz_set(res, large_keygen(low, q));
     mpz_gcd(tmp, res, q);
 
     // Check if values are coprime.
     while (mpz_cmp_ui(tmp, 1) != 0)
     {
-        //large_keygen(low, q, res); // old method
         mpz_sub(res, res, one);
         mpz_gcd(tmp, res, q);
     }
@@ -116,6 +113,21 @@ void encrypt_gamal(char *msg, publicKey *receiverKeys, cyphers *en_data)
 
     // Save string conversion of encryption.
     en_data->en_msg = toString(encryption, len);
+
+    // Compress encryption
+    // (Only if len original message > 3).
+    // Format: T END HuffmanTreeSize HuffmanTree END EncDataSize END EncodedData. (Without spaces. T for True and F for False).
+    // (END is the format seperator).
+    // If strtok(format) starts with "F",
+    // encryption is not compressed. Hence encryption
+    // is the next strtok(format).
+    // Compression maybe not necessary if p key encryption is compressed as well.
+    // Yet server combines encryption and p key. So this might be the message that needs to be compressed.
+    // Hence no need for formats. 
+    // If format of server sent data is Encryption-Pkey, just replace to T-Encryption-Pkey (T for True, F for False).
+    //
+    // TODO: New idea: Compress JSON file created by client instead of single Elgamal encryption.
+    // JSON file contains header info. Which means that compression will always have a good ratio.
 
     // Free memory.
     for (size_t i = 0; i < len; i++)
@@ -309,37 +321,26 @@ char *compressElgamal(char *input)
     int treeOffset, dataOffset;
     size_t len = strlen(input);
 
-    //printf("To compress: %s\n", input);
-    // printf("Len: %ld\n", len);
     compress(input, &encTree, &encData, &treeOffset, &dataOffset,
             &encTreeSize, &encDataSize);
 
     size_t compressedLen = encTreeSize + encDataSize;
 
-    // printf("Compressed Tree:\n %s END\n", encTree);
-    // printf("Compressed Data:\n %s END\n", encData);
-    // printf("Compressed len: %ld\n", compressedLen);
-    // printf("\nFinished compression\n");
-
     // Decompression.
     char *res = decompress(encData, dataOffset, encTree, treeOffset,
             encDataSize, encTreeSize);
 
-    // printf("\nDecompressed: %s\n", res);
-
     // Ratio.
     double ratio = (float) len / (float) compressedLen;
-    printf("\nConversion ratio: %f\n", ratio);
+    printf("\nCompression ratio: %f\n", ratio);
 
     // Free memory.
     free(encData);
     free(encTree);
-    //free(res);
     
     return res;
 }
 
-/*
 int main()
 {
     char *msg = "Black leather gloves, no sequins\n\
@@ -352,6 +353,7 @@ int main()
                  Basically, I'm saying either way, we 'bout to slide, ayy\n\
                  Can't let this one slide, ayy";
 
+    //char *msg = "I'ma";
     // char *msg = "Bought a spaceship now I'm a space cadet.";
     printf("Original message: %s\n", msg);
 
@@ -389,12 +391,9 @@ int main()
     // Free memory space.
     free(dr_msg);
     freeKeys(receiver_pubkey, receiver_privkey);
-    // freeKey(receiver_privkey);
-    // free(receiver_privkey);
     freeCyphers(dataCyphers);
     free(a);
 
     return 0;
 
 }
-*/

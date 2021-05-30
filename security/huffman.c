@@ -11,7 +11,7 @@
 
 #define _GNU_SOURCE
 
-/* README: Only use Huffman on base 62 compressed data! */
+/* README: Only use Huffman on base 62 compressed data. */
 
 // Heap creator.
 struct heap *newHeap(size_t capacity)
@@ -153,7 +153,6 @@ void buildFrequencyList(char *input, size_t *freq, char **chars)
 {
     // Use Glib data types to create list.
     GString *s = g_string_new(NULL);
-    // GArray *f = g_array_new(FALSE, FALSE, sizeof(gsize));
 
     // Build character list.
     ssize_t index;
@@ -188,8 +187,6 @@ void buildFrequencyList(char *input, size_t *freq, char **chars)
 }
 
 // Build Huffman tree.
-// Heap created in the process is saved to parameter heap in order to
-// free it after creation.
 struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size) 
 {
     struct heapNode *l;
@@ -216,8 +213,7 @@ struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size)
         insertNode(heap, top);
     }
  
-    // Step 4: The remaining node is the
-    // root node and the tree is complete.
+    // The remaining node is the root node.
     struct heapNode *res = getMin(heap);
 
     // Free heap memory.
@@ -228,9 +224,6 @@ struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size)
 }
 
 // Encoding.
-
-// TODO: If fails, create occurence list of characters in Huffman Tree.
-// chars and occur will be of size MAX_HT.
 
 void initCodes(struct codes *codes, struct heapNode *root)
 {
@@ -262,7 +255,6 @@ void freeCodes(struct codes *codes)
 void addCode(struct codes *codes, char el, int n, char *occur)
 {
     codes->chars[codes->size] = el;
-    // codes->occur[codes->size] = occur;
 
     // Copy passed occurence to codes struct.
     strncpy(codes->occur[codes->size], occur, n);
@@ -290,9 +282,7 @@ void occurList(struct heapNode *root, struct codes *codes,
     // Add code from arr[] to codes structure.
     if (isLeaf(root)) 
     {
-        // printf("Occur %c: %s\n", root->data, arr);
         addCode(codes, root->data, top, arr);
-        //bzero(arr, strlen(arr));
     }
 }
 
@@ -317,24 +307,14 @@ char *occur(struct codes *codes, char el)
     return res;
 }
 
-// Note: this function works. But toChar len should be
-// res->len / 8 maximum.
-// Hence problem might come from not allocating enough space in
-// toChar.
-// TODO: Fix toChar.
-// Maybe there's a resSize length overflow.
 char *encodeData(struct codes *codes, char *input)
 {
     GString *res = g_string_new(NULL);
     size_t len = strlen(input);
 
-    // GString *tmp;
     for (size_t i = 0; i < len; i++)
     {
-        // tmp = g_string_sized_new(MAX_HT);
-
         char *tmpStr = occur(codes, input[i]);
-        //printf("\nReceived occur %ld: %s\n", i, tmpStr);
         g_string_append(res, tmpStr);
     }
 
@@ -354,7 +334,6 @@ void encodeTree(struct heapNode *huffmanTree, GString *res)
         // Precede by 1.
         if (isLeaf(huffmanTree))
         {
-            // Create GString for left and right?
             char bin[10];
             bin[0] = '1';
             decBin((int) huffmanTree->data, bin+1);
@@ -388,24 +367,17 @@ void compress(char *data, unsigned char **resTree, unsigned char **resData,
     initCodes(codes, ht);
 
     // Step 4: Compress Huffman tree.
-    // printf("\nEncoding Huffman tree.\n");
-
     GString *tmp = g_string_new(NULL);
     encodeTree(ht, tmp);
 
     char *freedStr = g_string_free(tmp, FALSE);
-    // printf("Tree Before toChar: %s\n", freedStr);
     *resTree = toChar(freedStr, treeOffset, resTreeSize);
-    // printf("Res Str: %s\n", *resTree);
 
     // Free memory.
     free(freedStr);
 
     // Step 5: Compress input string.
-    // printf("\nEncoding input string.\n");
     char *preEncData = encodeData(codes, data);
-    // printf("Data Before toChar - Size %ld: %s\n", 
-    //        strlen(preEncData), preEncData);
     *resData = toChar(preEncData, dataOffset, resDataSize);
 
     // Free memory.
@@ -414,6 +386,77 @@ void compress(char *data, unsigned char **resTree, unsigned char **resData,
     free(freq);
     free(chars);
     deleteHuffman(ht);
+}
+
+// Merge compression into one string.
+// (Frees previous unmerged tree and data).
+// Format "TreeSize-DataSize-Tree END Data" (no spaces).
+// TODO: Use memmove instead if somehow memory areas overlap.
+unsigned char *mergeComp(struct comp *comp)
+{
+    // Get struct fields.
+    unsigned char *encTree = comp->encTree;
+    unsigned char *encData = comp->encData;
+    size_t treeSize = comp->treeSize;
+    size_t dataSize = comp->dataSize;
+
+    // Size of format seperator.
+    char token[] = "END";
+    int tokSize = strlen(token);
+    
+    // Create string for sizes.
+    char *sizes;
+    asprintf(sizes, "%ld-%ld-", treeSize, dataSize);
+
+    // Create final result.
+    size_t sizesLen = strlen(sizes);
+    size_t len = sizesLen + treeSize + tokSize + dataSize;
+    unsigned char *res = malloc(len * sizeof(unsigned char));
+
+    memcpy(res, sizes, sizesLen);
+    free(sizes);
+
+    unsigned char *tmp = memcpy(res+sizesLen, encTree, treeSize);
+    free(encTree);
+
+    tmp = memcpy(tmp+treeSize, token, tokSize);
+    tmp = memcpy(tmp+tokSize, encData, dataSize);
+    free(encData);
+
+    return res;
+}
+
+// Unmerge compressed data.
+// HINT: Use treeSize and dataSize to know when to stop.
+void unmergeComp(char *data, struct comp *res)
+{
+    int c = 0;
+    char strSize[8];
+    bzero(strSize, 8);
+
+    // Get encTree size.
+    char *tmp;
+    for (tmp = data; *tmp != '-'; tmp++)
+    {
+        strSize[c] = *tmp;
+        c++;
+    }
+
+    res->treeSize = atoi(strSize);
+
+    // Get encData size.
+    bzero(strSize, c);
+    c = 0;
+    for (tmp++; *tmp != '-'; tmp++)
+    {
+        strSize[c] = *tmp;
+        c++;
+    }
+
+    res->dataSize = atoi(strSize);
+
+    // Get encTree.
+    tmp++;
 }
 
 // Decode binary encoded string using corresponding huffman tree.
@@ -558,28 +601,22 @@ void deleteHuffman(struct heapNode *huffmanTree)
     }
 }
 
-// Prints huffman codes from the root of Huffman Tree.
-// It uses arr[] to store codes
+// Prints huffman codes.
 void printCodes(struct heapNode* root, int arr[], int top)
 {
-    // Assign 0 to left edge and recur
     if (root->l)
     {
         arr[top] = 0;
         printCodes(root->l, arr, top + 1);
     }
  
-    // Assign 1 to right edge and recur
     if (root->r)
     {
         arr[top] = 1;
         printCodes(root->r, arr, top + 1);
     }
  
-    // If this is a leaf node, then
-    // it contains one of the input
-    // characters, print the character
-    // and its code from arr[]
+    // Occurence found.
     if (isLeaf(root))
     {
         printf("%c: ", root->data);
@@ -587,46 +624,3 @@ void printCodes(struct heapNode* root, int arr[], int top)
     }
 }
 
-/*
-int main()
-{
-    char input[] = "Black leather gloves, no sequins Buckles on the jacket, it's Alyx **** Nike crossbody, got a piece in it Got a dance, but it's really on some street **** I'ma show you how to get it It go, right foot up, left foot slide Left foot up, right foot slide money";
-
-    // Compression.
-    unsigned char *encTree, *encData;
-    int treeOffset, dataOffset;
-    size_t len = strlen(input);
-
-    printf("To compress: %s\n", input);
-    printf("Len: %ld\n", len);
-    compress(input, &encTree, &encData, &treeOffset, &dataOffset);
-
-    size_t compressedLen = 0;
-    while (encTree[compressedLen] != '\0')
-        compressedLen++;
-    for (size_t i = 0; encData[i] != '\0'; i++)
-        compressedLen++;
-
-    printf("Compressed Tree:\n %s END\n", encTree);
-    printf("Compressed Data:\n %s END\n", encData);
-    printf("Compressed len: %ld\n", compressedLen);
-    
-    printf("\nFinished compression\n");
-
-    // Decompression.
-    char *res = decompress(encData, dataOffset, encTree, treeOffset);
-
-    printf("\nDecompressed: %s\n", res);
-
-    // Ratio.
-    double ratio = (float) len / (float) compressedLen;
-    printf("\nConversion ratio: %f\n", ratio);
-
-    // Free memory.
-    free(encData);
-    free(encTree);
-    free(res);
-
-    return 0;
-}
-*/
