@@ -334,6 +334,7 @@ char *compressElgamal(char *input)
     return res;
 }
 
+/*
 int main()
 {
     char *msg = "Black leather gloves, no sequins\n\
@@ -390,3 +391,4 @@ int main()
     return 0;
 
 }
+*/
