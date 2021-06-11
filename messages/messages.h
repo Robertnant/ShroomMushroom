@@ -16,7 +16,7 @@ struct message
     unsigned char *content;
     char *p;
     size_t size;
-    size_t compressedSize; // No compression case: size 0.
+    size_t compSize; // No compression case: size 0.
 
     char *time;
     char *sender;

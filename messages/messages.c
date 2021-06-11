@@ -20,17 +20,24 @@ void parseMessage(unsigned char *data, struct message *parsed)
     {
         while (data[size1] != ':')
             size1++;
+
+        size1++;
     }
 
-    // Include last character (double bracket).
+    // Include last character (double quote).
     size1++;
 
-    // Step 1: Create JSON to retrieve size of content (message->size).
+    // Step 1: Create JSON to retrieve size of content (message->compSize).
     // Terminate part1 with '}' and add fake data for content field.
     char part1[size1+4];
-    memcpy(data, part1, size1);
+    for (int i = 0; i < size1; i++)
+        part1[i] = data[i];
+
+    // memcpy(data, part1, size1);
     part1[size1+3] = '\0';
-    strcpy(part1, "1\"}");
+    strcpy(part1+size1, "1\"}");
+
+    // printf("Part1 %s\n", part1);
 
     struct json_object *parsed_size;
     parsed_size = json_tokener_parse(part1);
@@ -47,6 +54,7 @@ void parseMessage(unsigned char *data, struct message *parsed)
     
     // Step 2: Retrieve content.
     unsigned char *contentStart = data + size1;
+    // printf("\nContent till NULL: %s\n\n", (char*) contentStart);
     
     // Step 3: Retrieve part 2.
     json_object_object_get_ex(parsed_size, "size", &size);
@@ -59,9 +67,11 @@ void parseMessage(unsigned char *data, struct message *parsed)
     json_object_put(compSize);
     //free(compSize);
     
-    // Set character just before last part of string to '{' for JSON.
-    char *part2 = (char) (data + size1 + parsed->size - 1);
-    *part2 = '{';
+    // Add character '{' for JSON.
+    // printf("CompSize: %lu\n Size: %lu\n", parsed->compSize, parsed->size);
+    unsigned char *p2 = (data + size1 + parsed->compSize + 1);
+    *p2 = '{';
+    char *part2 = (char*) p2;
     
     parsed_json = json_tokener_parse(part2);
 
@@ -92,8 +102,8 @@ void parseMessage(unsigned char *data, struct message *parsed)
     }
     
     // Save content to struct.
-    parsed->content = malloc(sizeof(unsigned char) * parsed->size);
-    memcpy(parsed->content, contentStart, parsed->size);
+    parsed->content = malloc(sizeof(unsigned char) * parsed->compSize);
+    memcpy(parsed->content, contentStart, parsed->compSize);
 
     len = strlen(json_object_get_string(p));
     parsed->p = (char *) malloc(sizeof(char) * len + 1);
@@ -136,38 +146,44 @@ unsigned char *genMessage(struct message* message, int *l)
     // {"content":"COMPRESSION",
     // char part1[] = "{\"size\":%lu,\"content\":\"%s\",";
     char *part1;
-    int size1 = asprint(&part1, "{\"size\":%lu,\
-            \"compSize\":%lu,\"content\":\"",\ 
-            message->size, message->compSize);
+    int size1 = asprintf(&part1, "{\"size\":%lu,\
+\"compSize\":%lu,\"content\":\"", message->size, message->compSize);
 
     char *part2;
     *l = asprintf(&part2, "\",\"type\":%d,\
-            \"p\":\"%s\",\
-            \"time\":\"%s\",\
-            \"sender\":\"%s\",\
-            \"receiver\":\"%s\",\
-            \"filename\":\"%s\"}",\
-            message->type, message->p, message->time, 
-            message->sender, message->receiver, message->filename);
+\"p\":\"%s\",\
+\"time\":\"%s\",\
+\"sender\":\"%s\",\
+\"receiver\":\"%s\",\
+\"filename\":\"%s\"}",\
+message->type, message->p, message->time, 
+message->sender, message->receiver, message->filename);
 
     // Create result unsigned string (NULL terminated).
-    unsigned char *res = calloc((size1 + message->contentSize + *l + 1) * 
+    unsigned char *res = calloc((size1 + message->compSize + *l + 1),
             sizeof(unsigned char));
 
     // Copy part1.
     unsigned char *tmp = memcpy(res, part1, size1);
 
     // Copy content.
-    tmp = memcpy(tmp+size1, message->content, message->contentSize);
+    tmp = memcpy(tmp+size1, message->content, message->compSize);
 
     // Copy part2.
-    tmp = memcpy(tmp + message->size, part2, *l);
+    tmp = memcpy(tmp + message->compSize, part2, *l);
     
     // Update *l to final size.
-    *l += size1 + message->size;
+    *l += size1 + message->compSize;
+
+    /*
+    printf("\nTEST\n");
+    for (int i = 0; i < *l; i++)
+        printf("%c", res[i]);
+    */
 
     // Free memory.
     free(part1);
+    free(part2);
 
     return res;
 }
@@ -175,8 +191,9 @@ unsigned char *genMessage(struct message* message, int *l)
 void printStruct(struct message *parsed)
 {
     printf("User: %s sending message %s with second cypher %s\
-            and original msg size %lu to User %s\n", 
-            parsed->sender, parsed->content, parsed->p, parsed->size, parsed->receiver);
+            and original msg size %lu with compressed size %lu to User %s\n", 
+            parsed->sender, parsed->content, parsed->p, parsed->size, 
+            parsed->compSize, parsed->receiver);
 
     printf("Message of type %d sent at %s with file name %s\n",
             parsed->type, parsed->time, parsed->filename);
@@ -188,8 +205,8 @@ void freeMessage(struct message *message)
 {
     if (message->content)
         free(message->content);
-    if (message->p)
-        free(message->p);
+    // if (message->p)
+    //    free(message->p);
     if (message->time)
         free(message->time);
     if (message->sender)
@@ -198,6 +215,7 @@ void freeMessage(struct message *message)
         free(message->receiver);
     if (message->filename)
         free(message->filename);
+        
     //free(message);
 }
 
