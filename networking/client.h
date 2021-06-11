@@ -12,7 +12,7 @@ struct privateKey *privkey;
 
 int addContact(int fd, char number[]);
 
-struct user* init_procedure(int fd, char username[], char number[]);
+struct user* init_procedure(int fd, char username[], char number[], char avatar[]);
 char *requestKey(struct message *message, int sockfd);
 
 #endif

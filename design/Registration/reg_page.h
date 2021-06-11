@@ -8,6 +8,7 @@ struct registration_data
     int success;
     char username[17];
     char number[11];
+    char avatar[10];
 };
 
 typedef struct 

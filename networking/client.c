@@ -66,16 +66,16 @@ int exists(char filename[])
     return (access(filename, F_OK ) == 0);
 }
 
-struct user* init_procedure(int fd, char username[], char number[])
+struct user* init_procedure(int fd, char username[], char number[], char avatar[])
 {
-    struct user* user = init_user_path(username, number, USER_PATH);
+    struct user* user = init_user_path(username, number, avatar, USER_PATH);
     struct message* tmp_msg = (struct message *) calloc(1, sizeof(struct message));
     char* buf;
 
     int n;
     tmp_msg->type = INIT; 
-    if ((n = asprintf(&tmp_msg->content, "%s %s %s %s-%s-%s", user->username,\
-                    user->number, user->UID,\
+    if ((n = asprintf(&tmp_msg->content, "%s %s %s %s %s-%s-%s", user->username,\
+                     user->avatar, user->number, user->UID,\
                     user->pub.g, user->pub.q, user->pub.h)) < 1)
         errx(1, "Weird error sending generated user data");
     int l;

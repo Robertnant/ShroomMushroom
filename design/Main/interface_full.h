@@ -28,6 +28,8 @@ GtkButton *addContactButton;
 GtkEntry *TextEntry;
 GtkTextBuffer *send_textbuffer;
 GtkLabel *textlabel;
+GtkLabel *current_user_label;
+GtkImage *current_user_avatar;
 
 GtkButton *close_window_button;
 

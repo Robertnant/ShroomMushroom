@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow" id="reg_page">
@@ -151,7 +151,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkButton" id="lion_avatar_button">
+                          <object class="GtkButton" id="lion">
+                            <property name="name">lion</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -170,7 +171,8 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="elephant_avatar_button">
+                          <object class="GtkButton" id="elephant">
+                            <property name="name">elephant</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -189,7 +191,8 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="dog_avatar_button">
+                          <object class="GtkButton" id="dog">
+                            <property name="name">dog</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -208,7 +211,8 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="koala_avatar_button">
+                          <object class="GtkButton" id="koala">
+                            <property name="name">koala</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -227,7 +231,8 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="cat_avatar_button">
+                          <object class="GtkButton" id="cat">
+                            <property name="name">cat</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>

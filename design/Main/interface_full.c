@@ -59,6 +59,15 @@ void select_contact(GtkWidget * widget, gpointer arg)
     chat_bubbles(path);
     free(path);
 
+    // Change the label
+    gtk_label_set_text(current_user_label, target_user->username);
+
+    // Change the avatar
+    char *image_path;
+    asprintf(&image_path, "./design/Avatars/%s.ico", target_user->avatar);
+    gtk_image_set_from_file(current_user_avatar, image_path);
+    free(image_path);
+    
     printf("SELECTED USER:\n\
             username: %s,\n\
             number: %s\n\
@@ -476,6 +485,8 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
     TextEntry = GTK_ENTRY(gtk_builder_get_object(builder, "TextEntry"));
     //send_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "send_textbuffer"));
     textlabel = GTK_LABEL(gtk_builder_get_object(builder, "textlabel"));
+    current_user_label = GTK_LABEL(gtk_builder_get_object(builder, "current_user_label"));
+    current_user_avatar = GTK_IMAGE(gtk_builder_get_object(builder, "current_user_avatar"));
 
     fixed1 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed1"));
     grid1 = GTK_WIDGET(gtk_builder_get_object(builder, "grid1"));
@@ -486,6 +497,8 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
     g_signal_connect(sendTextButton, "clicked", G_CALLBACK(on_send_text_button_activate), NULL);
     g_signal_connect(addContactButton, "clicked", G_CALLBACK(on_add_contact_button_selected), NULL);
     g_signal_connect(close_window_button, "clicked", G_CALLBACK(on_window_main_destroy), NULL);
+    
+
     // Set Widget sensitivity.
     gtk_widget_set_sensitive(GTK_WIDGET(TextEntry), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(sendTextButton), TRUE);

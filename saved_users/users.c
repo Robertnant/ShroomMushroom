@@ -150,7 +150,7 @@ struct user* get_contact(char number[])
 }
 
 
-struct user* init_user(char username[], char number[])
+struct user* init_user(char username[], char number[], char avatar[])
 {
     struct user* new =  malloc(sizeof(struct user));
     if (new == NULL)
@@ -159,6 +159,7 @@ struct user* init_user(char username[], char number[])
     }
     char * id = get_id(number);
     strcpy(new->username, username);
+    strcpy(new->avatar, avatar);
     strcpy(new->number, number);
     strcpy(new->UID, id);
     free(id);
@@ -172,9 +173,13 @@ struct user* init_user(char username[], char number[])
 struct user* parseUser(char string[])
 {
     struct user* res = (struct user *) calloc(1, sizeof(struct user));
-    
+    printf("TRYING TO PARSE %s\n", string); 
     char *token = strtok(string, " ");
+    printf("GOT TOKEN %s\n", token); 
     strcpy(res->username, token);
+
+    token = strtok(NULL, " ");
+    strcpy(res->avatar, token);
 
     token = strtok(NULL, " ");
     strcpy(res->number, token);
@@ -206,8 +211,8 @@ char* user_to_string(struct user* user, size_t * l)
     char * res;
     size_t tmp;
     if (user)
-        tmp = asprintf(&res, "%s %s %s %s-%s-%s-", user->username, user->number, user->UID,
-            user->pub.g, user->pub.q, user->pub.h);
+        tmp = asprintf(&res, "%s %s %s %s %s-%s-%s-", user->username, user->avatar, 
+                user->number, user->UID, user->pub.g, user->pub.q, user->pub.h);
     else
         tmp = asprintf(&res, "(null)");
 
@@ -218,7 +223,7 @@ char* user_to_string(struct user* user, size_t * l)
 
 
 //public key variable needs to be added 
-struct user* init_user_path(char username[], char number[], char path[])
+struct user* init_user_path(char username[], char number[], char avatar[], char path[])
 {
     struct user* new =  calloc(1, sizeof(struct user));
     if (new == NULL)
@@ -227,6 +232,7 @@ struct user* init_user_path(char username[], char number[], char path[])
     }
     char * id = get_id(number);
     strcpy(new->username, username);
+    strcpy(new->avatar, avatar);
     strcpy(new->number, number);
     strcpy(new->UID, id);
     free(id);

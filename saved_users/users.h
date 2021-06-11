@@ -26,6 +26,7 @@ struct user
     char username[17];
     char number[11];
     char UID[11];
+    char avatar[10];
     struct user_priv priv;
     struct user_pub pub;
 };
@@ -44,9 +45,9 @@ void save_user_path(struct user * user, char * path);
 
 struct user* parseUser(char string[]);
 
-struct user* init_user(char username[], char number[]);
+struct user* init_user(char username[], char number[], char avatar[]);
 
-struct user* init_user_path(char username[], char number[], char path[]);
+struct user* init_user_path(char username[], char number[], char avatar[], char path[]);
 
 char* user_to_string(struct user* user, size_t * l);
 
