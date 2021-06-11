@@ -95,16 +95,10 @@ void * send_to(void* arg)
     int sent = 0;
     while (!sent)
     {
-        fd = open(filename, O_WRONLY);
+        while((fd = open(filename, O_WRONLY)) <= 0){}
         sent = rewrite(fd, args->message, args->size);
     }
-                    //printf("Attempting to open pipe\n");
-                    //file_fd = open(receiver->UID, O_WRONLY);
-                    //printf("Pipe opened!\n");
-                    //write(file_fd, buff, er);
-                    //printf("Write successfull!\n");
-                    //close(file_fd);
-                    //printf("Pipe closed!\n");
+    
     free(tmp_target_user);
     free(filename);
 

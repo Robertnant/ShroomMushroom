@@ -192,7 +192,6 @@ struct user* parseUser(char string[])
     token = strtok(NULL, "-");
     strcpy(res->pub.q, token);
     printf("PARSING Q: %s \n", token);
-    
 
     token = strtok(NULL, "-");
     strcpy(res->pub.h, token);

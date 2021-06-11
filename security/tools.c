@@ -84,7 +84,7 @@ void fromString(char *enc, size_t finalLen, mpz_t *res)
                 subIndex++;
 
                 // Reset data for next substring.
-                for (int i = 0; i < MAX_LENGTH; i++)
+                for (size_t i = 0; i < len; i++)
                     tmp[i] = '\0';
 
                 count = 0;

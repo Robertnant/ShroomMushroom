@@ -35,6 +35,18 @@ void parseMessage(char *data, struct message *parsed)
     parsed -> type =  (enum MESSAGE_TYPE) json_object_get_int(type);
     json_object_put(type);
     //free(type);
+    if (&parsed->type == NULL)
+    {
+        free(parsed_json);
+        parsed->content = NULL;
+        parsed->p = NULL;
+        parsed->size = 0;
+        parsed->time = NULL;
+        parsed->sender = NULL;
+        parsed->receiver = NULL;
+        parsed->filename = NULL;
+        return;
+    }
     
 
     len = strlen(json_object_get_string(content));

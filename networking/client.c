@@ -118,7 +118,10 @@ int addContact(int fd, char number[])
     struct user* new_user = parseUser(buf);
     
     if(!new_user)
+    {
+        printf("User parse unsuccessful!\n");
         return 0;
+    }
 
     // Saving user into contacts.txt
     FILE * contacts = fopen(".files/contacts.txt", "a");
@@ -179,7 +182,7 @@ int main()
 
     // Set IP and PORT.
     servaddr.sin_family = AF_INET; 
-    servaddr.sin_addr.s_addr = inet_addr("52.188.111.165"); 
+    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
     servaddr.sin_port = htons(PORT); 
 
     // Connect client to server.
