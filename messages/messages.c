@@ -7,6 +7,8 @@
 
 void parseMessage(char *data, struct message *parsed)
 {
+    // Step 1: Split messaged into unsigned content and strign parts.
+
     // Must be replaced later by a socket pointer for client/server connection.
 
     struct json_object *parsed_json;
@@ -93,31 +95,42 @@ void parseMessage(char *data, struct message *parsed)
     free(parsed_json);
 }
 
-/*
-struct message
+unsigned char *genMessage(struct message* message, int *l)
 {
-    enum MESSAGE_TYPE type;
-    char *content;
-    char *time;
-    char *sender;
-    char *receiver;
-    char *filename; // For image and document type
-};
-*/
+    
+    // Retrieve content.
+    // {"content":"COMPRESSION",
+    // char part1[] = "{\"content\":\"%s\",";
+    char part1[] = "{\"content\":\"";
+    int size1 = strlen(part1);
 
-char *genMessage(struct message* message, int *l)
-{
-    char *res;
-    *l = asprintf(&res, "{\"type\":%d,\
-\"content\":\"%s\",\
-\"p\":\"%s\",\
-\"size\":%lu,\
-\"time\":\"%s\",\
-\"sender\":\"%s\",\
-\"receiver\":\"%s\",\
-\"filename\":\"%s\"}",\
-message->type, message->content, message->p, message->size,\
-message->time, message->sender, message->receiver, message->filename);
+    char *part2;
+    *l = asprintf(&part2, "\",\"type\":%d,\
+            \"p\":\"%s\",\
+            \"size\":%lu,\
+            \"time\":\"%s\",\
+            \"sender\":\"%s\",\
+            \"receiver\":\"%s\",\
+            \"filename\":\"%s\"}",\
+            message->type, message->p, message->size, message->time, 
+            message->sender, message->receiver, message->filename);
+
+    // Create result unsigned string.
+    unsigned char *res = malloc((*l + size1 + message->contentSize) * 
+            sizeof(unsigned char));
+
+    // Copy part1.
+    unsigned char *tmp = memcpy(res, part1, size1);
+
+    // Copy content.
+    tmp = memcpy(tmp+size1, message->content, message->contentSize);
+
+    // Copy part2.
+    tmp = memcpy(tmp + message->contentSize, part2, *l);
+    
+    // Update *l to final size.
+    *l += size1 + message->contentSize;
+
     return res;
 }
 
@@ -150,8 +163,6 @@ void freeMessage(struct message *message)
     //free(message);
 }
 
-
-
 /*
 int main()
 {
@@ -171,3 +182,4 @@ int main()
     printStruct(parsed);
 }
 */
+
