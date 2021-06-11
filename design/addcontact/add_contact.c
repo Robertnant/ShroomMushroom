@@ -29,7 +29,7 @@ void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
     // Getting number into buffer
 	// char buffer_for_phone[11]; // changed to structure so no need for that
     strcpy(arg->data->number, gtk_entry_get_text(arg->phonenumber)); //TODO: might need to free it 
-
+    printf("GOT PHONE NUM\n");
     // Verifying buffer length
     if (strlen(arg->data->number) != 10)
     {
@@ -37,6 +37,7 @@ void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
         gtk_label_set_text(arg->error_label, (const gchar*) "Phone number should be 10 characters long!");
         return;
     }
+    printf("Len check\n");
 
     // Verifying format for number
     for (int i = 0; i < 10; i++)
@@ -48,11 +49,13 @@ void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
             return;
         }
     }
+    printf("Char check\n");
     if (!addContact(sockfd, arg->data->number))
     {
         gtk_label_set_text(arg->error_label, (const gchar*) "Woops! Who's that?");
         return;
     }
+    printf("finised adding contact\n");
 
     struct user * new_user = get_contact(arg->data->number);
     

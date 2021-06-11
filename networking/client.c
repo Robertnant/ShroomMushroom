@@ -112,11 +112,16 @@ int addContact(int fd, char number[])
     printf("BUFFER => %s\n", buf);
     //parseMessage(buf, message);
     
+    printf("preparsing!\n");
+    fflush(stdout);
     if (strcmp(buf, "(null)") == 0)
         return 0;
 
+    printf("parsing started!\n");
     struct user* new_user = parseUser(buf);
     
+    printf("parsing done!\n");
+
     if(!new_user)
     {
         printf("User parse unsuccessful!\n");
@@ -128,6 +133,7 @@ int addContact(int fd, char number[])
     fprintf(contacts, "%s-%s\n", new_user->username, new_user->number);
     fclose(contacts); 
 
+    printf("contact added!\n");
 
     // Save to specific file
     char *path;
