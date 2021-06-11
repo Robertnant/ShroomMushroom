@@ -17,6 +17,9 @@
 #define UNUSED(x) (void)(x)
 #define MAX_BUFFER 10000
 
+// TODO Step 2.1: Compress en_msg cypher.
+// TODO Step 6: Decompress data.
+
 int row = 0;    //grid row counter (contact)
 int row2 = 0;   //grid row counter (contact, not really for now)
 int row3 = 0;   //grid row counter (user)
@@ -283,6 +286,8 @@ void sendMessage(char *buff)
     free(receiver_keys);
 
 
+    // Step 2.1: Compress en_msg cypher.
+
     // Step 3: Generate JSON with cyphers.
     printf("\nConverting encryption into JSON\n");
     //sleep(0.5);
@@ -300,13 +305,14 @@ void sendMessage(char *buff)
     message->content = cyphers->en_msg;
     message->p = cyphers->p;
     message->size = cyphers->size;
+    message->compSize = compressedLen;
     message->time = time; //"1010";
     message->sender = sender; //"077644562";
     message->receiver = receiver;
     message->filename = 0;
 
     int jsonSize;
-    char *json = genMessage(message, &jsonSize);
+    unsigned char *json = genMessage(message, &jsonSize);
 
 
     // Reset message structure for next incoming message.
@@ -329,18 +335,16 @@ void sendMessage(char *buff)
 void retrieveMessage()
 {
     // Step 5: Receive incoming message from other client.
-    // (For now just itself).
-    // bzero(json, jsonSize);
 
-    //int jsonSize = MAX_BUFFER;
-    char json[MAX_BUFFER];
+    unsigned char json[MAX_BUFFER];
      GString *json_string = g_string_new(NULL);
     bzero(json, MAX_BUFFER);
-    //if (read(sockfd, json, jsonSize) == -1)
-    //    errx(1, "Error reading incoming messages");
+
     int found = 0;
     int er;
+
     printf("Waiting for message..\n");
+
     while((er = read(sockfd, json, MAX_BUFFER - 1)) > 0)
     {
         printf("BUFFER: %s\n", json);
@@ -388,8 +392,12 @@ void retrieveMessage()
     cyphers->p = message->p;
     cyphers->size = message->size;
 
+    // Step 6: Decompress data.
+    
+
     printf("Private key: %p\n", privkey);
-    // Step 6: Decrypt message and save to chat file.
+
+    // Step 7: Decrypt message and save to chat file.
     char *res = decrypt_gamal(cyphers, privkey);
     printf("Decrypting received message\n");
     printf("Received message: %s\n", res);

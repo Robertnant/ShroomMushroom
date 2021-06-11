@@ -5,10 +5,26 @@
 #include <json-c/json.h>
 #include "messages.h"
 
-void parseMessage(unsigned char *data, struct message *parsed, int size1)
+void parseMessage(unsigned char *data, struct message *parsed)
 {
     // Split message into unsigned content and string parts.
     
+    // Step 0: Retrieve size of part 1.
+    char tmp[60];
+    bzero(tmp, 60);
+
+    int size1 = 0;
+    // Increment till begining of content size part.
+    // Then till begining of content part.
+    for (int c = 0; c < 3; c++)
+    {
+        while (data[size1] != ':')
+            size1++;
+    }
+
+    // Include last character (double bracket).
+    size1++;
+
     // Step 1: Create JSON to retrieve size of content (message->size).
     // Terminate part1 with '}' and add fake data for content field.
     char part1[size1+4];
@@ -20,9 +36,9 @@ void parseMessage(unsigned char *data, struct message *parsed, int size1)
     parsed_size = json_tokener_parse(part1);
 
     struct json_object *parsed_json;
-    // struct json_object *content;
     struct json_object *p;
     struct json_object *size;
+    struct json_object *compSize;
     struct json_object *time;
     struct json_object *sender;
     struct json_object *receiver;
@@ -38,6 +54,11 @@ void parseMessage(unsigned char *data, struct message *parsed, int size1)
     json_object_put(size);
     //free(size);
 
+    json_object_object_get_ex(parsed_size, "compSize", &compSize);
+    parsed->compSize = json_object_get_int(compSize);
+    json_object_put(compSize);
+    //free(compSize);
+    
     // Set character just before last part of string to '{' for JSON.
     char *part2 = (char) (data + size1 + parsed->size - 1);
     *part2 = '{';
@@ -109,14 +130,15 @@ void parseMessage(unsigned char *data, struct message *parsed, int size1)
     free(parsed_size);
 }
 
-// Size 1 represents size of first part of final result.
-unsigned char *genMessage(struct message* message, int *l, int *size1)
+unsigned char *genMessage(struct message* message, int *l)
 {
     // Retrieve content.
     // {"content":"COMPRESSION",
     // char part1[] = "{\"size\":%lu,\"content\":\"%s\",";
     char *part1;
-    *size1 = asprint(&part1, "{\"size\":%lu,\"content\":\"", message->size);
+    int size1 = asprint(&part1, "{\"size\":%lu,\
+            \"compSize\":%lu,\"content\":\"",\ 
+            message->size, message->compSize);
 
     char *part2;
     *l = asprintf(&part2, "\",\"type\":%d,\
@@ -129,20 +151,20 @@ unsigned char *genMessage(struct message* message, int *l, int *size1)
             message->sender, message->receiver, message->filename);
 
     // Create result unsigned string (NULL terminated).
-    unsigned char *res = calloc((*size1 + message->contentSize + *l + 1) * 
+    unsigned char *res = calloc((size1 + message->contentSize + *l + 1) * 
             sizeof(unsigned char));
 
     // Copy part1.
-    unsigned char *tmp = memcpy(res, part1, *size1);
+    unsigned char *tmp = memcpy(res, part1, size1);
 
     // Copy content.
-    tmp = memcpy(tmp+(*size1), message->content, message->contentSize);
+    tmp = memcpy(tmp+size1, message->content, message->contentSize);
 
     // Copy part2.
-    tmp = memcpy(tmp + message->contentSize, part2, *l);
+    tmp = memcpy(tmp + message->size, part2, *l);
     
     // Update *l to final size.
-    *l += *size1 + message->contentSize;
+    *l += size1 + message->size;
 
     // Free memory.
     free(part1);
@@ -182,14 +204,7 @@ void freeMessage(struct message *message)
 /*
 int main()
 {
-    // Test JSON parser.
-    char *test = "{\"sender\": \"123456789\",\
-    \"receiver\": \"987654321\",\
-    \"type\": 5,\
-    \"content\": \"Encrypted message\",\
-    \"time\": \"1845689\",\
-    \"filename\": \"file.txt\"\
-    }";
+    // Test message generation and retrieval.
 
     struct message *parsed = malloc(sizeof(struct message));
     parseMessage(test, parsed);

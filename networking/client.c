@@ -70,7 +70,7 @@ struct user* init_procedure(int fd, char username[], char number[])
 {
     struct user* user = init_user_path(username, number, USER_PATH);
     struct message* tmp_msg = (struct message *) calloc(1, sizeof(struct message));
-    char* buf;
+    unsigned char* buf;
 
     int n;
     tmp_msg->type = INIT; 
@@ -101,7 +101,7 @@ int addContact(int fd, char number[])
     message->time = NULL;
 
     int l;    
-    char * mess = genMessage(message, &l);
+    unsigned char * mess = genMessage(message, &l);
     
     rewrite(fd, mess, l);
     free(mess);
@@ -207,7 +207,7 @@ int main()
         message->sender = user->number;
 
         int l;
-        char *msg = genMessage(message, &l);
+        unsigned char *msg = genMessage(message, &l);
         rewrite(sockfd, msg, l);
         free(msg);
         printf("Identification done!\n");

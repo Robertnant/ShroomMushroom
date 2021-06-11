@@ -9,6 +9,7 @@
 #include "elgamal.h"
 #include "tools.h"
 #include "huffman.h"
+#include "../messages/messages.c"
 
 #define MIN_GAMAL 511
 #define MAX_GAMAL 512
@@ -313,16 +314,48 @@ publicKey* stringtoPub(char *string)
     return key;
 }
 
-char *compressElgamal(char *input)
+char *compressElgamal(struct cyphers *dataCyphers)
 {
-    size_t len = strlen(input);
+    size_t len = dataCyphers->size;
 
     // Compression.
     size_t compressedLen;
-    unsigned char *compData = compress(input, &compressedLen);
+    unsigned char *compData = compress(dataCyphers->en_msg, &compressedLen);
+
+    // Test genMessage.
+    struct message *message = malloc(sizeof(struct message));
+
+    char * time = malloc(sizeof(char) * 5);
+    strcpy(time, "1010");
+
+    char * sender = malloc(sizeof(char) * 11);
+    strcpy(sender, "0123456789");
+
+    char * receiver = malloc(sizeof(char) * 11);
+    strcpy(receiver, "0123456789");
+
+    message->type = TEXT;
+    message->content = compData;
+    message->p = dataCyphers->p;
+    message->size = dataCyphers->size;
+    message->compSize = compressedLen;
+    message->time = time; //"1010";
+    message->sender = sender; //"077644562";
+    message->receiver = receiver;
+    message->filename = 0;
+
+    // size: size of uncompressed data.
+    // contentSize: size of compressed data.
+    int l;
+    unsigned char *jsonMessage = genMessage(message, &l);
+
+    // Test parseMessage.
+    freeMessage(message);
+    parseMessage(jsonMessage, message);
 
     // Decompression.
-    char *res = decompress(compData);
+    // char *res = decompress(compData);
+    char *res = decompress(message->content);
 
     // Ratio.
     double ratio = (float) len / (float) compressedLen;
@@ -330,11 +363,12 @@ char *compressElgamal(char *input)
 
     // Free memory.
     free(compData);
+    free(jsonMessage);
+    free(message);
 
     return res;
 }
 
-/*
 int main()
 {
     char *msg = "Black leather gloves, no sequins\n\
@@ -365,7 +399,7 @@ int main()
 
     // Compress encryption with Huffman.
     printf("\nCompressing data.\n");
-    char *res = compressElgamal(dataCyphers->en_msg);
+    char *res = compressElgamal(dataCyphers);
     free(dataCyphers->en_msg);
     dataCyphers->en_msg = res;
 
@@ -391,4 +425,3 @@ int main()
     return 0;
 
 }
-*/

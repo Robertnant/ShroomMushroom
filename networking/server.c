@@ -28,6 +28,8 @@
 #define SA struct sockaddr
 #define MESSAGE_SIZE sizeof(struct message)
 
+// TODO: Modify how listentoClient checks if JSON was retrieved.
+
 int running = 1;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -326,7 +328,7 @@ int main()
     struct client* curr = sentinel->next;
     signal(SIGINT, interrupt);
 
-    char buf[1024];
+    unsigned char buf[1024];
     //struct user* tmp_user = (struct user*) malloc(sizeof(struct user));
     struct user* tmp_user;
 
@@ -347,7 +349,7 @@ int main()
         
         // Get through JSON UID and number to identify you
         
-        memset(buf, 0, 1024 * sizeof(char));
+        memset(buf, 0, 1024 * sizeof(unsigned char));
         
  
         int r;
