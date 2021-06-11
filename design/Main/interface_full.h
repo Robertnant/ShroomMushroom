@@ -36,6 +36,9 @@ GtkButton *close_window_button;
 FILE *f_con; //contacts.txt 
 FILE *f_chat; //chat2 (contact)
 
+pthread_t receiving_thread;
+
+
 // Functions.
 void show_interface(char *interface_path, char *contacts_path, char *chat_path);
 void chat_bubbles(char path[]);

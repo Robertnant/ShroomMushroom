@@ -25,7 +25,9 @@ int row3 = 0;   //grid row counter (user)
 void on_row();
 void column(char path[]);
 
-pthread_t receiving_thread;
+// pthread_t receiving_thread;
+
+
 
 void on_window_main_destroy()
 {
@@ -352,7 +354,7 @@ void retrieveMessage()
     printf("Waiting for message..\n");
     while((er = read(sockfd, json, MAX_BUFFER - 1)) > 0)
     {
-        printf("BUFFER: %s\n", json);
+        printf("BUFFER2: %s\n", json);
         if (found)
             json_string = g_string_append(json_string,  json);
 
