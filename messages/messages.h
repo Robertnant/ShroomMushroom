@@ -13,7 +13,7 @@ enum MESSAGE_TYPE
 struct message
 {
     enum MESSAGE_TYPE type;
-    char *content;
+    unsigned char *content;
     char *p;
     size_t size;
 

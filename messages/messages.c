@@ -5,14 +5,22 @@
 #include <json-c/json.h>
 #include "messages.h"
 
-void parseMessage(char *data, struct message *parsed)
+void parseMessage(unsigned char *data, struct message *parsed, int size1)
 {
-    // Step 1: Split messaged into unsigned content and strign parts.
+    // Split message into unsigned content and string parts.
+    
+    // Step 1: Create JSON to retrieve size of content (message->size).
+    // Terminate part1 with '}' and add fake data for content field.
+    char part1[size1+4];
+    memcpy(data, part1, size1);
+    part1[size1+3] = '\0';
+    strcpy(part1, "1\"}");
 
-    // Must be replaced later by a socket pointer for client/server connection.
+    struct json_object *parsed_size;
+    parsed_size = json_tokener_parse(part1);
 
     struct json_object *parsed_json;
-    struct json_object *content;
+    // struct json_object *content;
     struct json_object *p;
     struct json_object *size;
     struct json_object *time;
@@ -21,11 +29,23 @@ void parseMessage(char *data, struct message *parsed)
     struct json_object *type;
     struct json_object *filename;
     
-    parsed_json = json_tokener_parse(data);
+    // Step 2: Retrieve content.
+    unsigned char *contentStart = data + size1;
+    
+    // Step 3: Retrieve part 2.
+    json_object_object_get_ex(parsed_size, "size", &size);
+    parsed->size = json_object_get_int(size);
+    json_object_put(size);
+    //free(size);
 
-    json_object_object_get_ex(parsed_json, "content", &content);
+    // Set character just before last part of string to '{' for JSON.
+    char *part2 = (char) (data + size1 + parsed->size - 1);
+    *part2 = '{';
+    
+    parsed_json = json_tokener_parse(part2);
+
+    // json_object_object_get_ex(parsed_json, "content", &content);
     json_object_object_get_ex(parsed_json, "p", &p);
-    json_object_object_get_ex(parsed_json, "size", &size);
     json_object_object_get_ex(parsed_json, "time", &time);
     json_object_object_get_ex(parsed_json, "sender", &sender);
     json_object_object_get_ex(parsed_json, "receiver", &receiver);
@@ -50,22 +70,15 @@ void parseMessage(char *data, struct message *parsed)
         return;
     }
     
-
-    len = strlen(json_object_get_string(content));
-    parsed->content = (char *) malloc(sizeof(char) * len + 1);
-    strcpy(parsed->content, json_object_get_string(content));
-    json_object_put(content);
-    //free(content);
+    // Save content to struct.
+    parsed->content = malloc(sizeof(unsigned char) * parsed->size);
+    memcpy(parsed->content, contentStart, parsed->size);
 
     len = strlen(json_object_get_string(p));
     parsed->p = (char *) malloc(sizeof(char) * len + 1);
     strcpy(parsed->p, json_object_get_string(p));
     json_object_put(p);
     //free(p);
-
-    parsed->size = json_object_get_int(size);
-    json_object_put(size);
-    //free(size);
 
     len = strlen(json_object_get_string(time));
     parsed->time = (char *) malloc(sizeof(char) * len + 1);
@@ -93,43 +106,46 @@ void parseMessage(char *data, struct message *parsed)
 
     // json_object_put(parsed_json);
     free(parsed_json);
+    free(parsed_size);
 }
 
-unsigned char *genMessage(struct message* message, int *l)
+// Size 1 represents size of first part of final result.
+unsigned char *genMessage(struct message* message, int *l, int *size1)
 {
-    
     // Retrieve content.
     // {"content":"COMPRESSION",
-    // char part1[] = "{\"content\":\"%s\",";
-    char part1[] = "{\"content\":\"";
-    int size1 = strlen(part1);
+    // char part1[] = "{\"size\":%lu,\"content\":\"%s\",";
+    char *part1;
+    *size1 = asprint(&part1, "{\"size\":%lu,\"content\":\"", message->size);
 
     char *part2;
     *l = asprintf(&part2, "\",\"type\":%d,\
             \"p\":\"%s\",\
-            \"size\":%lu,\
             \"time\":\"%s\",\
             \"sender\":\"%s\",\
             \"receiver\":\"%s\",\
             \"filename\":\"%s\"}",\
-            message->type, message->p, message->size, message->time, 
+            message->type, message->p, message->time, 
             message->sender, message->receiver, message->filename);
 
-    // Create result unsigned string.
-    unsigned char *res = malloc((*l + size1 + message->contentSize) * 
+    // Create result unsigned string (NULL terminated).
+    unsigned char *res = calloc((*size1 + message->contentSize + *l + 1) * 
             sizeof(unsigned char));
 
     // Copy part1.
-    unsigned char *tmp = memcpy(res, part1, size1);
+    unsigned char *tmp = memcpy(res, part1, *size1);
 
     // Copy content.
-    tmp = memcpy(tmp+size1, message->content, message->contentSize);
+    tmp = memcpy(tmp+(*size1), message->content, message->contentSize);
 
     // Copy part2.
     tmp = memcpy(tmp + message->contentSize, part2, *l);
     
     // Update *l to final size.
-    *l += size1 + message->contentSize;
+    *l += *size1 + message->contentSize;
+
+    // Free memory.
+    free(part1);
 
     return res;
 }
