@@ -5,7 +5,7 @@
 #include <json-c/json.h>
 #include "messages.h"
 
-void parseNormalMessage(char *data, struct message *parsed)
+void parseMessageNormal(char *data, struct message *parsed)
 {
     // Must be replaced later by a socket pointer for client/server connection.
 
@@ -13,6 +13,7 @@ void parseNormalMessage(char *data, struct message *parsed)
     struct json_object *content;
     struct json_object *p;
     struct json_object *size;
+    struct json_object *compSize;
     struct json_object *time;
     struct json_object *sender;
     struct json_object *receiver;
@@ -24,6 +25,7 @@ void parseNormalMessage(char *data, struct message *parsed)
     json_object_object_get_ex(parsed_json, "content", &content);
     json_object_object_get_ex(parsed_json, "p", &p);
     json_object_object_get_ex(parsed_json, "size", &size);
+    json_object_object_get_ex(parsed_json, "compSize", &compSize);
     json_object_object_get_ex(parsed_json, "time", &time);
     json_object_object_get_ex(parsed_json, "sender", &sender);
     json_object_object_get_ex(parsed_json, "receiver", &receiver);
@@ -41,6 +43,7 @@ void parseNormalMessage(char *data, struct message *parsed)
         parsed->content = NULL;
         parsed->p = NULL;
         parsed->size = 0;
+        parsed->compSize = 0;
         parsed->time = NULL;
         parsed->sender = NULL;
         parsed->receiver = NULL;
@@ -50,8 +53,10 @@ void parseNormalMessage(char *data, struct message *parsed)
 
 
     len = strlen(json_object_get_string(content));
-    parsed->content = (char *) malloc(sizeof(char) * len + 1);
-    strcpy(parsed->content, json_object_get_string(content));
+    // parsed->content = (unsigned char *) malloc(sizeof(unsigned char) * len + 1);
+    char *tmpContent = (char *) malloc(sizeof(char) * len + 1);
+    strcpy(tmpContent, json_object_get_string(content));
+    parsed->content = (unsigned char *) tmpContent;
     json_object_put(content);
     //free(content);
 
@@ -65,6 +70,10 @@ void parseNormalMessage(char *data, struct message *parsed)
     json_object_put(size);
     //free(size);
 
+    parsed->compSize = json_object_get_int(compSize);
+    json_object_put(compSize);
+    //free(compSize);
+    
     len = strlen(json_object_get_string(time));
     parsed->time = (char *) malloc(sizeof(char) * len + 1);
     strcpy(parsed->time, json_object_get_string(time));
@@ -226,6 +235,25 @@ void parseMessage(unsigned char *data, struct message *parsed)
     // json_object_put(parsed_json);
     free(parsed_json);
     free(parsed_size);
+}
+
+char *genMessageNormal(struct message* message, int *l)
+{
+    char *res;
+    *l = asprintf(&res, "{\"size\":%lu,\
+\"compSize\":%lu,\
+\"content\":\"%s\",\
+\"type\":%d,\
+\"p\":\"%s\",\
+\"time\":\"%s\",\
+\"sender\":\"%s\",\
+\"receiver\":\"%s\",\
+\"filename\":\"%s\"}",\
+message->size, message->compSize, 
+(char*) message->content, message->type, message->p,
+message->time, message->sender, message->receiver, message->filename);
+
+    return res;
 }
 
 unsigned char *genMessage(struct message* message, int *l)

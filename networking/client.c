@@ -62,7 +62,7 @@ struct user* init_procedure(int fd, char username[], char number[])
 {
     struct user* user = init_user_path(username, number, USER_PATH);
     struct message* tmp_msg = (struct message *) calloc(1, sizeof(struct message));
-    unsigned char* buf;
+    char* buf;
 
     int n;
     tmp_msg->type = INIT; 
@@ -83,7 +83,7 @@ struct user* init_procedure(int fd, char username[], char number[])
     printf("\nTMPCOntent: %s\n", tmp_msg->content);
 
     int l;
-    buf = genMessage(tmp_msg, &l);
+    buf = genMessageNormal(tmp_msg, &l);
 
     rewrite(fd, buf, l);
     free(buf);
@@ -211,7 +211,8 @@ int main()
         message->sender = user->number;
 
         int l;
-        unsigned char *msg = genMessage(message, &l);
+        char *msg = genMessageNormal(message, &l);
+
         rewrite(sockfd, msg, l);
         free(msg);
         printf("Identification done!\n");

@@ -336,7 +336,7 @@ int main()
     struct client* curr = sentinel->next;
     signal(SIGINT, interrupt);
 
-    unsigned char buf[1024];
+    char buf[1024];
     //struct user* tmp_user = (struct user*) malloc(sizeof(struct user));
     struct user* tmp_user;
 
@@ -357,7 +357,7 @@ int main()
         
         // Get through JSON UID and number to identify you
         
-        memset(buf, 0, 1024 * sizeof(unsigned char));
+        memset(buf, 0, 1024 * sizeof(char));
         
  
         int r;
@@ -365,8 +365,8 @@ int main()
         if (r <= 0)
             errx(1, "Error with identification process");
         
-        parseMessage(buf, message);
-        // printStruct(message);
+        parseMessageNormal(buf, message);
+        printStruct(message);
         printf("The buffer: %s\n", buf);
         switch (message->type)
         {
