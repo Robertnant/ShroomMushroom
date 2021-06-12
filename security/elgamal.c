@@ -334,6 +334,13 @@ char *compressElgamal(struct cyphers *dataCyphers)
     char * receiver = malloc(sizeof(char) * 11);
     strcpy(receiver, "0123456789");
 
+    char * filename = malloc(sizeof(char) * 2);
+    filename = 0;
+
+    size_t plen = strlen(dataCyphers->p);
+    char * p = malloc(sizeof(char) * plen+1);
+    strcpy(p, dataCyphers->p);
+
     unsigned char *content = malloc(sizeof(unsigned char) * compressedLen);
     memcpy(content, compData, compressedLen);
 
@@ -342,13 +349,13 @@ char *compressElgamal(struct cyphers *dataCyphers)
     message->type = TEXT;
     // message->content = compData; 
     message->content = content; 
-    message->p = dataCyphers->p;
+    message->p = p;
     message->size = dataCyphers->size;
     message->compSize = compressedLen;
     message->time = time; //"1010";
     message->sender = sender; //"077644562";
     message->receiver = receiver;
-    message->filename = 0;
+    message->filename = filename;
 
     // size: size of uncompressed data.
     // contentSize: size of compressed data.
@@ -356,26 +363,15 @@ char *compressElgamal(struct cyphers *dataCyphers)
     unsigned char *jsonMessage = genMessage(message, &l);
 
     // Test parseMessage.
-    freeMessage(message);    // CAUSES FPE for some reason when uncommented.
-    free(message);
-    // message->content = NULL;
-    // message = malloc(sizeof(struct message));
-    struct message *message2 = malloc(sizeof(struct message));
-    parseMessage(jsonMessage, message2);
+    freeMessage(message);
+    // free(message);
+    // struct message *message2 = malloc(sizeof(struct message));
+    // parseMessage(jsonMessage, message2);
+    parseMessage(jsonMessage, message);
 
     // Decompression.
     // char *res = decompress(compData);
-    char *res = decompress(message2->content);
-    printf("Len: %ld\nCompressed Len: %ld\n", len, compressedLen);
-
-    size_t i = 0;
-    while (i < message2->compSize && message2->content[i] == compData[i])
-        i++;
-
-    if (i == message2->compSize)
-        printf("Success\n");
-
-    // printf("Char res: %s\n", res);
+    char *res = decompress(message->content);
 
     // Ratio.
     double ratio = (float) len / (float) compressedLen;
@@ -384,8 +380,8 @@ char *compressElgamal(struct cyphers *dataCyphers)
     // Free memory.
     free(compData);
     free(jsonMessage);
-    freeMessage(message2);
-    free(message2);
+    freeMessage(message);
+    free(message);
 
     return res;
 }

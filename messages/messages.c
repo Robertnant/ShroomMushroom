@@ -205,8 +205,8 @@ void freeMessage(struct message *message)
 {
     if (message->content)
         free(message->content);
-    // if (message->p)
-    //    free(message->p);
+    if (message->p)
+        free(message->p);
     if (message->time)
         free(message->time);
     if (message->sender)
