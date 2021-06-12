@@ -169,8 +169,8 @@ void parseMessage(unsigned char *data, struct message *parsed)
     // Add character '{' for JSON.
     // printf("CompSize: %lu\n Size: %lu\n", parsed->compSize, parsed->size);
     unsigned char *p2 = (data + size1 + parsed->compSize + 1);
-    *p2 = '{';
     char *part2 = (char*) p2;
+    *part2 = '{';
 
     // NULL terminate part2 if not the case.
     /*

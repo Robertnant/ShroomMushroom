@@ -69,8 +69,8 @@ struct user* init_procedure(int fd, char username[], char number[], char avatar[
 
     // Generate user data and save to tmp_msg content field.
     char *tmpContent;
-    if ((n = asprintf(&tmpContent, "%s %s %s %s-%s-%s", user->username,\
-                    user->number, user->UID,\
+    if ((n = asprintf(&tmpContent, "%s %s %s %s %s-%s-%s", user->username,\
+                    user->avatar, user->number, user->UID,\
                     user->pub.g, user->pub.q, user->pub.h)) < 1)
         errx(1, "Weird error sending generated user data");
     tmp_msg->content = (unsigned char*) tmpContent;
