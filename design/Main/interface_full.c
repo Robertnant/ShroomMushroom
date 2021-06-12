@@ -479,7 +479,7 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
     // Get Widgets.
     
     GtkCssProvider *cssProvider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(cssProvider, "/snap/gtk-common-themes/1515/share/themes/Yaru-dark/gtk-3.20/gtk-dark.css", NULL);
+    gtk_css_provider_load_from_path(cssProvider, "design/themes/gtk-dark.css", NULL);
     gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
                                 GTK_STYLE_PROVIDER(cssProvider),
                                 GTK_STYLE_PROVIDER_PRIORITY_USER);
