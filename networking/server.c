@@ -102,6 +102,7 @@ void * send_to(void* arg)
         while((fd = open(filename, O_WRONLY)) <= 0){}
         sent = rewrite(fd, args->message, args->size);
     }
+
     
     free(tmp_target_user);
     free(filename);
@@ -175,14 +176,12 @@ void * listen_to_client( void * arg )
         //while((er = read(*sockfd, buff, MAX_BUF_SIZE)) > 0)
         //{
 
-        // TODO Parse message depending on type (normal or other).
-        printf("\nFINALLLL: %s\n", (char*) final);
+        printf("\nFINALLLL: ");
+        for (size_t i = 0; i < finalLen; i++)
+            printf("%c", final[i]);
+        
         parseMessage(final, message);
-        if (message->compSize == 0)
-        {
-            freeMessage(message);
-            parseMessageNormal((char *) final, message);
-        }
+
         printf("Sender: %s\n", message->sender);
         printf("Receiver: %s\n", message->receiver);
         printf("Type: %d\n", message->type);
@@ -208,13 +207,15 @@ void * listen_to_client( void * arg )
                 tmp_number = malloc(11 * sizeof(char));
                 
                 // strcpy(tmp_buf, final);
-                memcpy(tmp_buf, final, l);  // In theory should be l-1.
+                memcpy(tmp_buf, final, l);
                 strcpy(tmp_number, message->receiver);
                 
                 content->message = tmp_buf;
                 content->number = tmp_number;
-                content->size = l;  // In theory should be l-1.
+                content->size = l;
                 
+                printf("\nBefore send_to\n");
+
                 pthread_create(&id, NULL, send_to, (void*) content);
                 
                 break;
@@ -258,7 +259,9 @@ void * listen_to_client( void * arg )
 
 void connect_client(char pipe[], int client)
 {
-    char buf[MAX_BUF_SIZE];
+    printf("\nMessage sent to receiving client.\n");
+
+    unsigned char buf[MAX_BUF_SIZE];
     char * filename = get_filename(PIPES_FILE, pipe);
     //if (fd < 0)
     //    errx(1, "Couldn't open pipe for client redirection");
@@ -274,11 +277,18 @@ void connect_client(char pipe[], int client)
         {
             while ((r = read(fd, buf, MAX_BUF_SIZE)) > 0)
             {
+                printf("Got something in connect: ");
+                for (size_t i = 0; i < r; i++)
+                    printf("%c", buf[i]);
+
                 while (!rewrite(client, buf, r))
                     fd = open(filename, O_RDONLY);
             }
+
+            printf("\nWrote something.\n");
         }
     }
+
     free(filename);
 }
 

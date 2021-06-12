@@ -431,6 +431,7 @@ void * start_message_receiver(void * arg)
     UNUSED(arg);
     while(1)
     {
+        printf("Always 1\n");
         retrieveMessage();
     }
 }
