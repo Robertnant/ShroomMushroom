@@ -95,9 +95,10 @@ void * send_to(void* arg)
     int sent = 0;
     while (!sent)
     {
-        while((fd = open(filename, O_WRONLY)) <= 0){}
+        while((fd = open(filename, O_WRONLY)) <= 0){sleep(1);}
         sent = rewrite(fd, args->message, args->size);
     }
+    printf("MESSAGE SENT SUCCESSFULLY\n");
     
     free(tmp_target_user);
     free(filename);
@@ -149,6 +150,8 @@ void * listen_to_client( void * arg )
         }
         if (er <= 0)
         {
+            //printf("Freeing client space\n");
+            //free_client(self);
             printf("Closed connection with client\n");
             return NULL;
         }
@@ -229,6 +232,9 @@ void * listen_to_client( void * arg )
     // Free memory.
     //freeMessage(message);
     free(message);
+    
+    //printf("Freeing client space\n");
+    //free_client(self);
     printf("Closed connection with client\n");
     return NULL;
 }

@@ -227,6 +227,7 @@
                       <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="hscrollbar_policy">never</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkViewport">
@@ -238,41 +239,40 @@
                                 <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkGrid" id="grid2">
-                                    <property name="width_request">315</property>
-                                    <property name="height_request">100</property>
+                                    <property name="width_request">700</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="hexpand">True</property>
+                                    <property name="row_spacing">2</property>
                                     <property name="row_homogeneous">True</property>
                                     <property name="column_homogeneous">True</property>
                                     <child>
-                                      <object class="GtkLabel">
+                                      <object class="GtkButton">
+                                        <property name="label" translatable="yes">button</property>
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Shroom</property>
-                                        <attributes>
-                                          <attribute name="font-desc" value="Fredoka One 10"/>
-                                          <attribute name="foreground" value="#555557575353"/>
-                                        </attributes>
+                                        <property name="sensitive">False</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="opacity">0</property>
+                                        <property name="hexpand">True</property>
                                       </object>
                                       <packing>
-                                        <property name="left_attach">1</property>
+                                        <property name="left_attach">0</property>
                                         <property name="top_attach">0</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkLabel">
+                                      <object class="GtkButton">
+                                        <property name="label" translatable="yes">button</property>
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Shroom</property>
-                                        <attributes>
-                                          <attribute name="font-desc" value="Fredoka One 10"/>
-                                          <attribute name="scale" value="1"/>
-                                          <attribute name="foreground" value="#555557575353"/>
-                                          <attribute name="strikethrough-color" value="#769c67fb67fb"/>
-                                        </attributes>
+                                        <property name="sensitive">False</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="opacity">0</property>
+                                        <property name="hexpand">True</property>
                                       </object>
                                       <packing>
-                                        <property name="left_attach">0</property>
+                                        <property name="left_attach">1</property>
                                         <property name="top_attach">0</property>
                                       </packing>
                                     </child>

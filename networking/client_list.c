@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <pthread.h>
 #include <signal.h>
 #include "../saved_users/users.h"
@@ -31,13 +32,16 @@ void free_client(struct client* client)
 {
     // pthread_mutex_lock(&mutex);
     // Remove the current client from the list
+    printf("Removing from list\n");
     struct client* prev = client->prev;
     struct client* next = client->next;
     prev->next = next;
     if (next)
         next->prev = prev;
-    pthread_kill(client->sending, SIGTERM);
-    pthread_kill(client->listening, SIGTERM);
+    printf("Cancelling thread sending\n");
+    pthread_cancel(client->sending);
+    printf("Cancelling thread listening\n");
+    pthread_cancel(client->listening);
     free(client->user);
     free(client);
     // pthread_mutex_unlock(&mutex);

@@ -18,7 +18,7 @@
 #define MAX_BUFFER 10000
 
 int row = 0;    //grid row counter (contact)
-int row2 = 0;   //grid row counter (contact, not really for now)
+int row2 = 1;   //grid row counter (contact, not really for now)
 int row3 = 0;   //grid row counter (user)
 
 //struct *user user = get_user_path(".files/.user"); //name of the user
@@ -167,9 +167,8 @@ void chat_bubbles(char path[]) //Display chat bubbles
             {
         // Decrement row2 counter to remove extra row count.
         // row2--;
-
-        break;
-    }
+                break;
+            }
 
             else
             {
@@ -182,21 +181,23 @@ void chat_bubbles(char path[]) //Display chat bubbles
                     //char *user = "ROBERT";
 
                     token = strtok(tmp_chat, s); //[Username]
-                    int is_user = strcmp(token + 1, user->username);
+                    int is_user = strcmp(token, user->username);
 
                     token = strtok(NULL, s);
                     printf("TEXT: %s\n", token);
                     gtk_grid_insert_row(GTK_GRID(grid2), row2);
-                    button_chat[row3] = gtk_button_new_with_label(token);
-                    gtk_widget_set_hexpand(button_chat[row2], TRUE);
+                    bubble_chat[row2] = gtk_button_new_with_label(token);
+                    gtk_widget_set_hexpand(bubble_chat[row2], TRUE);
 
                     if (is_user != 0) //User - column2
                     {
-                            gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 1, row2, 1, 1);
+                        //gtk_grid_attach (GTK_GRID(grid2), GTK_WIDGET(button_chat[row2]), 1, row2, 1, 1);
+                        gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 0, row2, 1, 1);
                     }
                     else // Contact - column1
                     {
-                            gtk_grid_attach (GTK_GRID(grid2), button_chat[row2], 2, row2, 1, 1);
+                        //gtk_grid_attach (GTK_GRID(grid2), GTK_WIDGET(button_chat[row2]), 2, row2, 1, 1);
+                        gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);
                     }
                     row2+=1;
             }
@@ -242,7 +243,7 @@ void addBubble(char * sender, char* msg)
     if (sender == user->username) //user
       gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);
     else //not user
-      gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 2, row2, 1, 1);
+      gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 0, row2, 1, 1);
 
     row2+=1;
 
@@ -476,6 +477,14 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 {
     UNUSED(chat_path);
     // Get Widgets.
+    
+    GtkCssProvider *cssProvider = gtk_css_provider_new();
+    gtk_css_provider_load_from_path(cssProvider, "/snap/gtk-common-themes/1515/share/themes/Yaru-dark/gtk-3.20/gtk-dark.css", NULL);
+    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+                                GTK_STYLE_PROVIDER(cssProvider),
+                                GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+
     builder = gtk_builder_new_from_file(interface_path);
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
 
