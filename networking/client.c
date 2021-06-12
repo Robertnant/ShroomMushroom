@@ -27,14 +27,6 @@
 #define PORT 8080
 #define SA struct sockaddr 
 
-// TODO: 1. Make step 0 of "func" method use input from GTK text entry.
-// TODO: 2. Make "saveMessage" function use client username.
-// TODO: 3. Make new "getReceiverInfo" function in GTK file which will be called when 
-//          the interface contact button for the user will be selected.
-//          Return type: either struct user or struct *publickey.
-
-// Temporary public key request function. Hardcoded keys.
-// (These harcoded keys will be temporary used by server as well).
 char *requestKey(struct message *message, int sockfd)
 {
     if (sockfd)
@@ -74,12 +66,17 @@ struct user* init_procedure(int fd, char username[], char number[], char avatar[
 
     int n;
     tmp_msg->type = INIT; 
-    if ((n = asprintf(&tmp_msg->content, "%s %s %s %s %s-%s-%s", user->username,\
-                     user->avatar, user->number, user->UID,\
+
+    // Generate user data and save to tmp_msg content field.
+    char *tmpContent;
+    if ((n = asprintf(&tmpContent, "%s %s %s %s-%s-%s", user->username,\
+                    user->number, user->UID,\
                     user->pub.g, user->pub.q, user->pub.h)) < 1)
         errx(1, "Weird error sending generated user data");
+    tmp_msg->content = (unsigned char*) tmpContent;
+
     int l;
-    buf = genMessage(tmp_msg, &l);
+    buf = genMessageNormal(tmp_msg, &l);
 
     rewrite(fd, buf, l);
     free(buf);
@@ -98,10 +95,12 @@ int addContact(int fd, char number[])
     message->filename = NULL;
     message->content = NULL;
     message->size = 0;
+    message->compSize = 0;
     message->time = NULL;
 
-    int l;    
-    char * mess = genMessage(message, &l);
+    int l;
+    char * mess = genMessageNormal(message, &l);
+    printf("Message mess: %s\n", mess);
     
     rewrite(fd, mess, l);
     free(mess);
@@ -209,11 +208,12 @@ int main()
         user = get_user_path(USER_PATH);
         // send simple message with UID as content (use the function robert will implement)
         message->type = IDENTIFICATION;
-        message->content = user->UID;
+        message->content = (unsigned char*) user->UID;   // TODO: Might need to cast to unsigned char*.
         message->sender = user->number;
 
         int l;
-        char *msg = genMessage(message, &l);
+        char *msg = genMessageNormal(message, &l);
+
         rewrite(sockfd, msg, l);
         free(msg);
         printf("Identification done!\n");

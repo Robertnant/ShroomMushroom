@@ -28,6 +28,10 @@
 #define SA struct sockaddr
 #define MESSAGE_SIZE sizeof(struct message)
 
+// TODO: Modify how listentoClient checks if JSON was retrieved.
+// TODO: In listenClient for final JSON: In theory content size should be l-1.
+// TODO: User Identification: If fails use unsigned char.
+
 int running = 1;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -77,7 +81,7 @@ void interrupt(int err)
 
 struct pipe_content
 {
-    char * message;
+    unsigned char * message;
     size_t size;
     char * number;
 };
@@ -98,6 +102,7 @@ void * send_to(void* arg)
         while((fd = open(filename, O_WRONLY)) <= 0){sleep(1);}
         sent = rewrite(fd, args->message, args->size);
     }
+
     printf("MESSAGE SENT SUCCESSFULLY\n");
     
     free(tmp_target_user);
@@ -117,7 +122,7 @@ void * listen_to_client( void * arg )
 {
     struct client * self = (struct client *) arg;
     int sockfd =  self->fd;
-    char buff[MAX_BUF_SIZE]; 
+    unsigned char buff[MAX_BUF_SIZE]; 
     int er;
 
     printf("Listening to client...\n");
@@ -125,26 +130,28 @@ void * listen_to_client( void * arg )
     {
         bzero(buff, MAX_BUF_SIZE);
 
-        GString *json_string = g_string_new(NULL);
+        GArray *json_string = g_array_new(FALSE, FALSE, sizeof(unsigned char));
          
         int found = 0;
         while((er = read(sockfd, buff, MAX_BUF_SIZE - 1)) > 0)
         {
-            json_string = g_string_append(json_string,  buff);
+            json_string = g_array_append_vals(json_string, buff, er);
             
-            if(g_str_has_prefix(buff, "{"))
+            if (buff[0] == '{')
             {
+                printf("\nfound\n");
                 found = 1;
             }
-            if(g_str_has_suffix(buff, "}"))
+            if (buff[er-1] == '}')
             {
+                printf("\nfound2\n");
                 found++;
                 break;
             }
             else if (!found)
             {
-                free(g_string_free(json_string, FALSE));
-                json_string = g_string_new(NULL);
+                g_array_free(json_string, TRUE);
+                json_string = g_array_new(FALSE, FALSE, sizeof(unsigned char));
             }
             bzero(buff, MAX_BUF_SIZE);
         }
@@ -157,71 +164,87 @@ void * listen_to_client( void * arg )
         }
         if (!found)
         {
-            free(g_string_free(json_string, FALSE));
+            g_array_free(json_string, TRUE);
             continue;
         }
-        gchar * final = g_string_free(json_string, FALSE);
+
+        // Retrieve full JSON file and size.
+        size_t finalLen = json_string->len;
+        guchar * final = (guchar*)  g_array_free(json_string, FALSE);
+
+        // Null terminate.
+        final[finalLen] = '\0';
+
         // read the message from client and copy it in buffer 
         //while((er = read(*sockfd, buff, MAX_BUF_SIZE)) > 0)
         //{
 
-            parseMessage(final, message);
-            printf("Sender: %s\n", message->sender);
-            printf("Receiver: %s\n", message->receiver);
-            printf("Type: %d\n", message->type);
+        printf("\nFINALLLL: ");
+        for (size_t i = 0; i < finalLen; i++)
+            printf("%c", final[i]);
+        
+        parseMessage(final, message);
 
-            struct user* receiver = get_user(message->receiver);
+        printf("Sender: %s\n", message->sender);
+        printf("Receiver: %s\n", message->receiver);
+        printf("Type: %d\n", message->type);
 
-            char * user_message;
-            size_t l;
-            char *tmp_buf;
-            char *tmp_number;
-            pthread_t id;
-            struct pipe_content* content;
+        struct user* receiver = get_user(message->receiver);
 
-            switch (message->type)
-            {
-                case TEXT:
-                    l = strlen(final) + 1;
-                    
-                    content = malloc(sizeof(struct pipe_content));
-                    
-                    tmp_buf = malloc(l * sizeof(char));
-                    tmp_number = malloc(11 * sizeof(char));
-                    
-                    strcpy(tmp_buf, final);
-                    strcpy(tmp_number, message->receiver);
-                    
-                    content->message = tmp_buf;
-                    content->number = tmp_number;
-                    content->size = l;
-                    
-                    pthread_create(&id, NULL, send_to, (void*) content);
-                    
-                    break;
+        char * user_message;
+        size_t l;
+        unsigned char *tmp_buf;
+        char *tmp_number;
+        pthread_t id;
+        struct pipe_content* content;
+
+        switch (message->type)
+        {
+            case TEXT:
+                l = finalLen + 1;   // Extra 1 for NULL byte.
                 
-                case ADD:
-                    // get pub key and user
-                    // send the to "sender"
-                    user_message = user_to_string(receiver, &l);
-                    rewrite(sockfd, user_message, l);
-                    break;
-
-                case IDENTIFICATION: case INIT:
-                    printf("Attempting to identify/register at wrong moment!\n");
-                    break;
+                content = malloc(sizeof(struct pipe_content));
                 
-                default:
-                    printf("Feature not implemented yet!\n");
-                    break;
-
-            }
-            // Send message back to receiver.
-            // (For now send back to client).
+                // In theory tmp_buf size should be l-1.
+                tmp_buf = malloc(l * sizeof(unsigned char)); 
+                tmp_number = malloc(11 * sizeof(char));
+                
+                // strcpy(tmp_buf, final);
+                memcpy(tmp_buf, final, l);
+                tmp_buf[l-1] = '\0';
+                strcpy(tmp_number, message->receiver);
+                
+                content->message = tmp_buf;
+                content->number = tmp_number;
+                content->size = l;
+                
+                pthread_create(&id, NULL, send_to, (void*) content);
+                
+                break;
             
-            //send_to(num, buff, err);
-            bzero(buff, MAX_BUF_SIZE);
-            freeMessage(message);
+            case ADD:
+                // get pub key and user
+                // send the to "sender"
+                user_message = user_to_string(receiver, &l);
+                printf("User message: %s\n", user_message);
+                rewrite(sockfd, user_message, l);
+                break;
+
+            case IDENTIFICATION: case INIT:
+                printf("Attempting to identify/register at wrong moment!\n");
+                break;
+            
+            default:
+                printf("Feature not implemented yet!\n");
+                break;
+
+        }
+        // Send message back to receiver.
+        // (For now send back to client).
+        
+        //send_to(num, buff, err);
+        bzero(buff, MAX_BUF_SIZE);
+        freeMessage(message);
 
         // Add newline.
         printf("\n");
@@ -241,7 +264,9 @@ void * listen_to_client( void * arg )
 
 void connect_client(char pipe[], int client)
 {
-    char buf[MAX_BUF_SIZE];
+    printf("\nMessage sent to receiving client.\n");
+
+    unsigned char buf[MAX_BUF_SIZE];
     char * filename = get_filename(PIPES_FILE, pipe);
     //if (fd < 0)
     //    errx(1, "Couldn't open pipe for client redirection");
@@ -260,8 +285,10 @@ void connect_client(char pipe[], int client)
                 while (!rewrite(client, buf, r))
                     fd = open(filename, O_RDONLY);
             }
+
         }
     }
+
     free(filename);
 }
 
@@ -361,8 +388,9 @@ int main()
         if (r <= 0)
             errx(1, "Error with identification process");
         
-        parseMessage(buf, message);
+        parseMessageNormal(buf, message);
         // printStruct(message);
+        // printf("The buffer: %s\n", buf);
         switch (message->type)
         {
             case IDENTIFICATION:
@@ -370,8 +398,11 @@ int main()
                 {   
                     tmp_user = get_user(message->sender);
 
-                    if (tmp_user!=NULL && strcmp(tmp_user->UID, message->content) == 0)
+                    if (tmp_user!=NULL && 
+                            strcmp(tmp_user->UID, (char *) message->content) == 0)
+                    {
                         printf("USER %s IDENTIFIED SUCCESSFULLY\n", tmp_user->username);
+                    }
                     else
                     {
                         printf("FRAUD DETECTED OR NONE EXSISTING USER\n");
@@ -386,7 +417,7 @@ int main()
 
             case INIT:
                 printf("Starting init procedure..\n");
-                tmp_user = parseUser(message->content);
+                tmp_user = parseUser((char*) message->content);
                 save_user(tmp_user);
                 break;
 
@@ -397,8 +428,6 @@ int main()
             
         }
         freeMessage(message);
-        // TODO: Remove this after Sergio implements function to handle this.
-        
 
         struct client* user = (struct client*) malloc(sizeof(struct client));
         sentinel->next = user;

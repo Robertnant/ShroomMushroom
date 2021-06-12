@@ -13,7 +13,7 @@
 #include "../security/tools.h"
 
 
-int rewrite(int fd, char *buf, size_t count)
+int rewrite(int fd, void *buf, size_t count)
 {
     int tmp;
     while (count)

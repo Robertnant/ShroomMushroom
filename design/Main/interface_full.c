@@ -10,6 +10,7 @@
 #include "../../messages/messages.h"
 #include "../../saved_users/users.h"
 #include "../../security/elgamal.h"
+#include "../../security/huffman.h"
 #include "../../security/tools.h"
 #include "../../design/addcontact/add_contact.h"
 #include "interface_full.h"
@@ -272,11 +273,56 @@ void saveMessage(char * sender, char *msg)
     }
 }
 
+// Function to compress content field of message.
+unsigned char *compressContent(struct cyphers *cyphers, int *jsonSize)
+{
+    printf("\nConverting encryption (compressed) into JSON\n");
+
+    // Compress data.
+    size_t compressedLen;
+    unsigned char *compData = compress(cyphers->en_msg, &compressedLen);
+
+    char * time = malloc(sizeof(char) * 5);
+    strcpy(time, "1010");
+
+    char * sender = malloc(sizeof(char) * 11);
+    strcpy(sender, user->number);
+
+    char * receiver = malloc(sizeof(char) * 11);
+    strcpy(receiver, target_user->number);
+
+    // size_t plen = strlen(dataCyphers->p);
+    // char * p = malloc(sizeof(char) * plen+1);
+    // strcpy(p, dataCyphers->p);
+
+    // unsigned char *content = malloc(sizeof(unsigned char) * compressedLen);
+    // memcpy(content, compData, compressedLen);
+
+    message->type = TEXT;
+    message->content = compData;
+    message->p = cyphers->p;
+    message->size = cyphers->size;
+    message->compSize = compressedLen;
+    message->time = time; //"1010";
+    message->sender = sender; //"077644562";
+    message->receiver = receiver;
+    message->filename = 0;
+
+    unsigned char *json = genMessage(message, jsonSize);
+
+    // Reset message structure for next incoming message.
+    freeMessage(message);
+
+    return json;
+}
+
 // Function to send message.
 void sendMessage(char *buff)
 {
+
     saveMessage(user->username, buff);
     addBubble(user->username, buff);
+
     // Step 1: Get receiver's public key (HARDCODED FOR NOW).
     message->receiver = user->number;   // To modify to target_user.
     char *key = requestKey(message, sockfd);
@@ -295,81 +341,57 @@ void sendMessage(char *buff)
     free(receiver_keys);
 
 
-    // Step 3: Generate JSON with cyphers.
-    printf("\nConverting encryption into JSON\n");
-    //sleep(0.5);
-
-    char * time = malloc(sizeof(char) * 5);
-    strcpy(time, "1010");
-
-    char * sender = malloc(sizeof(char) * 11);
-    strcpy(sender, user->number);
-
-    char * receiver = malloc(sizeof(char) * 11);
-    strcpy(receiver, target_user->number);
-
-    message->type = TEXT;
-    message->content = cyphers->en_msg;
-    message->p = cyphers->p;
-    message->size = cyphers->size;
-    message->time = time; //"1010";
-    message->sender = sender; //"077644562";
-    message->receiver = receiver;
-    message->filename = 0;
-
+    // Ste3: Generate JSON with cyphers (after compression).
     int jsonSize;
-    char *json = genMessage(message, &jsonSize);
-
-
-    // Reset message structure for next incoming message.
-    freeMessage(message);
+    unsigned char *json = compressContent(cyphers, &jsonSize);
 
     // Step 4: Send JSON to server.
     printf("Sending JSON to server\n");
-    //sleep(2);
 
-    rewrite(sockfd, json, jsonSize);
-    //if (e == -1)
-    //    errx(1, "Write error");
+    ssize_t e = rewrite(sockfd, json, jsonSize);
+    if (e == -1)
+        errx(1, "Write error");
 
     // Free memory.
     free(cyphers);
     free(json);
+
 }
 
 // Function to retrieve incoming message.
 void retrieveMessage()
 {
     // Step 5: Receive incoming message from other client.
-    // (For now just itself).
-    // bzero(json, jsonSize);
 
-    //int jsonSize = MAX_BUFFER;
-    char json[MAX_BUFFER];
-     GString *json_string = g_string_new(NULL);
-    bzero(json, MAX_BUFFER);
-    //if (read(sockfd, json, jsonSize) == -1)
-    //    errx(1, "Error reading incoming messages");
-    int found = 0;
+    unsigned char json[MAX_BUFFER];
     int er;
+
     printf("Waiting for message..\n");
+
+    bzero(json, MAX_BUFFER);
+    GArray *json_string = g_array_new(FALSE, FALSE, sizeof(unsigned char));
+
+    int found = 0;
     while((er = read(sockfd, json, MAX_BUFFER - 1)) > 0)
     {
-        printf("BUFFER2: %s\n", json);
-        if (found)
-            json_string = g_string_append(json_string,  json);
+        json_string = g_array_append_vals(json_string,  json, er);
 
-
-        if(g_str_has_prefix(json, "{"))
+        if(json[0] == '{')
         {
-            found++;
-            json_string = g_string_append(json_string,  json);
+            found = 1;
         }
-        if(g_str_has_suffix(json, "}"))
+        // er-1 is index of NULL byte character at end.
+        json[er-1] = '\0';
+        if(json[er-2] == '}')
         {
-            found++;
             printf("COMPLETED JSON!!!\n");
+            found++;
             break;
+        }
+        else if (!found)
+        {
+            g_array_free(json_string, TRUE);
+            json_string = g_array_new(FALSE, FALSE, sizeof(unsigned char));
         }
         bzero(json, MAX_BUFFER);
     }
@@ -378,9 +400,17 @@ void retrieveMessage()
         pthread_cancel(receiving_thread);
         return;
     }
-    if (found != 2)
+    if (!found)
+    {
+        g_array_free(json_string, TRUE);
         return;
-    gchar * final = g_string_free(json_string, FALSE);
+    }
+
+    int finalLen = json_string->len;
+    guchar * final = (guchar*) g_array_free(json_string, FALSE);
+    
+    // NULL terminate final string.
+    final[finalLen] = '\0';
 
     if (!message)
     {
@@ -395,13 +425,17 @@ void retrieveMessage()
     //printf("MESSAGE CONTENT: %s\n", message->content);
 
     // free(cyphers);
+    
+    // Step 6: Retrieve cyphers and decompress data.
+    
     struct cyphers *cyphers = malloc(sizeof(struct cyphers)); // WARNING
-    cyphers->en_msg = message->content;
+    cyphers->en_msg = decompress(message->content);
     cyphers->p = message->p;
     cyphers->size = message->size;
 
     printf("Private key: %p\n", privkey);
-    // Step 6: Decrypt message and save to chat file.
+
+    // Step 7: Decrypt message and save to chat file.
     char *res = decrypt_gamal(cyphers, privkey);
     printf("Decrypting received message\n");
     printf("Received message: %s\n", res);
@@ -422,8 +456,11 @@ void * start_message_receiver(void * arg)
     UNUSED(arg);
     while(1)
     {
+        printf("Always 1\n");
         retrieveMessage();
     }
+
+    printf("Was cut\n\n");
 }
 
 
@@ -433,17 +470,6 @@ void on_send_text_button_activate()
     char *tmp = (char*) gtk_entry_get_text(TextEntry);
     sendMessage(tmp);
     gtk_entry_set_text(TextEntry, "");
-    //retrieveMessage();
-    // chat_bubbles();
-    // gtk_widget_show_all(main_window);
-
-	/*
-    //app_widgets *widgets = (app_widgets*) data;
-  	sprintf(tmp, "%s", gtk_entry_get_text(TextEntry));
-  	gtk_label_set_text(textlabel, (const gchar*) tmp);
-	//add it on chat.txt
-    */
-
 }
 
 void on_TextEntry_changed()
@@ -453,25 +479,6 @@ void on_TextEntry_changed()
   	sprintf(tmp, "%s", gtk_entry_get_text(TextEntry));
   	gtk_label_set_text(textlabel, (const gchar*) tmp);
 }
-
-/*
-char* get_name(char* tmp) //determine user or contact
-{
-	char *name = malloc(sizeof(char)*17);
-
-	name[0] = '0';
-
-	for(size_t i=1; i<strlen(tmp)-1; i++)
-	{
-		if (tmp[i] != ']')
-		{ name[i] = tmp[i]; }
-	}
-	name++; //pop the first element (space)
-
-	return name;
-}
-*/
-
 
 void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 {
@@ -526,6 +533,7 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 
 
     pthread_create(&receiving_thread, NULL, start_message_receiver, NULL);
+
     // Close.
     // fclose(f_con);
     // fclose(f_chat);
