@@ -137,10 +137,12 @@ void * listen_to_client( void * arg )
             
             if (buff[0] == '{')
             {
+                printf("\nfound\n");
                 found = 1;
             }
             if (buff[er-1] == '}')
             {
+                printf("\nfound2\n");
                 found++;
                 break;
             }
@@ -166,11 +168,21 @@ void * listen_to_client( void * arg )
         size_t finalLen = json_string->len;
         guchar * final = (guchar*)  g_array_free(json_string, FALSE);
 
+        // Null terminate.
+        final[finalLen] = '\0';
+
         // read the message from client and copy it in buffer 
         //while((er = read(*sockfd, buff, MAX_BUF_SIZE)) > 0)
         //{
 
+        // TODO Parse message depending on type (normal or other).
+        printf("\nFINALLLL: %s\n", (char*) final);
         parseMessage(final, message);
+        if (message->compSize == 0)
+        {
+            freeMessage(message);
+            parseMessageNormal((char *) final, message);
+        }
         printf("Sender: %s\n", message->sender);
         printf("Receiver: %s\n", message->receiver);
         printf("Type: %d\n", message->type);
@@ -211,6 +223,7 @@ void * listen_to_client( void * arg )
                 // get pub key and user
                 // send the to "sender"
                 user_message = user_to_string(receiver, &l);
+                printf("User message: %s\n", user_message);
                 rewrite(sockfd, user_message, l);
                 break;
 
@@ -366,8 +379,8 @@ int main()
             errx(1, "Error with identification process");
         
         parseMessageNormal(buf, message);
-        printStruct(message);
-        printf("The buffer: %s\n", buf);
+        // printStruct(message);
+        // printf("The buffer: %s\n", buf);
         switch (message->type)
         {
             case IDENTIFICATION:
@@ -395,7 +408,7 @@ int main()
             case INIT:
                 printf("Starting init procedure..\n");
                 // message->content[r] = '\0';
-                printf("\nUser data: %s\n", (char*) message->content);
+                // printf("\nUser data: %s\n", (char*) message->content);
                 // Message->content might not be NULL terminated.
                 tmp_user = parseUser((char*) message->content);
                 save_user(tmp_user);

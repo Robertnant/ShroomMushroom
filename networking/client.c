@@ -80,7 +80,7 @@ struct user* init_procedure(int fd, char username[], char number[])
                     user->pub.g, user->pub.q, user->pub.h)) < 1)
         errx(1, "Weird error sending generated user data");
     tmp_msg->content = (unsigned char*) tmpContent;
-    printf("\nTMPCOntent: %s\n", tmp_msg->content);
+    // printf("\nTMPCOntent: %s\n", tmp_msg->content);
 
     int l;
     buf = genMessageNormal(tmp_msg, &l);
@@ -102,10 +102,12 @@ int addContact(int fd, char number[])
     message->filename = NULL;
     message->content = NULL;
     message->size = 0;
+    message->compSize = 0;
     message->time = NULL;
 
-    int l;    
-    unsigned char * mess = genMessage(message, &l);
+    int l;
+    char * mess = genMessageNormal(message, &l);
+    printf("Message mess: %s\n", mess);
     
     rewrite(fd, mess, l);
     free(mess);

@@ -164,6 +164,23 @@ void parseMessage(unsigned char *data, struct message *parsed)
     json_object_put(compSize);
     //free(compSize);
     
+    // TODO: If compSize == 0: do a normal parse instead.
+    if (parsed->compSize == 0)
+    {
+        printf("Comp size: %ld\n", parsed->compSize);
+        // Free memory and return.
+        // json_object_put(p);
+        // json_object_put(time);
+        // json_object_put(sender);
+        // json_object_put(receiver);
+        // json_object_put(type);
+        // json_object_put(filename);
+
+        free(parsed_size);
+        
+        return parseMessageNormal((char *) data, parsed);
+    }
+
     // Add character '{' for JSON.
     // printf("CompSize: %lu\n Size: %lu\n", parsed->compSize, parsed->size);
     char *part2 =(char*)  (data + size1 + parsed->compSize + 1);
