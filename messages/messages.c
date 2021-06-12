@@ -8,7 +8,7 @@
 void parseMessageNormal(char *data, struct message *parsed)
 {
     // Must be replaced later by a socket pointer for client/server connection.
-
+    printf("Attempting to parse message: %s\n", data);
     struct json_object *parsed_json;
     struct json_object *content;
     struct json_object *p;
@@ -168,6 +168,7 @@ void parseMessage(unsigned char *data, struct message *parsed)
     
     // Add character '{' for JSON.
     // printf("CompSize: %lu\n Size: %lu\n", parsed->compSize, parsed->size);
+    // SERGIO: I removed a +1
     unsigned char *p2 = (data + size1 + parsed->compSize + 1);
     char *part2 = (char*) p2;
     *part2 = '{';
@@ -196,7 +197,7 @@ void parseMessage(unsigned char *data, struct message *parsed)
         return parseMessageNormal((char *) data, parsed);
     }
 
-    
+   // TODO: FIX HERE CAUSING SEGFAULT 
     parsed_json = json_tokener_parse(part2);
 
     // json_object_object_get_ex(parsed_json, "content", &content);

@@ -43,6 +43,7 @@ void free_client(struct client* client)
     pthread_cancel(client->sending);
     printf("Cancelling thread listening\n");
     pthread_cancel(client->listening);
+    printf("Freeing memory\n");
     free(client->user);
     free(client);
     // pthread_mutex_unlock(&mutex);

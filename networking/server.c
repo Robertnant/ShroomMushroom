@@ -157,8 +157,8 @@ void * listen_to_client( void * arg )
         }
         if (er <= 0)
         {
-            //printf("Freeing client space\n");
-            //free_client(self);
+            printf("Freeing client space\n");
+            free_client(self);
             printf("Closed connection with client\n");
             return NULL;
         }

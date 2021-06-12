@@ -122,10 +122,11 @@ void clear_bubbles()
 {
     for (int i = row2 ; i >= 1; i--)
     {
-        printf("Clearing row 2\n");
-        gtk_widget_hide(gtk_grid_get_child_at(GTK_GRID(grid2), 1, i));
+        printf("Clearing row 2 element %d\n", i);
+            //Apparently useless since remove row does it
+        //gtk_widget_hide(GTK_WIDGET(gtk_grid_get_child_at(GTK_GRID(grid2), 2, i)));
         //gtk_widget_hide(gtk_grid_get_child_at(GTK_GRID(grid2), 2, i));
-        gtk_widget_destroy(gtk_grid_get_child_at(GTK_GRID(grid2), 1, i));
+        //gtk_widget_destroy(GTK_WIDGET(gtk_grid_get_child_at(GTK_GRID(grid2), 2, i)));
         //gtk_widget_destroy(gtk_grid_get_child_at(GTK_GRID(grid2), 2, i));
         gtk_grid_remove_row (GTK_GRID(grid2), i);
         // row2 -= 1;
@@ -235,7 +236,7 @@ void addBubble(char * sender, char* msg)
     bubble_chat[row2] = gtk_button_new_with_label(msg);
     gtk_widget_set_hexpand(bubble_chat[row2], TRUE);
 
-    if (sender == user->username) //user
+    if (strcmp(sender, user->number) == 0) //user
       gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);
     else //not user
       gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 0, row2, 1, 1);
@@ -258,7 +259,7 @@ void saveMessage(char * sender, char *msg)
     if(msg)
     {
         char * path = NULL;
-        asprintf(&path, ".files/chats/%s", target_user->number);
+        asprintf(&path, ".files/chats/%s", sender);
         f_chat = fopen(path, "a+");
         free(path);
         fprintf(f_chat, "%s|%s\n", sender, msg);
@@ -313,8 +314,8 @@ unsigned char *compressContent(struct cyphers *cyphers, int *jsonSize)
 void sendMessage(char *buff)
 {
 
-    saveMessage(user->username, buff);
-    addBubble(user->username, buff);
+    saveMessage(user->number, buff);
+    addBubble(user->number, buff);
 
     // Step 1: Get receiver's public key (HARDCODED FOR NOW).
     message->receiver = user->number;   // To modify to target_user.
@@ -374,9 +375,9 @@ void retrieveMessage()
             found = 1;
         }
         // er-1 is index of NULL byte character at end.
-        json[er-1] = '\0';
         if(json[er-2] == '}')
         {
+            json[er-1] = '\0';
             printf("COMPLETED JSON!!!\n");
             found++;
             break;
@@ -403,7 +404,7 @@ void retrieveMessage()
     guchar * final = (guchar*) g_array_free(json_string, FALSE);
     
     // NULL terminate final string.
-    final[finalLen] = '\0';
+    final[finalLen - 1] = '\0';
 
     if (!message)
     {
@@ -433,9 +434,11 @@ void retrieveMessage()
     printf("Decrypting received message\n");
     printf("Received message: %s\n", res);
 
-    if (target_user && strcmp(message->sender, target_user->number) == 0)
-        addBubble(target_user->username, res);
-    saveMessage(target_user->username, res);
+    if (target_user != NULL && target_user->number && strcmp(message->sender, target_user->number) == 0)
+        addBubble(target_user->number, res);
+    printf("Attempting to save message\n");
+    saveMessage(message->sender, res);
+    printf("Message saved\n");
 
     // Free memory.
     free(res);
@@ -449,11 +452,8 @@ void * start_message_receiver(void * arg)
     UNUSED(arg);
     while(1)
     {
-        printf("Always 1\n");
         retrieveMessage();
     }
-
-    printf("Was cut\n\n");
 }
 
 
