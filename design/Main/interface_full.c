@@ -307,6 +307,7 @@ unsigned char *compressContent(struct cyphers *cyphers, int *jsonSize)
 // Function to send message.
 void sendMessage(char *buff)
 {
+
     saveMessage(user->username, buff);
     addBubble(user->username, buff);
 
@@ -335,13 +336,14 @@ void sendMessage(char *buff)
     // Step 4: Send JSON to server.
     printf("Sending JSON to server\n");
 
-    rewrite(sockfd, json, jsonSize);
-    //if (e == -1)
-    //    errx(1, "Write error");
+    ssize_t e = rewrite(sockfd, json, jsonSize);
+    if (e == -1)
+        errx(1, "Write error");
 
     // Free memory.
     free(cyphers);
     free(json);
+
 }
 
 // Function to retrieve incoming message.
@@ -350,31 +352,34 @@ void retrieveMessage()
     // Step 5: Receive incoming message from other client.
 
     unsigned char json[MAX_BUFFER];
-    GArray *json_string = g_array_new(FALSE, FALSE, sizeof(unsigned char));
-    bzero(json, MAX_BUFFER);
-
-    int found = 0;
     int er;
 
     printf("Waiting for message..\n");
 
+    bzero(json, MAX_BUFFER);
+    GArray *json_string = g_array_new(FALSE, FALSE, sizeof(unsigned char));
+
+    int found = 0;
     while((er = read(sockfd, json, MAX_BUFFER - 1)) > 0)
     {
-        // printf("BUFFER: %s\n", json);
-        if (found)
-            json_string = g_array_append_vals(json_string,  json, er);
-
+        json_string = g_array_append_vals(json_string,  json, er);
 
         if(json[0] == '{')
         {
-            found++;
-            json_string = g_array_append_vals(json_string,  json, er);
+            found = 1;
         }
-        if(json[er-1] == '}')
+        // er-1 is index of NULL byte character at end.
+        json[er-1] = '\0';
+        if(json[er-2] == '}')
         {
-            found++;
             printf("COMPLETED JSON!!!\n");
+            found++;
             break;
+        }
+        else if (!found)
+        {
+            g_array_free(json_string, TRUE);
+            json_string = g_array_new(FALSE, FALSE, sizeof(unsigned char));
         }
         bzero(json, MAX_BUFFER);
     }
@@ -383,9 +388,17 @@ void retrieveMessage()
         pthread_cancel(receiving_thread);
         return;
     }
-    if (found != 2)
+    if (!found)
+    {
+        g_array_free(json_string, TRUE);
         return;
+    }
+
+    int finalLen = json_string->len;
     guchar * final = (guchar*) g_array_free(json_string, FALSE);
+    
+    // NULL terminate final string.
+    final[finalLen] = '\0';
 
     if (!message)
     {
@@ -434,6 +447,8 @@ void * start_message_receiver(void * arg)
         printf("Always 1\n");
         retrieveMessage();
     }
+
+    printf("Was cut\n\n");
 }
 
 
@@ -443,17 +458,6 @@ void on_send_text_button_activate()
     char *tmp = (char*) gtk_entry_get_text(TextEntry);
     sendMessage(tmp);
     gtk_entry_set_text(TextEntry, "");
-    //retrieveMessage();
-    // chat_bubbles();
-    // gtk_widget_show_all(main_window);
-
-	/*
-    //app_widgets *widgets = (app_widgets*) data;
-  	sprintf(tmp, "%s", gtk_entry_get_text(TextEntry));
-  	gtk_label_set_text(textlabel, (const gchar*) tmp);
-	//add it on chat.txt
-    */
-
 }
 
 void on_TextEntry_changed()
@@ -463,25 +467,6 @@ void on_TextEntry_changed()
   	sprintf(tmp, "%s", gtk_entry_get_text(TextEntry));
   	gtk_label_set_text(textlabel, (const gchar*) tmp);
 }
-
-/*
-char* get_name(char* tmp) //determine user or contact
-{
-	char *name = malloc(sizeof(char)*17);
-
-	name[0] = '0';
-
-	for(size_t i=1; i<strlen(tmp)-1; i++)
-	{
-		if (tmp[i] != ']')
-		{ name[i] = tmp[i]; }
-	}
-	name++; //pop the first element (space)
-
-	return name;
-}
-*/
-
 
 void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 {
@@ -524,6 +509,7 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 
 
     pthread_create(&receiving_thread, NULL, start_message_receiver, NULL);
+
     // Close.
     // fclose(f_con);
     // fclose(f_chat);

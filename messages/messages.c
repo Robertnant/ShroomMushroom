@@ -104,6 +104,8 @@ void parseMessageNormal(char *data, struct message *parsed)
 
 void parseMessage(unsigned char *data, struct message *parsed)
 {
+    // NULL terminate data if not done.
+    //
     // Split message into unsigned content and string parts.
     
     // Step 0: Retrieve size of part 1.
@@ -164,7 +166,20 @@ void parseMessage(unsigned char *data, struct message *parsed)
     json_object_put(compSize);
     //free(compSize);
     
-    // TODO: If compSize == 0: do a normal parse instead.
+    // Add character '{' for JSON.
+    // printf("CompSize: %lu\n Size: %lu\n", parsed->compSize, parsed->size);
+    unsigned char *p2 = (data + size1 + parsed->compSize + 1);
+    *p2 = '{';
+    char *part2 = (char*) p2;
+
+    // NULL terminate part2 if not the case.
+    /*
+    int i = 0;
+    while (p2[i] != '}')
+        i++;
+    p2[i+1] = '\0';
+    */
+
     if (parsed->compSize == 0)
     {
         printf("Comp size: %ld\n", parsed->compSize);
@@ -181,11 +196,6 @@ void parseMessage(unsigned char *data, struct message *parsed)
         return parseMessageNormal((char *) data, parsed);
     }
 
-    // Add character '{' for JSON.
-    // printf("CompSize: %lu\n Size: %lu\n", parsed->compSize, parsed->size);
-    char *part2 =(char*)  (data + size1 + parsed->compSize + 1);
-    *part2 = '{';
-    // char *part2 = (char*) p2;
     
     parsed_json = json_tokener_parse(part2);
 

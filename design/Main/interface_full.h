@@ -40,6 +40,7 @@ void chat_bubbles(char path[]);
 void select_contact(GtkWidget * widget, gpointer arg);
 void * start_message_receiver(void * arg);
 void on_window_main_destroy();
+void retrieveMessage();
 
 
 #endif

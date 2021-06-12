@@ -198,7 +198,7 @@ void * listen_to_client( void * arg )
         switch (message->type)
         {
             case TEXT:
-                l = finalLen + 1;
+                l = finalLen + 1;   // Extra 1 for NULL byte.
                 
                 content = malloc(sizeof(struct pipe_content));
                 
@@ -208,14 +208,13 @@ void * listen_to_client( void * arg )
                 
                 // strcpy(tmp_buf, final);
                 memcpy(tmp_buf, final, l);
+                tmp_buf[l-1] = '\0';
                 strcpy(tmp_number, message->receiver);
                 
                 content->message = tmp_buf;
                 content->number = tmp_number;
                 content->size = l;
                 
-                printf("\nBefore send_to\n");
-
                 pthread_create(&id, NULL, send_to, (void*) content);
                 
                 break;
@@ -277,15 +276,10 @@ void connect_client(char pipe[], int client)
         {
             while ((r = read(fd, buf, MAX_BUF_SIZE)) > 0)
             {
-                printf("Got something in connect: ");
-                for (size_t i = 0; i < r; i++)
-                    printf("%c", buf[i]);
-
                 while (!rewrite(client, buf, r))
                     fd = open(filename, O_RDONLY);
             }
 
-            printf("\nWrote something.\n");
         }
     }
 
@@ -417,9 +411,6 @@ int main()
 
             case INIT:
                 printf("Starting init procedure..\n");
-                // message->content[r] = '\0';
-                // printf("\nUser data: %s\n", (char*) message->content);
-                // Message->content might not be NULL terminated.
                 tmp_user = parseUser((char*) message->content);
                 save_user(tmp_user);
                 break;
