@@ -30,7 +30,7 @@
 
 int running = 1;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
+struct client* sentinel;
 
 struct message* message; // = (struct message*) malloc(MESSAGE_SIZE);
 
@@ -250,6 +250,7 @@ void connect_client(char pipe[], int client)
     //    errx(1, "Could not forward data to client");
     int r;
     int fd;
+    while (!is_connected(sentinel, pipe));
     while (1)
     {
         fd = open(filename, O_RDONLY);
@@ -257,7 +258,7 @@ void connect_client(char pipe[], int client)
         {
             while ((r = read(fd, buf, MAX_BUF_SIZE)) > 0)
             {
-                while (!rewrite(client, buf, r))
+                while (fd > 0 && !rewrite(client, buf, r))
                     fd = open(filename, O_RDONLY);
             }
         }
@@ -328,7 +329,7 @@ int main()
     len = sizeof(cli);
 
 
-    struct client* sentinel = get_sentinel();
+    sentinel = get_sentinel();
     struct client* curr = sentinel->next;
     signal(SIGINT, interrupt);
 

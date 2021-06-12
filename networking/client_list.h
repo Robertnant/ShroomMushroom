@@ -21,4 +21,6 @@ void free_clients(struct client* sentinel);
 
 void free_client(struct client* client);
 
+int is_connected(struct client* sent, char UID[]);
+
 #endif
