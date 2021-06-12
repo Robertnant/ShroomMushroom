@@ -386,6 +386,7 @@ char *compressElgamal(struct cyphers *dataCyphers)
     return res;
 }
 
+/*
 int main()
 {
     char *msg = "Black leather gloves, no sequins\n\
@@ -442,3 +443,4 @@ int main()
     return 0;
 
 }
+*/

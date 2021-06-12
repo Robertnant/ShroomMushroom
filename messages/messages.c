@@ -69,9 +69,9 @@ void parseMessage(unsigned char *data, struct message *parsed)
     
     // Add character '{' for JSON.
     // printf("CompSize: %lu\n Size: %lu\n", parsed->compSize, parsed->size);
-    unsigned char *p2 = (data + size1 + parsed->compSize + 1);
-    *p2 = '{';
-    char *part2 = (char*) p2;
+    char *part2 =(char*)  (data + size1 + parsed->compSize + 1);
+    *part2 = '{';
+    // char *part2 = (char*) p2;
     
     parsed_json = json_tokener_parse(part2);
 
