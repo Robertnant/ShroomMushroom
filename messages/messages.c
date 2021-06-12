@@ -5,6 +5,30 @@
 #include <json-c/json.h>
 #include "messages.h"
 
+void parseNormalMessage(char *data, struct message *parsed)
+{
+    struct json_object *parsed_json;
+    struct json_object *content;
+    struct json_object *p;
+    struct json_object *size;
+    struct json_object *compSize;
+    struct json_object *time;
+    struct json_object *sender;
+    struct json_object *receiver;
+    struct json_object *type;
+    struct json_object *filename;
+    
+    parsed_json = json_tokener_parse(data);
+
+    json_object_object_get_ex(parsed_json, "content", &content);
+    json_object_object_get_ex(parsed_json, "p", &p);
+    json_object_object_get_ex(parsed_json, "size", &size);
+    json_object_object_get_ex(parsed_json, "time", &time);
+    json_object_object_get_ex(parsed_json, "sender", &sender);
+    json_object_object_get_ex(parsed_json, "receiver", &receiver);
+
+}
+
 void parseMessage(unsigned char *data, struct message *parsed)
 {
     // Split message into unsigned content and string parts.
@@ -102,7 +126,7 @@ void parseMessage(unsigned char *data, struct message *parsed)
     }
     
     // Save content to struct.
-    parsed->content = malloc(sizeof(unsigned char) * parsed->compSize);
+    parsed->content = calloc(parsed->compSize + 1, sizeof(unsigned char));
     memcpy(parsed->content, contentStart, parsed->compSize);
 
     len = strlen(json_object_get_string(p));

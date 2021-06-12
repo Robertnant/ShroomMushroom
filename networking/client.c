@@ -80,6 +80,7 @@ struct user* init_procedure(int fd, char username[], char number[])
                     user->pub.g, user->pub.q, user->pub.h)) < 1)
         errx(1, "Weird error sending generated user data");
     tmp_msg->content = (unsigned char*) tmpContent;
+    printf("\nTMPCOntent: %s\n", tmp_msg->content);
 
     int l;
     buf = genMessage(tmp_msg, &l);
@@ -206,7 +207,7 @@ int main()
         user = get_user_path(USER_PATH);
         // send simple message with UID as content (use the function robert will implement)
         message->type = IDENTIFICATION;
-        message->content = user->UID;   // TODO: Might need to cast to unsigned char*.
+        message->content = (unsigned char*) user->UID;   // TODO: Might need to cast to unsigned char*.
         message->sender = user->number;
 
         int l;

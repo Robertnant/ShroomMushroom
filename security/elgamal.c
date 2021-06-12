@@ -9,7 +9,7 @@
 #include "elgamal.h"
 #include "tools.h"
 #include "huffman.h"
-#include "../messages/messages.c"
+// #include "../messages/messages.c"
 
 #define MIN_GAMAL 511
 #define MAX_GAMAL 512
@@ -314,6 +314,7 @@ publicKey* stringtoPub(char *string)
     return key;
 }
 
+/*
 char *compressElgamal(struct cyphers *dataCyphers)
 {
     size_t len = strlen(dataCyphers->en_msg);
@@ -385,6 +386,7 @@ char *compressElgamal(struct cyphers *dataCyphers)
 
     return res;
 }
+*/
 
 /*
 int main()

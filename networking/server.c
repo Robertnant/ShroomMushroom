@@ -336,7 +336,7 @@ int main()
     struct client* curr = sentinel->next;
     signal(SIGINT, interrupt);
 
-    char buf[1024]; // TODO: If fails use unsigned char.
+    unsigned char buf[1024];
     //struct user* tmp_user = (struct user*) malloc(sizeof(struct user));
     struct user* tmp_user;
 
@@ -367,6 +367,7 @@ int main()
         
         parseMessage(buf, message);
         // printStruct(message);
+        printf("The buffer: %s\n", buf);
         switch (message->type)
         {
             case IDENTIFICATION:
@@ -374,8 +375,11 @@ int main()
                 {   
                     tmp_user = get_user(message->sender);
 
-                    if (tmp_user!=NULL && strcmp(tmp_user->UID, message->content) == 0)
+                    if (tmp_user!=NULL && 
+                            strcmp(tmp_user->UID, (char *) message->content) == 0)
+                    {
                         printf("USER %s IDENTIFIED SUCCESSFULLY\n", tmp_user->username);
+                    }
                     else
                     {
                         printf("FRAUD DETECTED OR NONE EXSISTING USER\n");
@@ -390,6 +394,9 @@ int main()
 
             case INIT:
                 printf("Starting init procedure..\n");
+                // message->content[r] = '\0';
+                printf("\nUser data: %s\n", (char*) message->content);
+                // Message->content might not be NULL terminated.
                 tmp_user = parseUser((char*) message->content);
                 save_user(tmp_user);
                 break;
