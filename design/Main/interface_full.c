@@ -120,25 +120,19 @@ void contacts(char *contacts_path)
 
 void clear_bubbles()
 {
-    /*
-    while(row3 >= 0)
-    {
-        printf("Clearing row 3\n");
-        gtk_widget_hide(gtk_grid_get_child_at(GTK_GRID(grid3), 1, row3));
-        gtk_widget_destroy(gtk_grid_get_child_at(GTK_GRID(grid3), 1, row3));
-        row3 -= 1;
-    }
-    */
-    for (int i = 0; i < row2; i++)
+    for (int i = row2 ; i >= 1; i--)
     {
         printf("Clearing row 2\n");
         gtk_widget_hide(gtk_grid_get_child_at(GTK_GRID(grid2), 1, i));
+        //gtk_widget_hide(gtk_grid_get_child_at(GTK_GRID(grid2), 2, i));
         gtk_widget_destroy(gtk_grid_get_child_at(GTK_GRID(grid2), 1, i));
+        //gtk_widget_destroy(gtk_grid_get_child_at(GTK_GRID(grid2), 2, i));
+        gtk_grid_remove_row (GTK_GRID(grid2), i);
         // row2 -= 1;
     }
 
     // Reset row2 counter.
-    row2 = 0;
+    row2 = 1;
 }
 
 //function to load chat bubbles from a text file
@@ -149,7 +143,7 @@ void chat_bubbles(char path[]) //Display chat bubbles
 	//[USER2] ---
 
     // Clear previous bubbles.
-    if (row2)
+    if (row2 > 1)
         clear_bubbles();
 
     //f_chat = fopen("design/Main/chat.txt", "a+");
@@ -268,7 +262,6 @@ void saveMessage(char * sender, char *msg)
         f_chat = fopen(path, "a+");
         free(path);
         fprintf(f_chat, "%s|%s\n", sender, msg);
-        //display bubble
         fclose(f_chat);
     }
 }

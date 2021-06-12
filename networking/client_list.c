@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <pthread.h>
 #include <signal.h>
 #include "../saved_users/users.h"
@@ -45,5 +46,15 @@ void free_client(struct client* client)
     free(client->user);
     free(client);
     // pthread_mutex_unlock(&mutex);
+}
+
+int is_connected(struct client* sent, char UID[])
+{
+    if (!sent)
+        return 0;
+    if (strcmp(UID, sent->user->UID) == 0)
+        return 1;
+    else
+        return is_connected(sent->next, UID);
 }
 
