@@ -58,12 +58,14 @@ void parseMessage(char *data, struct message *parsed)
     printf("content: %p\n", receiver);
     printf("content: %p\n", type);
     printf("content: %p\n", filename);
+  
+
     if (!(content && p && size 
             && compSize && time && sender && receiver && type && filename))
     {
-        printf("Using parseMessage2\n");
+        printf("Json could not be parsed\n");
         free(parsed_json);
-        parseMessage2(data, parsed);
+        //parseMessage2(data, parsed);
         return;
     }
 
