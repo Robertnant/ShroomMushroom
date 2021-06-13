@@ -8,10 +8,10 @@
 void parseMessageNormal(char *data, struct message *parsed)
 {
     // Prevent parsing HTTP request.
-    char *cmpStr = "{\"size\":";
-    if (!strncmp(cmpStr, (char*) data, strlen(cmpStr)))
+    if (!(data[0] == '{' && data[1] != '"'))
     {
         printf("Got incorrect message request\n");
+        printf("First char: %c\n", data[0]);
         parsed->content = NULL;
         parsed->p = NULL;
         parsed->time = NULL;
@@ -120,10 +120,10 @@ void parseMessageNormal(char *data, struct message *parsed)
 void parseMessage(unsigned char *data, struct message *parsed)
 {
     // Prevent parsing HTTP request.
-    char *cmpStr = "{\"size\":";
-    if (!strncmp(cmpStr, (char*) data, strlen(cmpStr)))
+    if (!(data[0] == '{' && data[1] != '"'))
     {
         printf("Got incorrect message request\n");
+        printf("First char: %c\n", data[0]);
         parsed->content = NULL;
         parsed->p = NULL;
         parsed->time = NULL;
