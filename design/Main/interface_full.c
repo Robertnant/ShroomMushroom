@@ -234,18 +234,31 @@ void addBubble(char * sender, char* msg)
 
 
     gtk_grid_insert_row(GTK_GRID(grid2), row2);
+    printf("Not bugging 1\n");
     bubble_chat[row2] = gtk_button_new_with_label(msg);
+    printf("Not bugging 2\n");
     gtk_widget_set_hexpand(bubble_chat[row2], TRUE);
+    printf("Not bugging 3\n");
 
     if (strcmp(sender, user->number) == 0) //user
-      gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);
+    {
+        printf("Not bugging 4\n");
+        gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);
+        printf("Not bugging 5\n");
+    }
     else //not user
-      gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 0, row2, 1, 1);
+    {
+        printf("Not bugging 6\n");
+        gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 0, row2, 1, 1);
+        printf("Not bugging 7\n");
+    }
 
     row2+=1;
 
-    //gtk_widget_show_all(bubble_chat[row2]);
+    // gtk_widget_show_all(bubble_chat[row2]);
     gtk_widget_show_all(grid2);
+
+    printf("Not bugging FINAL\n");
 }
 
 // function to append msg on column
