@@ -16,6 +16,7 @@
 #include "interface_full.h"
 
 #define UNUSED(x) (void)(x)
+#define G_SOURCE_FUNC(f) ((GSourceFunc) (void (*)(void)) (f))
 #define MAX_BUFFER 10000
 
 int row = 0;    //grid row counter (contact)
@@ -351,6 +352,34 @@ void sendMessage(char *buff)
 
 }
 
+struct bubble_content
+{
+    char *sender;
+    char *message;
+};
+
+
+void addBubble2(gpointer arg)
+{
+    struct bubble_content* bub = arg; 
+
+    gtk_grid_insert_row(GTK_GRID(grid2), row2);
+    bubble_chat[row2] = gtk_button_new_with_label(bub->message);
+    gtk_widget_set_hexpand(bubble_chat[row2], TRUE);
+
+    if (strcmp(bub->sender, user->number) == 0) //user
+      gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 1, row2, 1, 1);
+    else //not user
+      gtk_grid_attach (GTK_GRID(grid2), bubble_chat[row2], 0, row2, 1, 1);
+
+    row2+=1;
+
+    gtk_widget_show_all(grid2);
+    free(bub);
+}
+
+
+
 // Function to retrieve incoming message.
 void retrieveMessage()
 {
@@ -436,7 +465,12 @@ void retrieveMessage()
 
     if (target_user != NULL && target_user->number && 
             message->sender && strcmp(message->sender, target_user->number) == 0)
-        addBubble(target_user->number, res);
+    {
+        struct bubble_content* bub = malloc(sizeof(struct bubble_content));
+        bub->message = res;
+        bub->sender = target_user->number;
+        g_idle_add(G_SOURCE_FUNC(addBubble2), (gpointer) bub);
+    }
     printf("Attempting to save message\n");
     saveMessage(message->sender, message->sender, res);
     printf("Message saved\n");
