@@ -482,11 +482,11 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
     UNUSED(chat_path);
     // Get Widgets.
     
-    GtkCssProvider *cssProvider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(cssProvider, "design/themes/gtk-contained-dark.css", NULL);
-    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
-                                GTK_STYLE_PROVIDER(cssProvider),
-                                GTK_STYLE_PROVIDER_PRIORITY_USER);
+    //GtkCssProvider *cssProvider = gtk_css_provider_new();
+    //gtk_css_provider_load_from_path(cssProvider, "design/themes/gtk-contained-dark.css", NULL);
+    //gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+    //                            GTK_STYLE_PROVIDER(cssProvider),
+    //                            GTK_STYLE_PROVIDER_PRIORITY_USER);
 
 
     builder = gtk_builder_new_from_file(interface_path);

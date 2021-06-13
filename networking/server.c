@@ -185,8 +185,10 @@ void * listen_to_client( void * arg )
         
         parseMessage(final, message);
 
-        printf("Sender: %s\n", message->sender);
-        printf("Receiver: %s\n", message->receiver);
+        if (message->sender)
+            printf("Sender: %s\n", message->sender);
+        if (message->receiver)
+            printf("Receiver: %s\n", message->receiver);
         printf("Type: %d\n", message->type);
 
         struct user* receiver = get_user(message->receiver);
@@ -432,7 +434,6 @@ int main()
                 continue;
             
         }
-        freeMessage(message);
 
         struct client* user = (struct client*) malloc(sizeof(struct client));
         sentinel->next = user;
@@ -450,6 +451,7 @@ int main()
         pthread_create(&curr->listening, NULL, listen_to_client, (void *) user);
         pthread_create(&curr->sending, NULL, sending_from_pipe, (void *) user);
         
+        freeMessage(message);
         printf("New user connected!\n");
     }
 }
