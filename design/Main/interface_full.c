@@ -254,12 +254,12 @@ void addBubble(char * sender, char* msg)
 }*/
 
 // Function to save message to chat log.
-void saveMessage(char * sender, char *msg)
+void saveMessage(char * sender, char * chat, char *msg)
 {
     if(msg)
     {
         char * path = NULL;
-        asprintf(&path, ".files/chats/%s", sender);
+        asprintf(&path, ".files/chats/%s", chat);
         f_chat = fopen(path, "a+");
         free(path);
         fprintf(f_chat, "%s|%s\n", sender, msg);
@@ -313,8 +313,7 @@ unsigned char *compressContent(struct cyphers *cyphers, int *jsonSize)
 // Function to send message.
 void sendMessage(char *buff)
 {
-
-    saveMessage(user->number, buff);
+    saveMessage(user->number, target_user->number, buff);
     addBubble(user->number, buff);
 
     // Step 1: Get receiver's public key (HARDCODED FOR NOW).
@@ -435,10 +434,11 @@ void retrieveMessage()
     printf("Decrypting received message\n");
     printf("Received message: %s\n", res);
 
-    if (target_user != NULL && target_user->number && strcmp(message->sender, target_user->number) == 0)
+    if (target_user != NULL && target_user->number && 
+            message->sender && strcmp(message->sender, target_user->number) == 0)
         addBubble(target_user->number, res);
     printf("Attempting to save message\n");
-    saveMessage(message->sender, res);
+    saveMessage(message->sender, message->sender, res);
     printf("Message saved\n");
 
     // Free memory.
@@ -461,9 +461,12 @@ void * start_message_receiver(void * arg)
 void on_send_text_button_activate()
 {
     // int len = gtk_entry_get_text_length(TextEntry);
-    char *tmp = (char*) gtk_entry_get_text(TextEntry);
-    sendMessage(tmp);
-    gtk_entry_set_text(TextEntry, "");
+    if (target_user)
+    {
+        char *tmp = (char*) gtk_entry_get_text(TextEntry);
+        sendMessage(tmp);
+        gtk_entry_set_text(TextEntry, "");
+    }
 }
 
 void on_TextEntry_changed()
