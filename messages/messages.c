@@ -62,7 +62,7 @@ void parseMessage(char *data, struct message *parsed)
             && compSize && time && sender && receiver && type && filename))
     {
         printf("Objects not parsed\n");
-        //return;
+        return;
     }
 
     size_t len;
@@ -83,11 +83,13 @@ void parseMessage(char *data, struct message *parsed)
         parsed->filename = NULL;
         return;
     }
-
-    len = strlen(json_object_get_string(content));
+    char *content_string = json_object_get_string(content);
+    if (!content_string)
+        return;
+    len = strlen(content_string);
     // parsed->content = (char *) malloc(sizeof(char) * len + 1);
     char *tmpContent = (char *) malloc(sizeof(char) * len + 1);
-    strcpy(tmpContent, json_object_get_string(content));
+    strcpy(tmpContent, content_string);
     parsed->content = (char *) tmpContent;
     json_object_put(content);
     //free(content);
