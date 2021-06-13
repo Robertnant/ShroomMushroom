@@ -163,7 +163,7 @@ void * listen_to_client( void * arg )
             g_string_free(json_string, TRUE);
             continue;
         }
-        gchar * final = (guchar*)  g_string_free(json_string, FALSE);
+        gchar * final = g_string_free(json_string, FALSE);
 
         // read the message from client and copy it in buffer 
         //while((er = read(*sockfd, buff, MAX_BUF_SIZE)) > 0)
