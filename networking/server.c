@@ -142,7 +142,7 @@ void * listen_to_client( void * arg )
                 printf("\nfound\n");
                 found = 1;
             }
-            if (buff[er-1] == '}')
+            if (buff[er-1] == '}' || buff[er-2] == '}')
             {
                 printf("\nfound2\n");
                 found++;
@@ -283,6 +283,10 @@ void connect_client(char pipe[], int client)
         {
             while ((r = read(fd, buf, MAX_BUF_SIZE)) > 0)
             {
+                printf("Got: \n");
+                for (int i = 0; i < r; i++)
+                    printf("%c", buf[i]);
+
                 while (fd > 0 && !rewrite(client, buf, r))
                     fd = open(filename, O_RDONLY);
             }
