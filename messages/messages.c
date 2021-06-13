@@ -104,8 +104,11 @@ void parseMessageNormal(char *data, struct message *parsed)
 
 void parseMessage(unsigned char *data, struct message *parsed)
 {
-    // NULL terminate data if not done.
-    //
+    // Prevent parsing HTTP request.
+    char *cmpStr = "{\"size\":";
+    if (!strncmp(cmpStr, (char*) data, strlen(cmpStr)))
+            return;
+
     // Split message into unsigned content and string parts.
     
     // Step 0: Retrieve size of part 1.
