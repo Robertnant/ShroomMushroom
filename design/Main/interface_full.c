@@ -374,10 +374,11 @@ void retrieveMessage()
         {
             found = 1;
         }
-        // er-1 is index of NULL byte character at end.
-        if(json[er-2] == '}')
+        // er-1 and er-2 are indexes of NULL byte character at end.
+        if(json[er-3] == '}')
         {
             json[er-1] = '\0';
+            json[er-2] = '\0';
             printf("COMPLETED JSON!!!\n");
             found++;
             break;

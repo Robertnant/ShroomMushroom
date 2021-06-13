@@ -279,10 +279,18 @@ char *genMessageNormal(struct message* message, int *l)
 \"filename\":\"%s\"}",\
 message->size, message->compSize, 
 (char*) message->content, message->type, message->p,
-message->time, message->sender, message->receiver, message->filename);
+message->time, message->sender, message->receiver, message->filename
+);
 
     return res;
 }
+
+/*
+unsigned char *genMessage(struct message* message, int *l)
+{
+    // l = asprintf size + compSize + sizeof(
+}
+*/
 
 unsigned char *genMessage(struct message* message, int *l)
 {
@@ -293,6 +301,8 @@ unsigned char *genMessage(struct message* message, int *l)
     int size1 = asprintf(&part1, "{\"size\":%lu,\
 \"compSize\":%lu,\"content\":\"", message->size, message->compSize);
 
+
+// TODO: Add null byte at end of string if bugs.
     char *part2;
     *l = asprintf(&part2, "\",\"type\":%d,\
 \"p\":\"%s\",\
@@ -317,7 +327,9 @@ message->sender, message->receiver, message->filename);
     tmp = memcpy(tmp + message->compSize, part2, *l);
     
     // Update *l to final size.
-    *l += size1 + message->compSize;
+    *l += size1 + message->compSize + 1; // +1 for NULL byte.
+    // Force null termination.
+    res[*l - 1] = '\0';
 
     /*
     printf("\nTEST\n");
