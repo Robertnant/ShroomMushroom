@@ -16,7 +16,7 @@
 #include "interface_full.h"
 
 #define UNUSED(x) (void)(x)
-#define G_SOURCE_FUNC(f) ((GSourceFunc) (void (*)(void)) (f))
+//#define G_SOURCE_FUNC(f) ((GSourceFunc) (void (*)(void)) (f))
 #define MAX_BUFFER 10000
 
 int row = 0;    //grid row counter (contact)
@@ -282,13 +282,13 @@ void saveMessage(char * sender, char * chat, char *msg)
 }
 
 // Function to compress content field of message.
-unsigned char *compressContent(struct cyphers *cyphers, int *jsonSize)
+char *compressContent(struct cyphers *cyphers, int *jsonSize)
 {
     printf("\nConverting encryption (compressed) into JSON\n");
 
     // Compress data.
     size_t compressedLen;
-    unsigned char *compData = compress(cyphers->en_msg, &compressedLen);
+    char *compData = compress(cyphers->en_msg, &compressedLen);
 
     char * time = malloc(sizeof(char) * 5);
     strcpy(time, "1010");
@@ -303,7 +303,7 @@ unsigned char *compressContent(struct cyphers *cyphers, int *jsonSize)
     // char * p = malloc(sizeof(char) * plen+1);
     // strcpy(p, dataCyphers->p);
 
-    // unsigned char *content = malloc(sizeof(unsigned char) * compressedLen);
+    // char *content = malloc(sizeof(char) * compressedLen);
     // memcpy(content, compData, compressedLen);
 
     message->type = TEXT;
@@ -316,7 +316,7 @@ unsigned char *compressContent(struct cyphers *cyphers, int *jsonSize)
     message->receiver = receiver;
     message->filename = 0;
 
-    unsigned char *json = genMessage(message, jsonSize);
+    char *json = genMessage(message, jsonSize);
 
     // Reset message structure for next incoming message.
     freeMessage(message);
@@ -350,7 +350,7 @@ void sendMessage(char *buff)
 
     // Ste3: Generate JSON with cyphers (after compression).
     int jsonSize;
-    unsigned char *json = compressContent(cyphers, &jsonSize);
+    char *json = compressContent(cyphers, &jsonSize);
 
     // Step 4: Send JSON to server.
     printf("Sending JSON to server\n");
@@ -398,56 +398,43 @@ void retrieveMessage()
 {
     // Step 5: Receive incoming message from other client.
 
-    unsigned char json[MAX_BUFFER];
+    char json[MAX_BUFFER];
     int er;
 
     printf("Waiting for message..\n");
 
     bzero(json, MAX_BUFFER);
-    GArray *json_string = g_array_new(FALSE, FALSE, sizeof(unsigned char));
+    GString *json_string = g_string_new(NULL);
 
     int found = 0;
     while((er = read(sockfd, json, MAX_BUFFER - 1)) > 0)
     {
-        json_string = g_array_append_vals(json_string,  json, er);
+        if (found)
+            json_string = g_string_append(json_string, json);
 
-        if(json[0] == '{')
+        if(g_str_has_prefix(json, "{"))
         {
-            found = 1;
-        }
-        // er-1 and er-2 are indexes of NULL byte character at end.
-        if(json[er-3] == '}')
-        {
-            json[er-1] = '\0';
-            json[er-2] = '\0';
-            printf("COMPLETED JSON!!!\n");
             found++;
-            break;
+            json_string = g_string_append(json_string,  json);
         }
-        else if (!found)
+        if(g_str_has_suffix(json, "}"))
         {
-            g_array_free(json_string, TRUE);
-            json_string = g_array_new(FALSE, FALSE, sizeof(unsigned char));
+            found++;
+            printf("COMPLETED JSON!!!\n");
+            break;
         }
         bzero(json, MAX_BUFFER);
     }
     if (er <= 0)
     {
-        pthread_cancel(*receiving_thread);
+        pthread_cancel(receiving_thread);
         return;
     }
-    if (!found)
-    {
-        g_array_free(json_string, TRUE);
+    if (found != 2)
         return;
-    }
 
-    int finalLen = json_string->len;
-    guchar * final = (guchar*) g_array_free(json_string, FALSE);
+    gchar * final = g_string_free(json_string, FALSE);
     
-    // NULL terminate final string.
-    final[finalLen - 1] = '\0';
-
     if (!message)
     {
         printf("MESSAGE ADDRESS: %p\n", message);
@@ -575,9 +562,7 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 
     gtk_widget_show_all(main_window);
 
-    receiving_thread = malloc(sizeof(pthread_t));
-
-    pthread_create(receiving_thread, NULL, start_message_receiver, NULL);
+    pthread_create(&receiving_thread, NULL, start_message_receiver, NULL);
 
     // Close.
     // fclose(f_con);

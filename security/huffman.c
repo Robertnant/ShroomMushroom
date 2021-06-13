@@ -348,8 +348,8 @@ void encodeTree(struct heapNode *huffmanTree, GString *res)
     }
 }
 
-// Lenght pointer can be NULL.
-unsigned char *compress(char *data, size_t *len)
+// Lenght return pointer can be NULL.
+char *compress(char *data, size_t *len)
 {
     struct comp *comp = malloc(sizeof(struct comp));
     
@@ -383,7 +383,7 @@ unsigned char *compress(char *data, size_t *len)
     comp->encData = toChar(preEncData, &(comp->dataOffset), &(comp->dataSize));
 
     // Step 6: Merge compression.
-    unsigned char *res = mergeComp(comp, len);
+    char *res = mergeComp(comp, len);
 
     // Free memory.
     free(freq);
@@ -399,13 +399,11 @@ unsigned char *compress(char *data, size_t *len)
 // Merge compression into one string.
 // (Frees previous unmerged tree and data).
 // Format "TreeSize-DataSize-TreeOffset-DataOffset-EncTreeEncData" (no spaces).
-// TODO: Use memmove instead if somehow memory areas overlap.
-// Len is used for compression ratio purposes only.
-unsigned char *mergeComp(struct comp *comp, size_t *size)
+char *mergeComp(struct comp *comp, size_t *size)
 {
     // Get struct fields.
-    unsigned char *encTree = comp->encTree;
-    unsigned char *encData = comp->encData;
+    char *encTree = comp->encTree;
+    char *encData = comp->encData;
     size_t treeSize = comp->treeSize;
     size_t dataSize = comp->dataSize;
     int treeOffset = comp->treeOffset;
@@ -419,12 +417,12 @@ unsigned char *mergeComp(struct comp *comp, size_t *size)
     // Create final result.
     size_t sizesLen = strlen(sizes);
     size_t len = sizesLen + treeSize + dataSize;
-    unsigned char *res = malloc(len * sizeof(unsigned char));
+    char *res = malloc(len * sizeof(char));
 
     memcpy(res, sizes, sizesLen);
     free(sizes);
 
-    unsigned char *tmp = memcpy(res+sizesLen, encTree, treeSize);
+    char *tmp = memcpy(res+sizesLen, encTree, treeSize);
     free(encTree);
 
     tmp = memcpy(tmp+treeSize, encData, dataSize);
@@ -438,10 +436,10 @@ unsigned char *mergeComp(struct comp *comp, size_t *size)
 }
 
 // Copy bytes till delimiter reached.
-unsigned char *delimcpy(unsigned char *data, char *res)
+char *delimcpy(char *data, char *res)
 {
     int c = 0;
-    unsigned char *tmp;
+    char *tmp;
     for (tmp = data; *tmp != '-'; tmp++)
     {
         res[c] = *tmp;
@@ -456,13 +454,13 @@ unsigned char *delimcpy(unsigned char *data, char *res)
 
 // Unmerge compressed data.
 // HINT: Use treeSize and dataSize to know when to stop.
-void unmergeComp(unsigned char *data, struct comp *res)
+void unmergeComp(char *data, struct comp *res)
 {
     char strSize[8];
     bzero(strSize, 8);
 
     // Get encTree size.
-    unsigned char *tmp = data;
+    char *tmp = data;
     tmp = delimcpy(tmp, strSize);
     res->treeSize = atoi(strSize);
 
@@ -482,8 +480,8 @@ void unmergeComp(unsigned char *data, struct comp *res)
     res->dataOffset = atoi(strSize);
 
     // Get encTree and encData.
-    res->encTree = malloc((res->treeSize) * sizeof(unsigned char));
-    res->encData = malloc((res->dataSize) * sizeof(unsigned char));
+    res->encTree = malloc((res->treeSize) * sizeof(char));
+    res->encData = malloc((res->dataSize) * sizeof(char));
 
     // Step 1: Copy encoded tree bytes to encTree.
     memcpy(res->encTree, tmp, res->treeSize);
@@ -564,17 +562,17 @@ struct heapNode *decodeTree(char *data)
         }
         else
         {
-            char sub[9];
-            sub[8] = '\0';
+            char sub[8];
+            sub[7] = '\0';
 
             // Create substring to convert to character.
-            for (int j = 1; j < 9; j++)
+            for (int j = 1; j < 8; j++)
                 sub[j-1] = data[i+j];
 
             // Save character to current tree.
             tmp->data = (char) binDec(sub);
 
-            i += 9;
+            i += 8;
 
             if (c > 0)
             {
@@ -595,15 +593,15 @@ struct heapNode *decodeTree(char *data)
 }
 
 // Decompression process.
-char *decompress(unsigned char *compData)
+char *decompress(char *compData)
 {
     // Step 1: Unmerge compressed data.
     struct comp *comp = malloc(sizeof(struct comp));
     unmergeComp(compData, comp);
 
     // Step 2: Get structure fields.
-    unsigned char *tree = comp->encTree;
-    unsigned char *data = comp->encData;
+    char *tree = comp->encTree;
+    char *data = comp->encData;
     size_t treeSize = comp->treeSize;
     size_t dataSize = comp->dataSize;
     int treeAlign = comp->treeOffset;

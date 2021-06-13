@@ -38,8 +38,8 @@ struct codes
 // Compressed data structure.
 struct comp
 {
-    unsigned char *encTree;
-    unsigned char *encData;
+    char *encTree;
+    char *encData;
     size_t treeSize;
     size_t dataSize;
     int treeOffset;
@@ -70,7 +70,7 @@ void occurList(struct heapNode *root, struct codes *codes,
 
 void buildFrequencyList(char *input, size_t *freq, char **chars);
 struct heapNode *buildHuffmanTree(char *data, size_t *freq, size_t size);
-unsigned char *compress(char *data, size_t *len);
+char *compress(char *data, size_t *len);
 
 // Encoding.
 char *encodeData(struct codes *codes, char *input);
@@ -83,13 +83,13 @@ char *decodeData(struct heapNode *huffmanTree, char *data);
 struct heapNode *decodeTree(char *data);
 
 // DECOMPRESSION.
-char *decompress(unsigned char *data);
+char *decompress(char *data);
 
 // Deletion.
 void deleteHuffman(struct heapNode *huffmanTree);
 void freeCodes(struct codes *codes);
 
 // Merge compression.
-unsigned char *mergeComp(struct comp *comp, size_t *size);
-void unmergeComp(unsigned char *data, struct comp *res);
+char *mergeComp(struct comp *comp, size_t *size);
+void unmergeComp(char *data, struct comp *res);
 #endif

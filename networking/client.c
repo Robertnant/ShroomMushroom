@@ -68,15 +68,14 @@ struct user* init_procedure(int fd, char username[], char number[], char avatar[
     tmp_msg->type = INIT; 
 
     // Generate user data and save to tmp_msg content field.
-    char *tmpContent;
-    if ((n = asprintf(&tmpContent, "%s %s %s %s %s-%s-%s", user->username,\
+    if ((n = asprintf(&tmp_msg->content, 
+                    "%s %s %s %s %s-%s-%s", user->username,\
                     user->avatar, user->number, user->UID,\
                     user->pub.g, user->pub.q, user->pub.h)) < 1)
         errx(1, "Weird error sending generated user data");
-    tmp_msg->content = (unsigned char*) tmpContent;
 
     int l;
-    buf = genMessageNormal(tmp_msg, &l);
+    buf = genMessage(tmp_msg, &l);
 
     rewrite(fd, buf, l);
     free(buf);
@@ -99,7 +98,7 @@ int addContact(int fd, char number[])
     message->time = NULL;
 
     int l;
-    char * mess = genMessageNormal(message, &l);
+    char * mess = genMessage(message, &l);
     printf("Message mess: %s\n", mess);
     
     rewrite(fd, mess, l);
@@ -208,11 +207,11 @@ int main()
         user = get_user_path(USER_PATH);
         // send simple message with UID as content (use the function robert will implement)
         message->type = IDENTIFICATION;
-        message->content = (unsigned char*) user->UID;   // TODO: Might need to cast to unsigned char*.
+        message->content = user->UID;
         message->sender = user->number;
 
         int l;
-        char *msg = genMessageNormal(message, &l);
+        char *msg = genMessage(message, &l);
 
         rewrite(sockfd, msg, l);
         free(msg);

@@ -321,7 +321,7 @@ char *compressElgamal(struct cyphers *dataCyphers)
 
     // Compression.
     size_t compressedLen;
-    unsigned char *compData = compress(dataCyphers->en_msg, &compressedLen);
+    char *compData = compress(dataCyphers->en_msg, &compressedLen);
 
     // Test genMessage.
     struct message *message = malloc(sizeof(struct message));
@@ -342,7 +342,7 @@ char *compressElgamal(struct cyphers *dataCyphers)
     char * p = malloc(sizeof(char) * plen+1);
     strcpy(p, dataCyphers->p);
 
-    unsigned char *content = malloc(sizeof(unsigned char) * compressedLen);
+    char *content = malloc(sizeof(char) * compressedLen);
     memcpy(content, compData, compressedLen);
 
     // THIS BLOCK CAUSES BUG.
@@ -361,7 +361,7 @@ char *compressElgamal(struct cyphers *dataCyphers)
     // size: size of uncompressed data.
     // contentSize: size of compressed data.
     int l;
-    unsigned char *jsonMessage = genMessage(message, &l);
+    char *jsonMessage = genMessage(message, &l);
 
     // Test parseMessage.
     freeMessage(message);

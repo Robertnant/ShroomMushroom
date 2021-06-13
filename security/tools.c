@@ -113,10 +113,10 @@ int binDec(char *binStr)
 }
 
 // Convert decimal to binary string.
-// Result will have 8 digits.
+// Result will have 7 digits.
 void decBin(int dec, char res[])
 {
-    int i = 7;
+    int i = 6;
     while (i >= 0)
     {
         res[i] = (dec%2) + '0';
@@ -125,38 +125,38 @@ void decBin(int dec, char res[])
     }
 
     // Null terminate string.
-    res[8] = '\0';
+    res[7] = '\0';
 }
 
 // Convert encoded data from binary to characters.
-unsigned char *toChar(char *encData, int *offset, size_t *resSize)
+char *toChar(char *encData, int *offset, size_t *resSize)
 {
-    char tmp[9];
-    bzero(tmp, 9);
+    char tmp[8];
+    bzero(tmp, 8);
 
     // Get size of result string (floor division).
     size_t len = strlen(encData);
-    *resSize = (size_t) len / 8;
+    *resSize = (size_t) len / 7;
 
-    if (len % 8 != 0)
+    if (len % 7 != 0)
         *resSize += 1;
 
     // Allocate 10 extra slots just in case.
-    unsigned char *res = calloc((*resSize) + 10, sizeof(unsigned char));
+    char *res = calloc((*resSize) + 10, sizeof(char));
     size_t resIndex = 0;
 
     size_t i;
     // printf("Enc size: %ld\nAnd Wanted Size: %ld\n", len, *resSize);
     for (i = 0; i < len; i++)
     {
-        tmp[i%8] = encData[i];
+        tmp[i%7] = encData[i];
 
         // Convert byte set to character.
-        if ((i+1) % 8 == 0)
+        if ((i+1) % 7 == 0)
         {
             int dec = binDec(tmp);
-            // printf("BinDec values: %d\n", (unsigned char) dec);
-            res[resIndex] = (unsigned char) dec;
+            // printf("BinDec values: %d\n", (char) dec);
+            res[resIndex] = (char) dec;
 
             // if (res[resIndex] == '\0')
             //    printf("\nWhy tf did I encode a NULL byte %ld?\n", resIndex);
@@ -164,7 +164,7 @@ unsigned char *toChar(char *encData, int *offset, size_t *resSize)
             // printf("Char: %c\n", res[resIndex]);
 
             // Reset tmp string.
-            bzero(tmp, 8);
+            bzero(tmp, 7);
 
             // Increment result string index.
             resIndex++;
@@ -173,18 +173,18 @@ unsigned char *toChar(char *encData, int *offset, size_t *resSize)
 
 
     *offset = 0;
-    if ((i) % 8 != 0)
+    if ((i) % 7 != 0)
     {
         // Pad last set of bits to 8 bits.
         int dec = binDec(tmp);
-        // printf("BinDec values: %d\n", (unsigned char) dec);
-        res[resIndex] = (unsigned char) dec;
+        // printf("BinDec values: %d\n", (char) dec);
+        res[resIndex] = (char) dec;
         
         // TODO Delete.
         // printf("Char: %c\n", res[resIndex]);
 
         // Save offset (number of NULL bytes added).
-        *offset = 8 - strlen(tmp);
+        *offset = 7 - strlen(tmp);
         // printf("Offset yo: %d\n", *offset);
 
         resIndex++;
@@ -200,20 +200,20 @@ unsigned char *toChar(char *encData, int *offset, size_t *resSize)
 }
 
 // Convert each string character to binary representation.
-char *fromChar(unsigned char *data, size_t len, int align)
+char *fromChar(char *data, size_t len, int align)
 {
     // printf("Original Len: %ld\n", len);
     // printf("Align: %d\n", align);
 
-    size_t resSize = len * 8 - align;
+    size_t resSize = len * 7 - align;
     
     // printf("Len wanted for fromChar: %ld\n", resSize);
     // Add 10 extra slots just in case.
     char *res = calloc(resSize + 10, sizeof(char));
     size_t c = 0;
 
-    char tmp[9];
-    bzero(tmp, 9);
+    char tmp[7];
+    bzero(tmp, 7);
 
     for (size_t i = 0; i < len - 1; i++)
     {
@@ -224,7 +224,7 @@ char *fromChar(unsigned char *data, size_t len, int align)
         // printf("Binary: %s\n", tmp);
 
         // Append converted character.
-        for (int j = 0; j < 8; j++)
+        for (int j = 0; j < 7; j++)
         {
             res[c] = tmp[j];
             c++;
@@ -237,7 +237,7 @@ char *fromChar(unsigned char *data, size_t len, int align)
     decBin(dec, tmp);
 
     // Append conversion (exclude extra padding 0s).
-    for (int j = align; j < 8; j++)
+    for (int j = align; j < 7; j++)
     {
         res[c] = tmp[j];
         c++;

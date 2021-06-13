@@ -13,7 +13,7 @@ enum MESSAGE_TYPE
 struct message
 {
     enum MESSAGE_TYPE type;
-    unsigned char *content;
+    char *content;
     char *p;
     size_t size;
     size_t compSize; // No compression case: size 0.
@@ -24,9 +24,7 @@ struct message
     char *filename; // For image and document type
 };
 
-void parseMessage(unsigned char *data, struct message *parsed);
-void parseMessageNormal(char *data, struct message *parsed);
+void parseMessage(char *data, struct message *parsed);
 void printStruct(struct message *parsed);
 void freeMessage(struct message *message);
-unsigned char *genMessage(struct message* message, int* l);
-char *genMessageNormal(struct message* message, int *l);
+char *genMessage(struct message* message, int *l);
