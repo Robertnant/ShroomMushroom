@@ -10,7 +10,17 @@ void parseMessageNormal(char *data, struct message *parsed)
     // Prevent parsing HTTP request.
     char *cmpStr = "{\"size\":";
     if (!strncmp(cmpStr, (char*) data, strlen(cmpStr)))
-            return;
+    {
+        printf("Got incorrect message request\n");
+        parsed->content = NULL;
+        parsed->p = NULL;
+        parsed->time = NULL;
+        parsed->sender = NULL;
+        parsed->receiver = NULL;
+        parsed->filename = NULL;
+
+        return;
+    }
 
     // Must be replaced later by a socket pointer for client/server connection.
     printf("Attempting to parse message: %s\n", data);
@@ -112,7 +122,17 @@ void parseMessage(unsigned char *data, struct message *parsed)
     // Prevent parsing HTTP request.
     char *cmpStr = "{\"size\":";
     if (!strncmp(cmpStr, (char*) data, strlen(cmpStr)))
-            return;
+    {
+        printf("Got incorrect message request\n");
+        parsed->content = NULL;
+        parsed->p = NULL;
+        parsed->time = NULL;
+        parsed->sender = NULL;
+        parsed->receiver = NULL;
+        parsed->filename = NULL;
+
+        return;
+    }
 
     // Split message into unsigned content and string parts.
     
