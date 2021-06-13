@@ -90,7 +90,7 @@ Make sure everything is up to date and running before installing
 
 ### Installation
 
-1. Clone the repo
+1. Clone the respository
    ```sh
    git clone https://github.com/Robertnant/ShroomMushroom.git
    ```
@@ -152,14 +152,14 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/Robertnant/repo.svg?style=for-the-badge
-[contributors-url]: https://github.com/Robertnant/repo/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/Robertnant/repo.svg?style=for-the-badge
-[forks-url]: https://github.com/Robertnant/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/Robertnant/repo.svg?style=for-the-badge
-[stars-url]: https://github.com/Robertnant/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Robertnant/repo.svg?style=for-the-badge
-[issues-url]: https://github.com/Robertnant/repo/issues
-[license-shield]: https://img.shields.io/github/license/Robertnant/repo.svg?style=for-the-badge
-[license-url]: https://github.com/Robertnant/repo/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/Robertnant/ShroomMushroom.svg?style=for-the-badge
+[contributors-url]: https://github.com/Robertnant/ShroomMushroom/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Robertnant/ShroomMushroom.svg?style=for-the-badge
+[forks-url]: https://github.com/Robertnant/ShroomMushroom/network/members
+[stars-shield]: https://img.shields.io/github/stars/Robertnant/ShroomMushroom.svg?style=for-the-badge
+[stars-url]: https://github.com/Robertnant/ShroomMushroom/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Robertnant/ShroomMushroom.svg?style=for-the-badge
+[issues-url]: https://github.com/Robertnant/ShroomMushroom/issues
+[license-shield]: https://img.shields.io/github/license/Robertnant/ShroomMushroom.svg?style=for-the-badge
+[license-url]: https://github.com/Robertnant/ShroomMushroom/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
