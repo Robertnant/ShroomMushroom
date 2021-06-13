@@ -287,8 +287,9 @@ char *compressContent(struct cyphers *cyphers, int *jsonSize)
     printf("\nConverting encryption (compressed) into JSON\n");
 
     // Compress data.
-    size_t compressedLen;
-    char *compData = compress(cyphers->en_msg, &compressedLen);
+    size_t compressedLen = 1;
+    // TO REMOVE FOR COMPRESSION
+    char *compData = cyphers->en_msg; //compress(cyphers->en_msg, &compressedLen);
 
     char * time = malloc(sizeof(char) * 5);
     strcpy(time, "1010");
@@ -452,7 +453,7 @@ void retrieveMessage()
     // Step 6: Retrieve cyphers and decompress data.
     
     struct cyphers *cyphers = malloc(sizeof(struct cyphers)); // WARNING
-    cyphers->en_msg = decompress(message->content);
+    cyphers->en_msg = message->content;//decompress(message->content);
     cyphers->p = message->p;
     cyphers->size = message->size;
 
