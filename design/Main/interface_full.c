@@ -389,6 +389,7 @@ void addBubble2(gpointer arg)
     row2+=1;
 
     gtk_widget_show_all(grid2);
+    free(bub->message);
     free(bub);
 }
 
@@ -477,7 +478,7 @@ void retrieveMessage()
     printf("Message saved\n");
 
     // Free memory.
-    free(res);
+    // free(res);
     freeMessage(message);
     free(cyphers);
     // free(json);
