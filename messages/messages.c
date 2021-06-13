@@ -8,7 +8,7 @@
 void parseMessageNormal(char *data, struct message *parsed)
 {
     // Prevent parsing HTTP request.
-    if (!(data[0] == '{' && data[1] != '"'))
+    if (!(data[0] == '{'))
     {
         printf("Got incorrect message request\n");
         printf("First char: %c\n", data[0]);
@@ -120,7 +120,7 @@ void parseMessageNormal(char *data, struct message *parsed)
 void parseMessage(unsigned char *data, struct message *parsed)
 {
     // Prevent parsing HTTP request.
-    if (!(data[0] == '{' && data[1] != '"'))
+    if (!(data[0] == '{'))
     {
         printf("Got incorrect message request\n");
         printf("First char: %c\n", data[0]);
