@@ -25,6 +25,7 @@ struct message
 };
 
 void parseMessage(char *data, struct message *parsed);
+void parseMessage2(char *data, struct message *parsed);
 void printStruct(struct message *parsed);
 void freeMessage(struct message *message);
 void resetMessage(struct message *parsed);
