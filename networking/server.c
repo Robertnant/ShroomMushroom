@@ -172,7 +172,9 @@ void * listen_to_client( void * arg )
         printf("\nFINALLLL: %s\n", final);
         //for (size_t i = 0; i < finalLen; i++)
         //    printf("%c", final[i]);
-        
+       
+        resetMessage(message);
+
         parseMessage(final, message);
 
         if (message->sender)

@@ -27,4 +27,5 @@ struct message
 void parseMessage(char *data, struct message *parsed);
 void printStruct(struct message *parsed);
 void freeMessage(struct message *message);
+void resetMessage(struct message *parsed);
 char *genMessage(struct message* message, int *l);

@@ -49,11 +49,20 @@ void parseMessage(char *data, struct message *parsed)
     json_object_object_get_ex(parsed_json, "filename", &filename);
 
     // Check if objects are parsed.
+    printf("content: %p\n", content);
+    printf("content: %p\n", p);
+    printf("content: %p\n", size);
+    printf("content: %p\n", compSize);
+    printf("content: %p\n", time);
+    printf("content: %p\n", sender);
+    printf("content: %p\n", receiver);
+    printf("content: %p\n", type);
+    printf("content: %p\n", filename);
     if (!(content && p && size 
             && compSize && time && sender && receiver && type && filename))
     {
         printf("Objects not parsed\n");
-        return;
+        //return;
     }
 
     size_t len;
@@ -142,6 +151,16 @@ message->size, message->compSize,
 message->time, message->sender, message->receiver, message->filename);
 
     return res;
+}
+
+void resetMessage(struct message* parsed)
+{
+        parsed->content = NULL;
+        parsed->p = NULL;
+        parsed->time = NULL;
+        parsed->sender = NULL;
+        parsed->receiver = NULL;
+        parsed->filename = NULL;
 }
 
 void printStruct(struct message *parsed)

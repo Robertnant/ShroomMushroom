@@ -1,6 +1,10 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
+#define G_SOURCE_FUNC(f) ((GSourceFunc) (void (*)(void)) (f))
+
+
+
 // Global variables.
 GtkLabel *textlabel;
 
