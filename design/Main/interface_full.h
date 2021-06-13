@@ -36,7 +36,7 @@ GtkButton *close_window_button;
 FILE *f_con; //contacts.txt 
 FILE *f_chat; //chat2 (contact)
 
-pthread_t receiving_thread;
+pthread_t *receiving_thread;
 
 
 // Functions.

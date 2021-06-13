@@ -20,7 +20,7 @@ GtkBuilder *main_builder;   // Builder of main interface.
 void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
 {
     UNUSED(widget);
-    pthread_cancel(receiving_thread);
+    pthread_cancel(*receiving_thread);
     printf("register_now_button pressed\n");
     app_widgets_add_contacts *arg = data;
 
@@ -89,7 +89,7 @@ void on_add_contact_button_clicked(GtkWidget *widget, gpointer data)
 
     //user = init_procedure(sockfd, arg->data->username, arg->data->number);
     gtk_window_close(GTK_WINDOW(arg->window));
-    pthread_create(&receiving_thread, NULL, start_message_receiver, NULL);
+    pthread_create(receiving_thread, NULL, start_message_receiver, NULL);
     // gtk_widget_destroy(
 }
 

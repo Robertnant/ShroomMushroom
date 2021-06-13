@@ -392,7 +392,7 @@ void retrieveMessage()
     }
     if (er <= 0)
     {
-        pthread_cancel(receiving_thread);
+        pthread_cancel(*receiving_thread);
         return;
     }
     if (!found)
@@ -525,8 +525,9 @@ void show_interface(char *interface_path, char *contacts_path, char *chat_path)
 
     gtk_widget_show_all(main_window);
 
+    receiving_thread = malloc(sizeof(pthread_t));
 
-    pthread_create(&receiving_thread, NULL, start_message_receiver, NULL);
+    pthread_create(receiving_thread, NULL, start_message_receiver, NULL);
 
     // Close.
     // fclose(f_con);

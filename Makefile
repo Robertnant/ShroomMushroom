@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS= `pkg-config --cflags gtk+-3.0` `pkg-config --cflags glib-2.0` -Wall -Wextra -lm -g -pthread -std=c99 -fsanitize=address -static-libasan
+CFLAGS= `pkg-config --cflags gtk+-3.0` `pkg-config --cflags glib-2.0` -Wall -Wextra -lm -g -pthread -std=c99 -fsanitize=address
 LDLIBS= `pkg-config --libs gtk+-3.0`  -ljson-c -lgmp -lm
 VPATH=networking:saved_users:messages:security:design/Registration:design/Main:design/addcontact
 LIBS= `pkg-config --libs glib-2.0` -lgmp -lm
