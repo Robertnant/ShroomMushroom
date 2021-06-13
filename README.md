@@ -126,7 +126,7 @@ This was a university project that was done by a group of four people at EPITA S
 
 Team Members:
 * [Robert Nantchouang N.](https://www.linkedin.com/in/robert-nantchouang-nantchouang-8649731b0/) (Group Leader)
-* [Jiyoung Yun](https://www.linkedin.com/in/jiyoung-yun-8936b2146/)
+* [Grace Yun](https://www.linkedin.com/in/jiyoung-yun-8936b2146/)
 * [Manon Loveland](https://www.linkedin.com/in/manon-loveland-104696210/)
 * [Sergio Moubayed](https://www.linkedin.com/in/sergio-moubayed-4186011b3/)
 
