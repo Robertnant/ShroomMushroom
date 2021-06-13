@@ -3,10 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <json-c/json.h>
+#include <gmodule.h>
 #include "messages.h"
 
 void parseMessage(char *data, struct message *parsed)
 {
+    if (!(g_str_has_prefix(data, "content")))
+    {
+            printf("Got the wrong message to parse\n");
+            return;
+    }
+
     // Prevent parsing HTTP request.
     if (!(data[0] == '{'))
     {
