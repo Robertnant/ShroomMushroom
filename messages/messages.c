@@ -83,13 +83,11 @@ void parseMessage(char *data, struct message *parsed)
         parsed->filename = NULL;
         return;
     }
-    char *content_string = json_object_get_string(content);
-    if (!content_string)
-        return;
-    len = strlen(content_string);
+    
+    len = strlen(json_object_get_string(content));
     // parsed->content = (char *) malloc(sizeof(char) * len + 1);
     char *tmpContent = (char *) malloc(sizeof(char) * len + 1);
-    strcpy(tmpContent, content_string);
+    strcpy(tmpContent, json_object_get_string(content));
     parsed->content = (char *) tmpContent;
     json_object_put(content);
     //free(content);
