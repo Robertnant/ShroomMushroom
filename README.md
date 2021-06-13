@@ -48,7 +48,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#contributors/team-members">Contributing</a></li>
+    <li><a href="#team-members">Team Members</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
@@ -58,12 +58,15 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
-
 ### Registration Page
+<img src="https://media.discordapp.net/attachments/828573338359693362/853587342753005588/Registration_page_image.png" alt="Registration page">
+
 ### Main Page
+<img src="https://media.discordapp.net/attachments/828573338359693362/853587373610237962/Main_interface.png?width=748&height=640" alt="Empty main page">
+<img src="https://media.discordapp.net/attachments/828573338359693362/853587451384954900/Messaging.png?width=748&height=640" alt="Main page">
+
 ### Add Contacts Page
+<img src="https://media.discordapp.net/attachments/828573338359693362/853587419408498688/Adding_new_contact_interface.png?width=745&height=640" alt="Add contacts page">
 
 For more info, you can visit our website [here](https://shroomshroommushro.wixsite.com/homepage).
 
@@ -93,7 +96,7 @@ Make sure everything is up to date and running before installing
    ```
 2. Install the required libraries
    ```sh
-   make install
+   sudo make install
    ```
   
  3. Compile the client
@@ -106,20 +109,23 @@ Make sure everything is up to date and running before installing
    ```
 
 
-
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+After compiling the code, you just have to run ``./client`` from a terminal and follow the steps:
+1. **REGIRSTRATION**: enter a username and a phone number then choose one of our wonderful avatars. You can then press on register to go to the main page
+2. **ADD CONTACTS**: You can press on the bottom left button that says ``Add Contact`` then enter the phone number you wish to add. The username of the added user will then appear on the left contacts column.
+3.  **CHAT**: Select a contact you would like to communicate with by clicking on his/her username, you should see the username being displayed just under the avatar that popped up. Now you can chat together :)
 
+If you want to run the server locally you can just run ``./server`` after compiling.
 
 <!-- CONTRIBUTING -->
-## Contributors / Team Members
+## Team Members
 
 This was a university project that was done by a group of four people at EPITA School of Engineering and Computer Science as an end of the year project for the fourth semester.
 
 Team Members:
-* [Robert N. Nantchouang](https://www.linkedin.com/in/robert-nantchouang-nantchouang-8649731b0/) (Group Leader)
+* [Robert Nantchouang N.](https://www.linkedin.com/in/robert-nantchouang-nantchouang-8649731b0/) (Group Leader)
 * [Jiyoung Yun](https://www.linkedin.com/in/jiyoung-yun-8936b2146/)
 * [Manon Loveland](https://www.linkedin.com/in/manon-loveland-104696210/)
 * [Sergio Moubayed](https://www.linkedin.com/in/sergio-moubayed-4186011b3/)

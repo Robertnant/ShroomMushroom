@@ -31,4 +31,9 @@ clearchat:
 clearcontacts:
 	${RM} .files/contacts.txt .files/contacts/*[0-9]*
 
-.PHONY: all clean remove bigclean
+install:
+	apt install libjson-c-dev
+	apt install libgtk-3-dev
+	apt install libgmp3-dev
+
+.PHONY: all clean remove bigclean clearchat clearcontacts
