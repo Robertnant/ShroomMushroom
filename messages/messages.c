@@ -7,6 +7,11 @@
 
 void parseMessageNormal(char *data, struct message *parsed)
 {
+    // Prevent parsing HTTP request.
+    char *cmpStr = "{\"size\":";
+    if (!strncmp(cmpStr, (char*) data, strlen(cmpStr)))
+            return;
+
     // Must be replaced later by a socket pointer for client/server connection.
     printf("Attempting to parse message: %s\n", data);
     struct json_object *parsed_json;
