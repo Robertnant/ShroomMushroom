@@ -8,12 +8,6 @@
 
 void parseMessage(char *data, struct message *parsed)
 {
-    if (!(g_str_has_prefix(data, "content")))
-    {
-            printf("Got the wrong message to parse\n");
-            return;
-    }
-
     // Prevent parsing HTTP request.
     if (!(data[0] == '{'))
     {
@@ -54,6 +48,14 @@ void parseMessage(char *data, struct message *parsed)
     json_object_object_get_ex(parsed_json, "type", &type);
     json_object_object_get_ex(parsed_json, "filename", &filename);
 
+    // Check if objects are parsed.
+    if (!(content && p && size 
+            && compSize && time && sender && receiver && type && filename))
+    {
+        printf("Objects not parsed\n");
+        return;
+    }
+
     size_t len;
     // Store objects from json.
     parsed -> type =  (enum MESSAGE_TYPE) json_object_get_int(type);
@@ -72,7 +74,6 @@ void parseMessage(char *data, struct message *parsed)
         parsed->filename = NULL;
         return;
     }
-
 
     len = strlen(json_object_get_string(content));
     // parsed->content = (char *) malloc(sizeof(char) * len + 1);
