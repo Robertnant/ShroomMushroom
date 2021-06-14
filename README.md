@@ -10,7 +10,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://https://github.com/Robertnant/ShroomMushroom">
+  <a href="https://github.com/Robertnant/ShroomMushroom">
     <img src="https://static.wixstatic.com/media/0faaa3_a4255995826d4b7ba7a3c0ebd5f07515~mv2.jpg/v1/fill/w_326,h_279,al_c,q_80,usm_0.66_1.00_0.01/logomushrooms_edited.webp" alt="Logo" width="160" height="160">
   </a>
 <!--
